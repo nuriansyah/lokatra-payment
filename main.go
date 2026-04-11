@@ -11,6 +11,7 @@ import (
 
 var configService *configs.Config
 
+// @title Lokatra Auth
 // @securityDefinitions.apikey LokatraAuth
 // @in header
 // @name Authorization
