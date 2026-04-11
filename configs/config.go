@@ -24,6 +24,18 @@ type Config struct {
 		Revision string `mapstructure:"REVISION"`
 		URL      string `mapstructure:"URL"`
 	}
+	Cache struct {
+		Redis struct {
+			Expired struct {
+			}
+			Primary struct {
+				DB       int    `mapstructure:"DB"`
+				Host     string `mapstructure:"HOST"`
+				Port     string `mapstructure:"PORT"`
+				Password string `mapstructure:"PASSWORD"`
+			}
+		}
+	}
 	DB struct {
 		Postgres struct {
 			Read struct {
@@ -50,18 +62,37 @@ type Config struct {
 			}
 		} `mapstructure:"PG"`
 	}
-	Cache struct {
-		Redis struct {
-			Expired struct {
-			}
-			Primary struct {
-				DB       int    `mapstructure:"DB"`
-				Host     string `mapstructure:"HOST"`
-				Port     string `mapstructure:"PORT"`
-				Password string `mapstructure:"PASSWORD"`
-			}
-		}
-	}
+	Externals struct {
+		Providers struct {
+			Midtrans struct {
+				AccountID      string `mapstructure:"ACCOUNT_ID"`
+				AccountLabel   string `mapstructure:"ACCOUNT_LABEL"`
+				Enabled        bool   `mapstructure:"ENABLED"`
+				BaseURL        string `mapstructure:"BASE_URL"`
+				ChargePath     string `mapstructure:"CHARGE_PATH"`
+				ServerKey      string `mapstructure:"SERVER_KEY"`
+				TimeoutSeconds int    `mapstructure:"TIMEOUT_SECONDS"`
+			} `mapstructure:"MIDTRANS"`
+			Xendit struct {
+				AccountID      string `mapstructure:"ACCOUNT_ID"`
+				AccountLabel   string `mapstructure:"ACCOUNT_LABEL"`
+				Enabled        bool   `mapstructure:"ENABLED"`
+				BaseURL        string `mapstructure:"BASE_URL"`
+				ChargePath     string `mapstructure:"CHARGE_PATH"`
+				SecretKey      string `mapstructure:"SECRET_KEY"`
+				TimeoutSeconds int    `mapstructure:"TIMEOUT_SECONDS"`
+			} `mapstructure:"XENDIT"`
+		} `mapstructure:"PROVIDERS"`
+	} `mapstructure:"EXTERNALS"`
+	Internal struct {
+		Payment struct {
+			Routing struct {
+				DefaultStrategy     string `mapstructure:"DEFAULT_STRATEGY"`
+				DefaultUseCase      string `mapstructure:"DEFAULT_USE_CASE"`
+				UseDatabaseFallback bool   `mapstructure:"USE_DATABASE_FALLBACK"`
+			} `mapstructure:"ROUTING"`
+		} `mapstructure:"PAYMENT"`
+	} `mapstructure:"INTERNAL"`
 	Server struct {
 		Env      string `mapstructure:"ENV"`
 		LogLevel string `mapstructure:"LOG_LEVEL"`

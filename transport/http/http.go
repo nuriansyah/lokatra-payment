@@ -75,6 +75,16 @@ func (h *HTTP) setupSwaggerDocs() {
 	if h.Config.Server.Env == "development" {
 		docs.SwaggerInfo.Title = h.Config.App.Name
 		docs.SwaggerInfo.Version = h.Config.App.Revision
+		docs.SwaggerInfo.Host = strings.TrimPrefix(h.Config.App.URL, "https://")
+		docs.SwaggerInfo.BasePath = "/payment"
+		docs.SwaggerInfo.Schemes = []string{"https", "http"}
+		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", h.Config.App.URL+docs.SwaggerInfo.BasePath)
+		h.mux.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(swaggerURL)))
+		log.Info().Str("url", swaggerURL).Msg("Swagger documentation enabled.")
+	}
+	if h.Config.Server.Env == "local" {
+		docs.SwaggerInfo.Title = h.Config.App.Name
+		docs.SwaggerInfo.Version = h.Config.App.Revision
 		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", h.Config.App.URL)
 		h.mux.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL(swaggerURL)))
 		log.Info().Str("url", swaggerURL).Msg("Swagger documentation enabled.")
