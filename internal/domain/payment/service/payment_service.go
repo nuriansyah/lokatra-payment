@@ -516,4 +516,3 @@ func businessCode(prefix string) string {
 	}
 	return fmt.Sprintf("%s-%s-%s", prefix, stamp, strings.ToUpper(compact))
 }
-
