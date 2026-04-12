@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/netip"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -58,7 +59,7 @@ func composeInsertFieldsAndParamsPaymentIntents(paymentIntentsList []model.Payme
 			case selectField.CustomerPhone():
 				args = append(args, paymentIntents.CustomerPhone)
 			case selectField.CustomerIp():
-				args = append(args, paymentIntents.CustomerIp)
+				args = append(args, customerIPValue(paymentIntents.CustomerIp))
 			case selectField.CustomerCountry():
 				args = append(args, paymentIntents.CustomerCountry)
 			case selectField.PaymentMethodId():
@@ -134,6 +135,13 @@ func composePaymentIntentsCompositePrimaryKeyWhere(primaryIDs []model.PaymentInt
 	}
 
 	return strings.Join(primaryKeyQry, " OR "), params
+}
+
+func customerIPValue(addr *netip.Addr) interface{} {
+	if addr == nil {
+		return nil
+	}
+	return addr.String()
 }
 
 func defaultPaymentIntentsSelectFields() string {
@@ -409,7 +417,7 @@ func defaultPaymentIntentsUpdateFields(paymentIntents model.PaymentIntents) (pay
 		NewPaymentIntentsUpdateField(selectFields.CustomerName(), paymentIntents.CustomerName),
 		NewPaymentIntentsUpdateField(selectFields.CustomerEmail(), paymentIntents.CustomerEmail),
 		NewPaymentIntentsUpdateField(selectFields.CustomerPhone(), paymentIntents.CustomerPhone),
-		NewPaymentIntentsUpdateField(selectFields.CustomerIp(), paymentIntents.CustomerIp),
+		NewPaymentIntentsUpdateField(selectFields.CustomerIp(), customerIPValue(paymentIntents.CustomerIp)),
 		NewPaymentIntentsUpdateField(selectFields.CustomerCountry(), paymentIntents.CustomerCountry),
 		NewPaymentIntentsUpdateField(selectFields.PaymentMethodId(), paymentIntents.PaymentMethodId),
 		NewPaymentIntentsUpdateField(selectFields.PaymentMethodType(), paymentIntents.PaymentMethodType),
