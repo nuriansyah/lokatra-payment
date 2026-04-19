@@ -17,6 +17,7 @@ import (
 	paymentmodel "github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
 	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
+	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 	"github.com/rs/zerolog/log"
 	"github.com/shopspring/decimal"
@@ -468,7 +469,7 @@ func (b *PaymentFlowBuilder) buildIntent() (*paymentmodel.PaymentIntents, error)
 	if b.request.CustomerIP != "" {
 		parsedIP, err := netip.ParseAddr(b.request.CustomerIP)
 		if err == nil {
-			intent.CustomerIp = &parsedIP
+			intent.CustomerIp = inetaddr.FromAddr(parsedIP)
 		}
 	}
 	return intent, nil

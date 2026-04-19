@@ -3,12 +3,12 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"net/netip"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/guregu/null"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
+	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 	"github.com/shopspring/decimal"
 )
@@ -263,7 +263,7 @@ type PaymentIntents struct {
 	CustomerName        null.String       `db:"customer_name"`
 	CustomerEmail       null.String       `db:"customer_email"`
 	CustomerPhone       null.String       `db:"customer_phone"`
-	CustomerIp          *netip.Addr       `db:"customer_ip"`
+	CustomerIp          inetaddr.NullIP   `db:"customer_ip"`
 	CustomerCountry     null.String       `db:"customer_country"`
 	PaymentMethodId     nuuid.NUUID       `db:"payment_method_id"`
 	PaymentMethodType   PaymentMethodType `db:"payment_method_type"`
