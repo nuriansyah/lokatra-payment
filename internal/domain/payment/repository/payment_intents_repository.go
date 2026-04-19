@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/netip"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
