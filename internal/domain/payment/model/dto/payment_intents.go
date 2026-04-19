@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net/netip"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -15,6 +14,7 @@ import (
 	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
 	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
+	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 )
 
 type PaymentIntentsDTOFieldNameType string
@@ -885,22 +885,16 @@ func (d PaymentIntentsPrimaryID) ToModel() model.PaymentIntentsPrimaryID {
 	}
 }
 
-// parseCustomerIP converts a string IP address to *netip.Addr for storing in PaymentIntents
-func parseCustomerIP(ipStr string) *netip.Addr {
-	if ipStr == "" {
-		return nil
-	}
-	addr, err := netip.ParseAddr(ipStr)
+// parseCustomerIP converts a string IP address to a nullable INET value for storing in PaymentIntents.
+func parseCustomerIP(ipStr string) inetaddr.NullIP {
+	addr, err := inetaddr.FromString(ipStr)
 	if err != nil {
-		return nil
+		return inetaddr.NullIP{}
 	}
-	return &addr
+	return addr
 }
 
-// ipAddrToString converts *netip.Addr to string for DTO transfer
-func ipAddrToString(addr *netip.Addr) string {
-	if addr == nil {
-		return ""
-	}
+// ipAddrToString converts a nullable INET value to string for DTO transfer.
+func ipAddrToString(addr inetaddr.NullIP) string {
 	return addr.String()
 }

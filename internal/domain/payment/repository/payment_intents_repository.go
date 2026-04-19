@@ -13,6 +13,7 @@ import (
 
 	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
+	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 )
 
 func composeInsertFieldsAndParamsPaymentIntents(paymentIntentsList []model.PaymentIntents, fieldsInsert ...PaymentIntentsField) (fieldStr string, valueListStr []string, args []interface{}) {
@@ -137,8 +138,8 @@ func composePaymentIntentsCompositePrimaryKeyWhere(primaryIDs []model.PaymentInt
 	return strings.Join(primaryKeyQry, " OR "), params
 }
 
-func customerIPValue(addr *netip.Addr) interface{} {
-	if addr == nil {
+func customerIPValue(addr inetaddr.NullIP) interface{} {
+	if !addr.Valid {
 		return nil
 	}
 	return addr.String()
