@@ -1,81 +1,44 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/guregu/null"
+	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
-	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 )
 
 type PaymentMethodsDBFieldNameType string
 
 type paymentMethodsDBFieldName struct {
-	Id                     PaymentMethodsDBFieldNameType
-	UserId                 PaymentMethodsDBFieldNameType
-	MerchantId             PaymentMethodsDBFieldNameType
-	MethodType             PaymentMethodsDBFieldNameType
-	Psp                    PaymentMethodsDBFieldNameType
-	TokenRef               PaymentMethodsDBFieldNameType
-	TokenType              PaymentMethodsDBFieldNameType
-	TokenExpiresAt         PaymentMethodsDBFieldNameType
-	CardBrand              PaymentMethodsDBFieldNameType
-	CardLastFour           PaymentMethodsDBFieldNameType
-	CardExpMonth           PaymentMethodsDBFieldNameType
-	CardExpYear            PaymentMethodsDBFieldNameType
-	CardCountry            PaymentMethodsDBFieldNameType
-	CardFundingType        PaymentMethodsDBFieldNameType
-	CardBin                PaymentMethodsDBFieldNameType
-	WalletAccountRef       PaymentMethodsDBFieldNameType
-	VaBankCode             PaymentMethodsDBFieldNameType
-	DisplayLabel           PaymentMethodsDBFieldNameType
-	IsDefault              PaymentMethodsDBFieldNameType
-	IsActive               PaymentMethodsDBFieldNameType
-	VerifiedAt             PaymentMethodsDBFieldNameType
-	Fingerprint            PaymentMethodsDBFieldNameType
-	GdprErasureRequestedAt PaymentMethodsDBFieldNameType
-	GdprErasedAt           PaymentMethodsDBFieldNameType
-	MetaCreatedAt          PaymentMethodsDBFieldNameType
-	MetaCreatedBy          PaymentMethodsDBFieldNameType
-	MetaUpdatedAt          PaymentMethodsDBFieldNameType
-	MetaUpdatedBy          PaymentMethodsDBFieldNameType
-	MetaDeletedAt          PaymentMethodsDBFieldNameType
-	MetaDeletedBy          PaymentMethodsDBFieldNameType
+	Id            PaymentMethodsDBFieldNameType
+	Code          PaymentMethodsDBFieldNameType
+	MethodType    PaymentMethodsDBFieldNameType
+	Name          PaymentMethodsDBFieldNameType
+	Status        PaymentMethodsDBFieldNameType
+	Metadata      PaymentMethodsDBFieldNameType
+	MetaCreatedAt PaymentMethodsDBFieldNameType
+	MetaCreatedBy PaymentMethodsDBFieldNameType
+	MetaUpdatedAt PaymentMethodsDBFieldNameType
+	MetaUpdatedBy PaymentMethodsDBFieldNameType
+	MetaDeletedAt PaymentMethodsDBFieldNameType
+	MetaDeletedBy PaymentMethodsDBFieldNameType
 }
 
 var PaymentMethodsDBFieldName = paymentMethodsDBFieldName{
-	Id:                     "id",
-	UserId:                 "user_id",
-	MerchantId:             "merchant_id",
-	MethodType:             "method_type",
-	Psp:                    "psp",
-	TokenRef:               "token_ref",
-	TokenType:              "token_type",
-	TokenExpiresAt:         "token_expires_at",
-	CardBrand:              "card_brand",
-	CardLastFour:           "card_last_four",
-	CardExpMonth:           "card_exp_month",
-	CardExpYear:            "card_exp_year",
-	CardCountry:            "card_country",
-	CardFundingType:        "card_funding_type",
-	CardBin:                "card_bin",
-	WalletAccountRef:       "wallet_account_ref",
-	VaBankCode:             "va_bank_code",
-	DisplayLabel:           "display_label",
-	IsDefault:              "is_default",
-	IsActive:               "is_active",
-	VerifiedAt:             "verified_at",
-	Fingerprint:            "fingerprint",
-	GdprErasureRequestedAt: "gdpr_erasure_requested_at",
-	GdprErasedAt:           "gdpr_erased_at",
-	MetaCreatedAt:          "meta_created_at",
-	MetaCreatedBy:          "meta_created_by",
-	MetaUpdatedAt:          "meta_updated_at",
-	MetaUpdatedBy:          "meta_updated_by",
-	MetaDeletedAt:          "meta_deleted_at",
-	MetaDeletedBy:          "meta_deleted_by",
+	Id:            "id",
+	Code:          "code",
+	MethodType:    "method_type",
+	Name:          "name",
+	Status:        "status",
+	Metadata:      "metadata",
+	MetaCreatedAt: "meta_created_at",
+	MetaCreatedBy: "meta_created_by",
+	MetaUpdatedAt: "meta_updated_at",
+	MetaUpdatedBy: "meta_updated_by",
+	MetaDeletedAt: "meta_deleted_at",
+	MetaDeletedBy: "meta_deleted_by",
 }
 
 func NewPaymentMethodsDBFieldNameFromStr(field string) (dbField PaymentMethodsDBFieldNameType, found bool) {
@@ -84,74 +47,20 @@ func NewPaymentMethodsDBFieldNameFromStr(field string) (dbField PaymentMethodsDB
 	case string(PaymentMethodsDBFieldName.Id):
 		return PaymentMethodsDBFieldName.Id, true
 
-	case string(PaymentMethodsDBFieldName.UserId):
-		return PaymentMethodsDBFieldName.UserId, true
-
-	case string(PaymentMethodsDBFieldName.MerchantId):
-		return PaymentMethodsDBFieldName.MerchantId, true
+	case string(PaymentMethodsDBFieldName.Code):
+		return PaymentMethodsDBFieldName.Code, true
 
 	case string(PaymentMethodsDBFieldName.MethodType):
 		return PaymentMethodsDBFieldName.MethodType, true
 
-	case string(PaymentMethodsDBFieldName.Psp):
-		return PaymentMethodsDBFieldName.Psp, true
+	case string(PaymentMethodsDBFieldName.Name):
+		return PaymentMethodsDBFieldName.Name, true
 
-	case string(PaymentMethodsDBFieldName.TokenRef):
-		return PaymentMethodsDBFieldName.TokenRef, true
+	case string(PaymentMethodsDBFieldName.Status):
+		return PaymentMethodsDBFieldName.Status, true
 
-	case string(PaymentMethodsDBFieldName.TokenType):
-		return PaymentMethodsDBFieldName.TokenType, true
-
-	case string(PaymentMethodsDBFieldName.TokenExpiresAt):
-		return PaymentMethodsDBFieldName.TokenExpiresAt, true
-
-	case string(PaymentMethodsDBFieldName.CardBrand):
-		return PaymentMethodsDBFieldName.CardBrand, true
-
-	case string(PaymentMethodsDBFieldName.CardLastFour):
-		return PaymentMethodsDBFieldName.CardLastFour, true
-
-	case string(PaymentMethodsDBFieldName.CardExpMonth):
-		return PaymentMethodsDBFieldName.CardExpMonth, true
-
-	case string(PaymentMethodsDBFieldName.CardExpYear):
-		return PaymentMethodsDBFieldName.CardExpYear, true
-
-	case string(PaymentMethodsDBFieldName.CardCountry):
-		return PaymentMethodsDBFieldName.CardCountry, true
-
-	case string(PaymentMethodsDBFieldName.CardFundingType):
-		return PaymentMethodsDBFieldName.CardFundingType, true
-
-	case string(PaymentMethodsDBFieldName.CardBin):
-		return PaymentMethodsDBFieldName.CardBin, true
-
-	case string(PaymentMethodsDBFieldName.WalletAccountRef):
-		return PaymentMethodsDBFieldName.WalletAccountRef, true
-
-	case string(PaymentMethodsDBFieldName.VaBankCode):
-		return PaymentMethodsDBFieldName.VaBankCode, true
-
-	case string(PaymentMethodsDBFieldName.DisplayLabel):
-		return PaymentMethodsDBFieldName.DisplayLabel, true
-
-	case string(PaymentMethodsDBFieldName.IsDefault):
-		return PaymentMethodsDBFieldName.IsDefault, true
-
-	case string(PaymentMethodsDBFieldName.IsActive):
-		return PaymentMethodsDBFieldName.IsActive, true
-
-	case string(PaymentMethodsDBFieldName.VerifiedAt):
-		return PaymentMethodsDBFieldName.VerifiedAt, true
-
-	case string(PaymentMethodsDBFieldName.Fingerprint):
-		return PaymentMethodsDBFieldName.Fingerprint, true
-
-	case string(PaymentMethodsDBFieldName.GdprErasureRequestedAt):
-		return PaymentMethodsDBFieldName.GdprErasureRequestedAt, true
-
-	case string(PaymentMethodsDBFieldName.GdprErasedAt):
-		return PaymentMethodsDBFieldName.GdprErasedAt, true
+	case string(PaymentMethodsDBFieldName.Metadata):
+		return PaymentMethodsDBFieldName.Metadata, true
 
 	case string(PaymentMethodsDBFieldName.MetaCreatedAt):
 		return PaymentMethodsDBFieldName.MetaCreatedAt, true
@@ -175,6 +84,124 @@ func NewPaymentMethodsDBFieldNameFromStr(field string) (dbField PaymentMethodsDB
 	return "unknown", false
 }
 
+var PaymentMethodsFilterJoins = map[string]JoinSpec{}
+
+var PaymentMethodsFilterFields = map[string]FilterFieldSpec{
+	"id": {
+		SourcePath:        "id",
+		DefaultOutputPath: "id",
+		Column:            "id",
+		SQLAlias:          "id",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"code": {
+		SourcePath:        "code",
+		DefaultOutputPath: "code",
+		Column:            "code",
+		SQLAlias:          "code",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"method_type": {
+		SourcePath:        "method_type",
+		DefaultOutputPath: "methodType",
+		Column:            "method_type",
+		SQLAlias:          "method_type",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"name": {
+		SourcePath:        "name",
+		DefaultOutputPath: "name",
+		Column:            "name",
+		SQLAlias:          "name",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"status": {
+		SourcePath:        "status",
+		DefaultOutputPath: "status",
+		Column:            "status",
+		SQLAlias:          "status",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"metadata": {
+		SourcePath:        "metadata",
+		DefaultOutputPath: "metadata",
+		Column:            "metadata",
+		SQLAlias:          "metadata",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_created_at": {
+		SourcePath:        "meta_created_at",
+		DefaultOutputPath: "metaCreatedAt",
+		Column:            "meta_created_at",
+		SQLAlias:          "meta_created_at",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_created_by": {
+		SourcePath:        "meta_created_by",
+		DefaultOutputPath: "metaCreatedBy",
+		Column:            "meta_created_by",
+		SQLAlias:          "meta_created_by",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_updated_at": {
+		SourcePath:        "meta_updated_at",
+		DefaultOutputPath: "metaUpdatedAt",
+		Column:            "meta_updated_at",
+		SQLAlias:          "meta_updated_at",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_updated_by": {
+		SourcePath:        "meta_updated_by",
+		DefaultOutputPath: "metaUpdatedBy",
+		Column:            "meta_updated_by",
+		SQLAlias:          "meta_updated_by",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_deleted_at": {
+		SourcePath:        "meta_deleted_at",
+		DefaultOutputPath: "metaDeletedAt",
+		Column:            "meta_deleted_at",
+		SQLAlias:          "meta_deleted_at",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+	"meta_deleted_by": {
+		SourcePath:        "meta_deleted_by",
+		DefaultOutputPath: "metaDeletedBy",
+		Column:            "meta_deleted_by",
+		SQLAlias:          "meta_deleted_by",
+		Selectable:        true,
+		Filterable:        true,
+		Sortable:          true,
+	},
+}
+
+func NewPaymentMethodsFilterFieldSpecFromStr(field string) (spec FilterFieldSpec, found bool) {
+	spec, found = PaymentMethodsFilterFields[field]
+	return
+}
+
 type PaymentMethodsFilterResult struct {
 	PaymentMethods
 	FilterCount int `db:"count"`
@@ -182,60 +209,80 @@ type PaymentMethodsFilterResult struct {
 
 func ValidatePaymentMethodsFieldNameFilter(filter Filter) (err error) {
 	for _, selectField := range filter.SelectFields {
-		_, exist := NewPaymentMethodsDBFieldNameFromStr(selectField)
-		if !exist {
-			err = failure.InternalError(fmt.Errorf("field %s is not found", selectField))
+		sourceField, _, _ := ParseProjection(selectField)
+		spec, exist := NewPaymentMethodsFilterFieldSpecFromStr(sourceField)
+		if !exist || !spec.Selectable || spec.Relation != "" {
+			err = failure.BadRequest(fmt.Errorf("field %s is not selectable", sourceField))
 			return
 		}
 	}
 	for _, sort := range filter.Sorts {
-		_, exist := NewPaymentMethodsDBFieldNameFromStr(sort.Field)
-		if !exist {
-			err = failure.InternalError(fmt.Errorf("field %s is not found", sort.Field))
+		spec, exist := NewPaymentMethodsFilterFieldSpecFromStr(sort.Field)
+		if !exist || !spec.Sortable {
+			err = failure.BadRequest(fmt.Errorf("field %s is not sortable", sort.Field))
 			return
 		}
 	}
 	for _, field := range filter.FilterFields {
-		_, exist := NewPaymentMethodsDBFieldNameFromStr(field.Field)
-		if !exist {
-			err = failure.InternalError(fmt.Errorf("field %s is not found", field.Field))
+		spec, exist := NewPaymentMethodsFilterFieldSpecFromStr(field.Field)
+		if !exist || !spec.Filterable {
+			err = failure.BadRequest(fmt.Errorf("field %s is not filterable", field.Field))
+			return
+		}
+	}
+	if filter.Where != nil {
+		err = validatePaymentMethodsFilterGroupFieldNames(*filter.Where)
+		if err != nil {
 			return
 		}
 	}
 	return
 }
 
+func validatePaymentMethodsFilterGroupFieldNames(group FilterGroup) (err error) {
+	for _, field := range group.FilterFields {
+		spec, exist := NewPaymentMethodsFilterFieldSpecFromStr(field.Field)
+		if !exist || !spec.Filterable {
+			err = failure.BadRequest(fmt.Errorf("field %s is not filterable", field.Field))
+			return
+		}
+	}
+	for _, child := range group.Groups {
+		err = validatePaymentMethodsFilterGroupFieldNames(child)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PaymentMethodStatus string
+
+const (
+	PaymentMethodStatusActive     PaymentMethodStatus = "active"
+	PaymentMethodStatusInactive   PaymentMethodStatus = "inactive"
+	PaymentMethodStatusDeprecated PaymentMethodStatus = "deprecated"
+)
+
+type PaymentMethodType string
+
+const (
+	PaymentMethodTypeCard         PaymentMethodType = "card"
+	PaymentMethodTypeBankTransfer PaymentMethodType = "bank_transfer"
+	PaymentMethodTypeEwallet      PaymentMethodType = "ewallet"
+	PaymentMethodTypeCash         PaymentMethodType = "cash"
+	PaymentMethodTypeCod          PaymentMethodType = "cod"
+)
+
 type PaymentMethods struct {
-	Id                     uuid.UUID         `db:"id"`
-	UserId                 nuuid.NUUID       `db:"user_id"`
-	MerchantId             nuuid.NUUID       `db:"merchant_id"`
-	MethodType             PaymentMethodType `db:"method_type"`
-	Psp                    Psp               `db:"psp"`
-	TokenRef               null.String       `db:"token_ref"`
-	TokenType              null.String       `db:"token_type"`
-	TokenExpiresAt         null.Time         `db:"token_expires_at"`
-	CardBrand              null.String       `db:"card_brand"`
-	CardLastFour           null.String       `db:"card_last_four"`
-	CardExpMonth           null.Int          `db:"card_exp_month"`
-	CardExpYear            null.Int          `db:"card_exp_year"`
-	CardCountry            null.String       `db:"card_country"`
-	CardFundingType        null.String       `db:"card_funding_type"`
-	CardBin                null.String       `db:"card_bin"`
-	WalletAccountRef       null.String       `db:"wallet_account_ref"`
-	VaBankCode             null.String       `db:"va_bank_code"`
-	DisplayLabel           null.String       `db:"display_label"`
-	IsDefault              bool              `db:"is_default"`
-	IsActive               bool              `db:"is_active"`
-	VerifiedAt             null.Time         `db:"verified_at"`
-	Fingerprint            null.String       `db:"fingerprint"`
-	GdprErasureRequestedAt null.Time         `db:"gdpr_erasure_requested_at"`
-	GdprErasedAt           null.Time         `db:"gdpr_erased_at"`
-	MetaCreatedAt          time.Time         `db:"meta_created_at"`
-	MetaCreatedBy          uuid.UUID         `db:"meta_created_by"`
-	MetaUpdatedAt          time.Time         `db:"meta_updated_at"`
-	MetaUpdatedBy          nuuid.NUUID       `db:"meta_updated_by"`
-	MetaDeletedAt          null.Time         `db:"meta_deleted_at"`
-	MetaDeletedBy          nuuid.NUUID       `db:"meta_deleted_by"`
+	Id         uuid.UUID           `db:"id"`
+	Code       string              `db:"code"`
+	MethodType PaymentMethodType   `db:"method_type"`
+	Name       string              `db:"name"`
+	Status     PaymentMethodStatus `db:"status"`
+	Metadata   json.RawMessage     `db:"metadata"`
+
+	shared.MetaSignature
 }
 type PaymentMethodsPrimaryID struct {
 	Id uuid.UUID `db:"id"`
@@ -248,3 +295,5 @@ func (d PaymentMethods) ToPaymentMethodsPrimaryID() PaymentMethodsPrimaryID {
 }
 
 type PaymentMethodsList []*PaymentMethods
+
+type PaymentMethodsFilterResultList []*PaymentMethodsFilterResult

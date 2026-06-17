@@ -31,52 +31,16 @@ func composeInsertFieldsAndParamsPaymentMethods(paymentMethodsList []model.Payme
 			switch field {
 			case selectField.Id():
 				args = append(args, paymentMethods.Id)
-			case selectField.UserId():
-				args = append(args, paymentMethods.UserId)
-			case selectField.MerchantId():
-				args = append(args, paymentMethods.MerchantId)
+			case selectField.Code():
+				args = append(args, paymentMethods.Code)
 			case selectField.MethodType():
 				args = append(args, paymentMethods.MethodType)
-			case selectField.Psp():
-				args = append(args, paymentMethods.Psp)
-			case selectField.TokenRef():
-				args = append(args, paymentMethods.TokenRef)
-			case selectField.TokenType():
-				args = append(args, paymentMethods.TokenType)
-			case selectField.TokenExpiresAt():
-				args = append(args, paymentMethods.TokenExpiresAt)
-			case selectField.CardBrand():
-				args = append(args, paymentMethods.CardBrand)
-			case selectField.CardLastFour():
-				args = append(args, paymentMethods.CardLastFour)
-			case selectField.CardExpMonth():
-				args = append(args, paymentMethods.CardExpMonth)
-			case selectField.CardExpYear():
-				args = append(args, paymentMethods.CardExpYear)
-			case selectField.CardCountry():
-				args = append(args, paymentMethods.CardCountry)
-			case selectField.CardFundingType():
-				args = append(args, paymentMethods.CardFundingType)
-			case selectField.CardBin():
-				args = append(args, paymentMethods.CardBin)
-			case selectField.WalletAccountRef():
-				args = append(args, paymentMethods.WalletAccountRef)
-			case selectField.VaBankCode():
-				args = append(args, paymentMethods.VaBankCode)
-			case selectField.DisplayLabel():
-				args = append(args, paymentMethods.DisplayLabel)
-			case selectField.IsDefault():
-				args = append(args, paymentMethods.IsDefault)
-			case selectField.IsActive():
-				args = append(args, paymentMethods.IsActive)
-			case selectField.VerifiedAt():
-				args = append(args, paymentMethods.VerifiedAt)
-			case selectField.Fingerprint():
-				args = append(args, paymentMethods.Fingerprint)
-			case selectField.GdprErasureRequestedAt():
-				args = append(args, paymentMethods.GdprErasureRequestedAt)
-			case selectField.GdprErasedAt():
-				args = append(args, paymentMethods.GdprErasedAt)
+			case selectField.Name():
+				args = append(args, paymentMethods.Name)
+			case selectField.Status():
+				args = append(args, paymentMethods.Status)
+			case selectField.Metadata():
+				args = append(args, paymentMethods.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentMethods.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -149,96 +113,24 @@ func (ss PaymentMethodsSelectFields) Id() PaymentMethodsField {
 	return PaymentMethodsField("id")
 }
 
-func (ss PaymentMethodsSelectFields) UserId() PaymentMethodsField {
-	return PaymentMethodsField("user_id")
-}
-
-func (ss PaymentMethodsSelectFields) MerchantId() PaymentMethodsField {
-	return PaymentMethodsField("merchant_id")
+func (ss PaymentMethodsSelectFields) Code() PaymentMethodsField {
+	return PaymentMethodsField("code")
 }
 
 func (ss PaymentMethodsSelectFields) MethodType() PaymentMethodsField {
 	return PaymentMethodsField("method_type")
 }
 
-func (ss PaymentMethodsSelectFields) Psp() PaymentMethodsField {
-	return PaymentMethodsField("psp")
+func (ss PaymentMethodsSelectFields) Name() PaymentMethodsField {
+	return PaymentMethodsField("name")
 }
 
-func (ss PaymentMethodsSelectFields) TokenRef() PaymentMethodsField {
-	return PaymentMethodsField("token_ref")
+func (ss PaymentMethodsSelectFields) Status() PaymentMethodsField {
+	return PaymentMethodsField("status")
 }
 
-func (ss PaymentMethodsSelectFields) TokenType() PaymentMethodsField {
-	return PaymentMethodsField("token_type")
-}
-
-func (ss PaymentMethodsSelectFields) TokenExpiresAt() PaymentMethodsField {
-	return PaymentMethodsField("token_expires_at")
-}
-
-func (ss PaymentMethodsSelectFields) CardBrand() PaymentMethodsField {
-	return PaymentMethodsField("card_brand")
-}
-
-func (ss PaymentMethodsSelectFields) CardLastFour() PaymentMethodsField {
-	return PaymentMethodsField("card_last_four")
-}
-
-func (ss PaymentMethodsSelectFields) CardExpMonth() PaymentMethodsField {
-	return PaymentMethodsField("card_exp_month")
-}
-
-func (ss PaymentMethodsSelectFields) CardExpYear() PaymentMethodsField {
-	return PaymentMethodsField("card_exp_year")
-}
-
-func (ss PaymentMethodsSelectFields) CardCountry() PaymentMethodsField {
-	return PaymentMethodsField("card_country")
-}
-
-func (ss PaymentMethodsSelectFields) CardFundingType() PaymentMethodsField {
-	return PaymentMethodsField("card_funding_type")
-}
-
-func (ss PaymentMethodsSelectFields) CardBin() PaymentMethodsField {
-	return PaymentMethodsField("card_bin")
-}
-
-func (ss PaymentMethodsSelectFields) WalletAccountRef() PaymentMethodsField {
-	return PaymentMethodsField("wallet_account_ref")
-}
-
-func (ss PaymentMethodsSelectFields) VaBankCode() PaymentMethodsField {
-	return PaymentMethodsField("va_bank_code")
-}
-
-func (ss PaymentMethodsSelectFields) DisplayLabel() PaymentMethodsField {
-	return PaymentMethodsField("display_label")
-}
-
-func (ss PaymentMethodsSelectFields) IsDefault() PaymentMethodsField {
-	return PaymentMethodsField("is_default")
-}
-
-func (ss PaymentMethodsSelectFields) IsActive() PaymentMethodsField {
-	return PaymentMethodsField("is_active")
-}
-
-func (ss PaymentMethodsSelectFields) VerifiedAt() PaymentMethodsField {
-	return PaymentMethodsField("verified_at")
-}
-
-func (ss PaymentMethodsSelectFields) Fingerprint() PaymentMethodsField {
-	return PaymentMethodsField("fingerprint")
-}
-
-func (ss PaymentMethodsSelectFields) GdprErasureRequestedAt() PaymentMethodsField {
-	return PaymentMethodsField("gdpr_erasure_requested_at")
-}
-
-func (ss PaymentMethodsSelectFields) GdprErasedAt() PaymentMethodsField {
-	return PaymentMethodsField("gdpr_erased_at")
+func (ss PaymentMethodsSelectFields) Metadata() PaymentMethodsField {
+	return PaymentMethodsField("metadata")
 }
 
 func (ss PaymentMethodsSelectFields) MetaCreatedAt() PaymentMethodsField {
@@ -268,29 +160,11 @@ func (ss PaymentMethodsSelectFields) MetaDeletedBy() PaymentMethodsField {
 func (ss PaymentMethodsSelectFields) All() PaymentMethodsFieldList {
 	return []PaymentMethodsField{
 		ss.Id(),
-		ss.UserId(),
-		ss.MerchantId(),
+		ss.Code(),
 		ss.MethodType(),
-		ss.Psp(),
-		ss.TokenRef(),
-		ss.TokenType(),
-		ss.TokenExpiresAt(),
-		ss.CardBrand(),
-		ss.CardLastFour(),
-		ss.CardExpMonth(),
-		ss.CardExpYear(),
-		ss.CardCountry(),
-		ss.CardFundingType(),
-		ss.CardBin(),
-		ss.WalletAccountRef(),
-		ss.VaBankCode(),
-		ss.DisplayLabel(),
-		ss.IsDefault(),
-		ss.IsActive(),
-		ss.VerifiedAt(),
-		ss.Fingerprint(),
-		ss.GdprErasureRequestedAt(),
-		ss.GdprErasedAt(),
+		ss.Name(),
+		ss.Status(),
+		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -340,29 +214,11 @@ func defaultPaymentMethodsUpdateFields(paymentMethods model.PaymentMethods) (pay
 	selectFields := NewPaymentMethodsSelectFields()
 	paymentMethodsUpdateFieldList = append(paymentMethodsUpdateFieldList,
 		NewPaymentMethodsUpdateField(selectFields.Id(), paymentMethods.Id),
-		NewPaymentMethodsUpdateField(selectFields.UserId(), paymentMethods.UserId),
-		NewPaymentMethodsUpdateField(selectFields.MerchantId(), paymentMethods.MerchantId),
+		NewPaymentMethodsUpdateField(selectFields.Code(), paymentMethods.Code),
 		NewPaymentMethodsUpdateField(selectFields.MethodType(), paymentMethods.MethodType),
-		NewPaymentMethodsUpdateField(selectFields.Psp(), paymentMethods.Psp),
-		NewPaymentMethodsUpdateField(selectFields.TokenRef(), paymentMethods.TokenRef),
-		NewPaymentMethodsUpdateField(selectFields.TokenType(), paymentMethods.TokenType),
-		NewPaymentMethodsUpdateField(selectFields.TokenExpiresAt(), paymentMethods.TokenExpiresAt),
-		NewPaymentMethodsUpdateField(selectFields.CardBrand(), paymentMethods.CardBrand),
-		NewPaymentMethodsUpdateField(selectFields.CardLastFour(), paymentMethods.CardLastFour),
-		NewPaymentMethodsUpdateField(selectFields.CardExpMonth(), paymentMethods.CardExpMonth),
-		NewPaymentMethodsUpdateField(selectFields.CardExpYear(), paymentMethods.CardExpYear),
-		NewPaymentMethodsUpdateField(selectFields.CardCountry(), paymentMethods.CardCountry),
-		NewPaymentMethodsUpdateField(selectFields.CardFundingType(), paymentMethods.CardFundingType),
-		NewPaymentMethodsUpdateField(selectFields.CardBin(), paymentMethods.CardBin),
-		NewPaymentMethodsUpdateField(selectFields.WalletAccountRef(), paymentMethods.WalletAccountRef),
-		NewPaymentMethodsUpdateField(selectFields.VaBankCode(), paymentMethods.VaBankCode),
-		NewPaymentMethodsUpdateField(selectFields.DisplayLabel(), paymentMethods.DisplayLabel),
-		NewPaymentMethodsUpdateField(selectFields.IsDefault(), paymentMethods.IsDefault),
-		NewPaymentMethodsUpdateField(selectFields.IsActive(), paymentMethods.IsActive),
-		NewPaymentMethodsUpdateField(selectFields.VerifiedAt(), paymentMethods.VerifiedAt),
-		NewPaymentMethodsUpdateField(selectFields.Fingerprint(), paymentMethods.Fingerprint),
-		NewPaymentMethodsUpdateField(selectFields.GdprErasureRequestedAt(), paymentMethods.GdprErasureRequestedAt),
-		NewPaymentMethodsUpdateField(selectFields.GdprErasedAt(), paymentMethods.GdprErasedAt),
+		NewPaymentMethodsUpdateField(selectFields.Name(), paymentMethods.Name),
+		NewPaymentMethodsUpdateField(selectFields.Status(), paymentMethods.Status),
+		NewPaymentMethodsUpdateField(selectFields.Metadata(), paymentMethods.Metadata),
 		NewPaymentMethodsUpdateField(selectFields.MetaCreatedAt(), paymentMethods.MetaCreatedAt),
 		NewPaymentMethodsUpdateField(selectFields.MetaCreatedBy(), paymentMethods.MetaCreatedBy),
 		NewPaymentMethodsUpdateField(selectFields.MetaUpdatedAt(), paymentMethods.MetaUpdatedAt),
@@ -508,7 +364,7 @@ func (repo *RepositoryImpl) IsExistPaymentMethodsByIDs(ctx context.Context, ids 
 
 	query = repo.db.Read.Rebind(query)
 	var resIds []model.PaymentMethodsPrimaryID
-	err = repo.db.Read.Select(&resIds, query, params...)
+	err = repo.db.Read.SelectContext(ctx, &resIds, query, params...)
 	if err != nil {
 		log.Error().Err(err).Msg("[IsExistPaymentMethodsByIDs] failed get ids")
 		return false, nil, failure.InternalError(err)
@@ -660,74 +516,20 @@ func GetPaymentMethodsFieldType(paymentMethodsField PaymentMethodsField) string 
 	case selectPaymentMethodsFields.Id():
 		return "uuid"
 
-	case selectPaymentMethodsFields.UserId():
-		return "uuid"
-
-	case selectPaymentMethodsFields.MerchantId():
-		return "uuid"
+	case selectPaymentMethodsFields.Code():
+		return "text"
 
 	case selectPaymentMethodsFields.MethodType():
 		return "payment_method_type_enum"
 
-	case selectPaymentMethodsFields.Psp():
-		return "psp_enum"
-
-	case selectPaymentMethodsFields.TokenRef():
+	case selectPaymentMethodsFields.Name():
 		return "text"
 
-	case selectPaymentMethodsFields.TokenType():
-		return "text"
+	case selectPaymentMethodsFields.Status():
+		return "payment_method_status_enum"
 
-	case selectPaymentMethodsFields.TokenExpiresAt():
-		return "timestamptz"
-
-	case selectPaymentMethodsFields.CardBrand():
-		return "text"
-
-	case selectPaymentMethodsFields.CardLastFour():
-		return "text"
-
-	case selectPaymentMethodsFields.CardExpMonth():
-		return "int2"
-
-	case selectPaymentMethodsFields.CardExpYear():
-		return "int2"
-
-	case selectPaymentMethodsFields.CardCountry():
-		return "text"
-
-	case selectPaymentMethodsFields.CardFundingType():
-		return "text"
-
-	case selectPaymentMethodsFields.CardBin():
-		return "text"
-
-	case selectPaymentMethodsFields.WalletAccountRef():
-		return "text"
-
-	case selectPaymentMethodsFields.VaBankCode():
-		return "text"
-
-	case selectPaymentMethodsFields.DisplayLabel():
-		return "text"
-
-	case selectPaymentMethodsFields.IsDefault():
-		return "bool"
-
-	case selectPaymentMethodsFields.IsActive():
-		return "bool"
-
-	case selectPaymentMethodsFields.VerifiedAt():
-		return "timestamptz"
-
-	case selectPaymentMethodsFields.Fingerprint():
-		return "text"
-
-	case selectPaymentMethodsFields.GdprErasureRequestedAt():
-		return "timestamptz"
-
-	case selectPaymentMethodsFields.GdprErasedAt():
-		return "timestamptz"
+	case selectPaymentMethodsFields.Metadata():
+		return "jsonb"
 
 	case selectPaymentMethodsFields.MetaCreatedAt():
 		return "timestamptz"
@@ -807,10 +609,287 @@ func (repo *RepositoryImpl) ResolvePaymentMethodsByFilter(ctx context.Context, f
 		log.Error().Err(err).Msg("[ResolvePaymentMethodsByFilter] failed compose paymentMethods filter")
 		return
 	}
-	err = repo.db.Read.Select(&result, query, args...)
+	err = repo.db.Read.SelectContext(ctx, &result, query, args...)
 	if err != nil {
 		log.Error().Err(err).Msg("[ResolvePaymentMethodsByFilter] failed get paymentMethods by filter")
 		err = failure.InternalError(err)
+	}
+	return
+}
+
+func composePaymentMethodsFilterSQLExpr(spec model.FilterFieldSpec) (string, error) {
+	if spec.Relation == "" {
+		return fmt.Sprintf("base.\"%s\"", spec.Column), nil
+	}
+	joinSpec, found := model.PaymentMethodsFilterJoins[spec.Relation]
+	if !found {
+		return "", failure.BadRequestFromString(fmt.Sprintf("join %s is not allowed", spec.Relation))
+	}
+	return fmt.Sprintf("%s.\"%s\"", joinSpec.Alias, spec.Column), nil
+}
+
+func composePaymentMethodsFilterJoins(requiredJoins map[string]bool) string {
+	if len(requiredJoins) == 0 {
+		return ""
+	}
+	joinQueries := []string{}
+
+	if len(joinQueries) == 0 {
+		return ""
+	}
+	return " " + strings.Join(joinQueries, " ")
+}
+
+func normalizePaymentMethodsSortOrder(order string) (string, error) {
+	order = strings.ToUpper(strings.TrimSpace(order))
+	switch order {
+	case model.SortAsc, model.SortDesc:
+		return order, nil
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("sort order %s is not allowed", order))
+	}
+}
+
+func composePaymentMethodsFilterSelectColumns(filter model.Filter, isCursorMode bool) (selectColumns []string, err error) {
+	selectedColumnCapacity := len(filter.SelectFields) + 1
+	if len(filter.SelectFields) == 0 {
+		selectedColumnCapacity = 12 + 1
+	}
+	selectedColumns := make(map[string]struct{}, selectedColumnCapacity)
+	addColumn := func(field string) error {
+		sourceField, _, _ := model.ParseProjection(field)
+		spec, found := model.NewPaymentMethodsFilterFieldSpecFromStr(sourceField)
+		if !found || !spec.Selectable || spec.Relation != "" {
+			return failure.BadRequestFromString(fmt.Sprintf("field %s is not selectable", sourceField))
+		}
+		if _, selected := selectedColumns[spec.Column]; selected {
+			return nil
+		}
+		selectColumns = append(selectColumns, fmt.Sprintf("base.\"%s\"", spec.Column))
+		selectedColumns[spec.Column] = struct{}{}
+		return nil
+	}
+
+	if len(filter.SelectFields) == 0 {
+		selectColumns = make([]string, 0, 12+1)
+		if _, selected := selectedColumns["id"]; !selected {
+			selectColumns = append(selectColumns, "base.\"id\"")
+			selectedColumns["id"] = struct{}{}
+		}
+		if _, selected := selectedColumns["code"]; !selected {
+			selectColumns = append(selectColumns, "base.\"code\"")
+			selectedColumns["code"] = struct{}{}
+		}
+		if _, selected := selectedColumns["method_type"]; !selected {
+			selectColumns = append(selectColumns, "base.\"method_type\"")
+			selectedColumns["method_type"] = struct{}{}
+		}
+		if _, selected := selectedColumns["name"]; !selected {
+			selectColumns = append(selectColumns, "base.\"name\"")
+			selectedColumns["name"] = struct{}{}
+		}
+		if _, selected := selectedColumns["status"]; !selected {
+			selectColumns = append(selectColumns, "base.\"status\"")
+			selectedColumns["status"] = struct{}{}
+		}
+		if _, selected := selectedColumns["metadata"]; !selected {
+			selectColumns = append(selectColumns, "base.\"metadata\"")
+			selectedColumns["metadata"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_created_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_created_at\"")
+			selectedColumns["meta_created_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_created_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_created_by\"")
+			selectedColumns["meta_created_by"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_updated_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_updated_at\"")
+			selectedColumns["meta_updated_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_updated_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_updated_by\"")
+			selectedColumns["meta_updated_by"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_deleted_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_deleted_at\"")
+			selectedColumns["meta_deleted_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_deleted_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_deleted_by\"")
+			selectedColumns["meta_deleted_by"] = struct{}{}
+		}
+
+	} else {
+		selectColumns = make([]string, 0, len(filter.SelectFields)+1)
+		for _, field := range filter.SelectFields {
+			if err = addColumn(field); err != nil {
+				return
+			}
+		}
+	}
+
+	if _, selected := selectedColumns["id"]; isCursorMode && !selected {
+		selectColumns = append(selectColumns, "base.\"id\"")
+		selectedColumns["id"] = struct{}{}
+	}
+
+	return
+}
+
+type paymentMethodsFilterPlaceholder struct {
+	index int
+}
+
+func (p *paymentMethodsFilterPlaceholder) Next() string {
+	placeholder := fmt.Sprintf("$%d", p.index)
+	p.index++
+	return placeholder
+}
+
+func composePaymentMethodsFilterPredicate(filterField model.FilterField, placeholders *paymentMethodsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (string, error) {
+	spec, found := model.NewPaymentMethodsFilterFieldSpecFromStr(filterField.Field)
+	if !found || !spec.Filterable {
+		return "", failure.BadRequestFromString(fmt.Sprintf("field %s is not filterable", filterField.Field))
+	}
+	sqlExpr, err := composePaymentMethodsFilterSQLExpr(spec)
+	if err != nil {
+		return "", err
+	}
+	if spec.Relation != "" {
+		requiredJoins[spec.Relation] = true
+	}
+	switch filterField.Operator {
+	case model.OperatorEqual:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s = %s", sqlExpr, placeholder), nil
+	case model.OperatorRange:
+		valueArray, ok := filterField.Value.([]interface{})
+		if !ok || len(valueArray) != 2 {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		start := placeholders.Next()
+		end := placeholders.Next()
+		*args = append(*args, valueArray...)
+		return fmt.Sprintf("%s BETWEEN %s AND %s", sqlExpr, start, end), nil
+	case model.OperatorIn, model.OperatorNotIn:
+		valueArray, ok := filterField.Value.([]interface{})
+		if !ok || len(valueArray) == 0 {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		placeholder := []string{}
+		for range valueArray {
+			placeholder = append(placeholder, placeholders.Next())
+		}
+		operator := "IN"
+		if filterField.Operator == model.OperatorNotIn {
+			operator = "NOT IN"
+		}
+		*args = append(*args, valueArray...)
+		return fmt.Sprintf("%s %s (%s)", sqlExpr, operator, strings.Join(placeholder, ",")), nil
+	case model.OperatorIsNull:
+		value, ok := filterField.Value.(bool)
+		if !ok {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		if value {
+			return fmt.Sprintf("%s IS NULL", sqlExpr), nil
+		}
+		return fmt.Sprintf("%s IS NOT NULL", sqlExpr), nil
+	case model.OperatorNot:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s != %s", sqlExpr, placeholder), nil
+	case model.OperatorGT:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s > %s", sqlExpr, placeholder), nil
+	case model.OperatorGTE:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s >= %s", sqlExpr, placeholder), nil
+	case model.OperatorLT:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s < %s", sqlExpr, placeholder), nil
+	case model.OperatorLTE:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s <= %s", sqlExpr, placeholder), nil
+	case model.OperatorLike:
+		value, ok := filterField.Value.(string)
+		if !ok {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		placeholder := placeholders.Next()
+		*args = append(*args, "%"+strings.TrimSpace(value)+"%")
+		return fmt.Sprintf("%s ILIKE %s", sqlExpr, placeholder), nil
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("operator %s is not allowed", filterField.Operator))
+	}
+}
+
+func composePaymentMethodsFilterGroup(group model.FilterGroup, placeholders *paymentMethodsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (string, error) {
+	logic := strings.ToUpper(strings.TrimSpace(group.Logic))
+	if logic == "" {
+		logic = "AND"
+	}
+	switch logic {
+	case "AND", "OR":
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("filter logic %s is not allowed", group.Logic))
+	}
+
+	parts := []string{}
+	for _, filterField := range group.FilterFields {
+		predicate, err := composePaymentMethodsFilterPredicate(filterField, placeholders, args, requiredJoins)
+		if err != nil {
+			return "", err
+		}
+		if predicate != "" {
+			parts = append(parts, predicate)
+		}
+	}
+	for _, child := range group.Groups {
+		childQuery, err := composePaymentMethodsFilterGroup(child, placeholders, args, requiredJoins)
+		if err != nil {
+			return "", err
+		}
+		if childQuery != "" {
+			parts = append(parts, childQuery)
+		}
+	}
+	if len(parts) == 0 {
+		return "", nil
+	}
+	if len(parts) == 1 {
+		return parts[0], nil
+	}
+	return "(" + strings.Join(parts, " "+logic+" ") + ")", nil
+}
+
+func composePaymentMethodsFilterWhereQueries(filter model.Filter, placeholders *paymentMethodsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (whereQueries []string, err error) {
+	for _, filterField := range filter.FilterFields {
+		predicate, predicateErr := composePaymentMethodsFilterPredicate(filterField, placeholders, args, requiredJoins)
+		if predicateErr != nil {
+			err = predicateErr
+			return
+		}
+		if predicate != "" {
+			whereQueries = append(whereQueries, predicate)
+		}
+	}
+	if filter.Where != nil {
+		groupQuery, groupErr := composePaymentMethodsFilterGroup(*filter.Where, placeholders, args, requiredJoins)
+		if groupErr != nil {
+			err = groupErr
+			return
+		}
+		if groupQuery != "" {
+			whereQueries = append(whereQueries, groupQuery)
+		}
 	}
 	return
 }
@@ -820,83 +899,99 @@ func composePaymentMethodsFilterQuery(filter model.Filter) (query string, args [
 	if err != nil {
 		return
 	}
-	selectFields := defaultPaymentMethodsSelectFields()
-	index := 1
-	if len(filter.SelectFields) > 0 {
-		fields := PaymentMethodsFieldList{}
-		for _, filterSelectField := range filter.SelectFields {
-			fields = append(fields, PaymentMethodsField(filterSelectField))
-		}
-		selectFields = composePaymentMethodsSelectFields(fields...)
+	isCursorMode := filter.Pagination.IsCursorMode()
+	requiredJoins := map[string]bool{}
+	cursorOperator := ">"
+	cursorSortOrder := model.SortAsc
+	if filter.Pagination.Direction == model.CursorDirectionPrev {
+		cursorOperator = "<"
+		cursorSortOrder = model.SortDesc
 	}
-	selectFields += ", COUNT(*) OVER() as count"
-	query = fmt.Sprintf(paymentMethodsQueries.selectPaymentMethods, selectFields)
-
-	if len(filter.FilterFields) > 0 {
-		var (
-			whereQueries []string
-			whereArgs    []interface{}
-		)
-		for _, filterField := range filter.FilterFields {
-			switch filterField.Operator {
-			case model.OperatorEqual:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" = $%d", filterField.Field, index))
-				whereArgs = append(whereArgs, filterField.Value)
-				index++
-			case model.OperatorRange:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" BETWEEN $%d AND $%d", filterField.Field, index, index+1))
-				valueArray, ok := filterField.Value.([]interface{})
-				if !ok && len(valueArray) != 2 {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				whereArgs = append(whereArgs, valueArray...)
-				index += 2
-			case model.OperatorIn:
-				valueArray, ok := filterField.Value.([]interface{})
-				if !ok {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				var placeholder []string
-				for range valueArray {
-					placeholder = append(placeholder, fmt.Sprintf("$%d", index))
-					index++
-				}
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IN (%s)", filterField.Field, strings.Join(placeholder, ",")))
-				whereArgs = append(whereArgs, valueArray...)
-			case model.OperatorIsNull:
-				value, ok := filterField.Value.(bool)
-				if !ok {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				if value {
-					whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IS NULL", filterField.Field))
-				} else {
-					whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IS NOT NULL", filterField.Field))
-				}
-			case model.OperatorNot:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" != $%d", filterField.Field, index))
-				whereArgs = append(whereArgs, filterField.Value)
-				index++
+	if isCursorMode {
+		if len(filter.Sorts) > 1 {
+			err = failure.BadRequestFromString("cursor pagination only supports the default primary-key sort")
+			return
+		}
+		if len(filter.Sorts) == 1 {
+			sortOrder, sortErr := normalizePaymentMethodsSortOrder(filter.Sorts[0].Order)
+			if sortErr != nil {
+				err = sortErr
+				return
+			}
+			if filter.Sorts[0].Field != "id" || sortOrder != model.SortAsc {
+				err = failure.BadRequestFromString("cursor pagination only supports the default primary-key sort")
+				return
 			}
 		}
+	}
 
-		query += fmt.Sprintf(" WHERE %s", strings.Join(whereQueries, " AND "))
-		args = append(args, whereArgs...)
+	selectColumns, err := composePaymentMethodsFilterSelectColumns(filter, isCursorMode)
+	if err != nil {
+		return
+	}
+	if isCursorMode {
+		selectColumns = append(selectColumns, "0 AS count")
+	} else {
+		selectColumns = append(selectColumns, "COUNT(*) OVER() AS count")
+	}
+
+	placeholders := paymentMethodsFilterPlaceholder{index: 1}
+	whereQueries, err := composePaymentMethodsFilterWhereQueries(filter, &placeholders, &args, requiredJoins)
+	if err != nil {
+		return
+	}
+
+	if isCursorMode && filter.Pagination.Cursor != nil {
+		whereQueries = append(whereQueries, fmt.Sprintf("base.\"id\" %s %s", cursorOperator, placeholders.Next()))
+		args = append(args, filter.Pagination.Cursor)
 	}
 
 	sortQuery := []string{}
-	for _, sort := range filter.Sorts {
-		sortQuery = append(sortQuery, fmt.Sprintf("\"%s\" %s", sort.Field, sort.Order))
+	if isCursorMode {
+		sortQuery = append(sortQuery, fmt.Sprintf("base.\"id\" %s", cursorSortOrder))
+
+	} else {
+		for _, sort := range filter.Sorts {
+			spec, found := model.NewPaymentMethodsFilterFieldSpecFromStr(sort.Field)
+			if !found || !spec.Sortable {
+				err = failure.BadRequestFromString(fmt.Sprintf("field %s is not sortable", sort.Field))
+				return
+			}
+			sqlExpr, exprErr := composePaymentMethodsFilterSQLExpr(spec)
+			if exprErr != nil {
+				err = exprErr
+				return
+			}
+			if spec.Relation != "" {
+				requiredJoins[spec.Relation] = true
+			}
+			sortOrder, sortErr := normalizePaymentMethodsSortOrder(sort.Order)
+			if sortErr != nil {
+				err = sortErr
+				return
+			}
+			sortQuery = append(sortQuery, fmt.Sprintf("%s %s", sqlExpr, sortOrder))
+		}
+		if len(sortQuery) == 0 {
+			sortQuery = append(sortQuery, "base.\"id\" ASC")
+		}
+
+	}
+
+	query = fmt.Sprintf("SELECT %s FROM \"payment_methods\" base%s", strings.Join(selectColumns, ","), composePaymentMethodsFilterJoins(requiredJoins))
+	if len(whereQueries) > 0 {
+		query += fmt.Sprintf(" WHERE %s", strings.Join(whereQueries, " AND "))
 	}
 	if len(sortQuery) > 0 {
 		query += fmt.Sprintf(" ORDER BY %s", strings.Join(sortQuery, ","))
 	}
 	if filter.Pagination.PageSize > 0 {
-		query += fmt.Sprintf(" LIMIT %d", filter.Pagination.PageSize)
-		if filter.Pagination.Page > 0 {
+		limit := filter.Pagination.PageSize
+		if isCursorMode {
+			limit = filter.Pagination.PageSize + 1
+		}
+		query += fmt.Sprintf(" LIMIT %d", limit)
+		if !isCursorMode && filter.Pagination.Page > 0 {
 			query += fmt.Sprintf(" OFFSET %d", (filter.Pagination.Page-1)*filter.Pagination.PageSize)
 		}
 	}
@@ -908,7 +1003,7 @@ func (repo *RepositoryImpl) IsExistPaymentMethodsByID(ctx context.Context, prima
 	whereQuery, params := composePaymentMethodsCompositePrimaryKeyWhere([]model.PaymentMethodsPrimaryID{primaryID})
 	query := fmt.Sprintf("%s WHERE %s", paymentMethodsQueries.selectCountPaymentMethods, whereQuery)
 	query = repo.db.Read.Rebind(query)
-	err = repo.db.Read.Get(&exists, query, params...)
+	err = repo.db.Read.GetContext(ctx, &exists, query, params...)
 	if err != nil {
 		log.Error().Err(err).Msg("[IsExistPaymentMethodsByID] failed get count")
 		err = failure.InternalError(err)
@@ -925,7 +1020,7 @@ func (repo *RepositoryImpl) ResolvePaymentMethods(ctx context.Context, selectFie
 	}
 	query := fmt.Sprintf(paymentMethodsQueries.selectPaymentMethods, defaultPaymentMethodsSelectFields)
 
-	err = repo.db.Read.Select(&paymentMethodsList, query)
+	err = repo.db.Read.SelectContext(ctx, &paymentMethodsList, query)
 	if err != nil {
 		log.Error().Err(err).Msg("[ResolvePaymentMethods] failed get paymentMethods list")
 		err = failure.InternalError(err)
@@ -943,7 +1038,7 @@ func (repo *RepositoryImpl) ResolvePaymentMethodsByID(ctx context.Context, prima
 	whereQry, params := composePaymentMethodsCompositePrimaryKeyWhere([]model.PaymentMethodsPrimaryID{primaryID})
 	query := fmt.Sprintf(paymentMethodsQueries.selectPaymentMethods+" WHERE "+whereQry, defaultPaymentMethodsSelectFields)
 	query = repo.db.Read.Rebind(query)
-	err = repo.db.Read.Get(&paymentMethods, query, params...)
+	err = repo.db.Read.GetContext(ctx, &paymentMethods, query, params...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			err = failure.NotFound(fmt.Sprintf("paymentMethods with id '%s' not found", fmt.Sprint(primaryID)))
@@ -998,6 +1093,62 @@ func (repo *RepositoryImpl) UpdatePaymentMethodsByID(ctx context.Context, primar
 	return err
 }
 
+func (repo *RepositoryImpl) UpdatePaymentMethodsByFilter(ctx context.Context, filter model.Filter, paymentMethodsUpdateFields ...PaymentMethodsUpdateField) (rowsAffected int64, err error) {
+	if len(filter.FilterFields) == 0 && filter.Where == nil {
+		err = failure.BadRequestFromString("update by filter requires at least one filter predicate")
+		return
+	}
+	if len(paymentMethodsUpdateFields) == 0 {
+		err = failure.BadRequestFromString("update fields are required")
+		return
+	}
+
+	var (
+		updateFields PaymentMethodsUpdateFieldList
+		selectFields = NewPaymentMethodsSelectFields()
+	)
+	for _, updateField := range paymentMethodsUpdateFields {
+		if updateField.paymentMethodsField == selectFields.Id() {
+			continue
+		}
+		updateFields = append(updateFields, updateField)
+	}
+	if len(updateFields) == 0 {
+		err = failure.BadRequestFromString("no mutable update fields provided")
+		return
+	}
+
+	fields, updateArgs := composeUpdateFieldsPaymentMethodsCommand(updateFields, 1)
+	args := append([]interface{}{}, updateArgs...)
+	requiredJoins := map[string]bool{}
+	placeholders := paymentMethodsFilterPlaceholder{index: len(updateArgs) + 1}
+	whereQueries, err := composePaymentMethodsFilterWhereQueries(filter, &placeholders, &args, requiredJoins)
+	if err != nil {
+		return
+	}
+	if len(whereQueries) == 0 {
+		err = failure.BadRequestFromString("update by filter requires at least one filter predicate")
+		return
+	}
+	if len(requiredJoins) > 0 {
+		err = failure.BadRequestFromString("update by filter does not support join fields")
+		return
+	}
+
+	commandQuery := fmt.Sprintf("UPDATE \"payment_methods\" AS base SET %s WHERE %s", strings.Join(fields, ","), strings.Join(whereQueries, " AND "))
+	commandQuery = repo.db.Read.Rebind(commandQuery)
+	result, err := repo.exec(ctx, commandQuery, args)
+	if err != nil {
+		log.Error().Err(err).Msg("[UpdatePaymentMethodsByFilter] error when try to update paymentMethods by filter")
+		return
+	}
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		log.Error().Err(err).Msg("[UpdatePaymentMethodsByFilter] failed get rows affected")
+	}
+	return
+}
+
 var (
 	paymentMethodsQueries = struct {
 		selectPaymentMethods      string
@@ -1020,6 +1171,7 @@ type PaymentMethodsRepository interface {
 	ResolvePaymentMethods(ctx context.Context, selectFields ...PaymentMethodsField) (model.PaymentMethodsList, error)
 	ResolvePaymentMethodsByID(ctx context.Context, primaryID model.PaymentMethodsPrimaryID, selectFields ...PaymentMethodsField) (model.PaymentMethods, error)
 	UpdatePaymentMethodsByID(ctx context.Context, id model.PaymentMethodsPrimaryID, paymentMethods *model.PaymentMethods, paymentMethodsUpdateFields ...PaymentMethodsUpdateField) error
+	UpdatePaymentMethodsByFilter(ctx context.Context, filter model.Filter, paymentMethodsUpdateFields ...PaymentMethodsUpdateField) (rowsAffected int64, err error)
 	BulkUpdatePaymentMethods(ctx context.Context, paymentMethodsListMap map[model.PaymentMethodsPrimaryID]*model.PaymentMethods, PaymentMethodssMapUpdateFieldsRequest map[model.PaymentMethodsPrimaryID]PaymentMethodsUpdateFieldList) (err error)
 	DeletePaymentMethodsByID(ctx context.Context, id model.PaymentMethodsPrimaryID) error
 	BulkDeletePaymentMethodsByIDs(ctx context.Context, ids []model.PaymentMethodsPrimaryID) error

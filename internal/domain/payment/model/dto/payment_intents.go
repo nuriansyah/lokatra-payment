@@ -4,17 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
-	"github.com/gofrs/uuid"
-	"github.com/guregu/null"
-	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 	"github.com/shopspring/decimal"
+
+	"github.com/guregu/null"
+
+	"github.com/gofrs/uuid"
+
+	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 
 	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
 	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
-	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 )
 
 type PaymentIntentsDTOFieldNameType string
@@ -22,36 +25,24 @@ type PaymentIntentsDTOFieldNameType string
 type paymentIntentsDTOFieldName struct {
 	Id                  PaymentIntentsDTOFieldNameType
 	IntentCode          PaymentIntentsDTOFieldNameType
+	SourceService       PaymentIntentsDTOFieldNameType
+	SourceType          PaymentIntentsDTOFieldNameType
+	SourceId            PaymentIntentsDTOFieldNameType
 	MerchantId          PaymentIntentsDTOFieldNameType
-	OrderId             PaymentIntentsDTOFieldNameType
-	OrderType           PaymentIntentsDTOFieldNameType
+	CustomerId          PaymentIntentsDTOFieldNameType
 	Amount              PaymentIntentsDTOFieldNameType
 	Currency            PaymentIntentsDTOFieldNameType
-	TaxAmount           PaymentIntentsDTOFieldNameType
-	DiscountAmount      PaymentIntentsDTOFieldNameType
-	TipAmount           PaymentIntentsDTOFieldNameType
-	UserId              PaymentIntentsDTOFieldNameType
-	CustomerName        PaymentIntentsDTOFieldNameType
-	CustomerEmail       PaymentIntentsDTOFieldNameType
-	CustomerPhone       PaymentIntentsDTOFieldNameType
-	CustomerIp          PaymentIntentsDTOFieldNameType
-	CustomerCountry     PaymentIntentsDTOFieldNameType
-	PaymentMethodId     PaymentIntentsDTOFieldNameType
-	PaymentMethodType   PaymentIntentsDTOFieldNameType
 	Status              PaymentIntentsDTOFieldNameType
-	RoutingProfileId    PaymentIntentsDTOFieldNameType
-	ExpiresAt           PaymentIntentsDTOFieldNameType
-	Requires3ds         PaymentIntentsDTOFieldNameType
-	ThreeDsVersion      PaymentIntentsDTOFieldNameType
+	SelectedMethodCode  PaymentIntentsDTOFieldNameType
+	SelectedChannelCode PaymentIntentsDTOFieldNameType
 	Description         PaymentIntentsDTOFieldNameType
-	StatementDescriptor PaymentIntentsDTOFieldNameType
-	Metadata            PaymentIntentsDTOFieldNameType
-	PromoCode           PaymentIntentsDTOFieldNameType
-	PromoDiscountAmount PaymentIntentsDTOFieldNameType
-	IdempotencyKeyId    PaymentIntentsDTOFieldNameType
-	ConfirmedAt         PaymentIntentsDTOFieldNameType
-	CancelledAt         PaymentIntentsDTOFieldNameType
+	ExpiresAt           PaymentIntentsDTOFieldNameType
+	PaidAt              PaymentIntentsDTOFieldNameType
+	CanceledAt          PaymentIntentsDTOFieldNameType
 	CancellationReason  PaymentIntentsDTOFieldNameType
+	IdempotencyKey      PaymentIntentsDTOFieldNameType
+	SourceSnapshot      PaymentIntentsDTOFieldNameType
+	Metadata            PaymentIntentsDTOFieldNameType
 	MetaCreatedAt       PaymentIntentsDTOFieldNameType
 	MetaCreatedBy       PaymentIntentsDTOFieldNameType
 	MetaUpdatedAt       PaymentIntentsDTOFieldNameType
@@ -63,36 +54,24 @@ type paymentIntentsDTOFieldName struct {
 var PaymentIntentsDTOFieldName = paymentIntentsDTOFieldName{
 	Id:                  "id",
 	IntentCode:          "intentCode",
+	SourceService:       "sourceService",
+	SourceType:          "sourceType",
+	SourceId:            "sourceId",
 	MerchantId:          "merchantId",
-	OrderId:             "orderId",
-	OrderType:           "orderType",
+	CustomerId:          "customerId",
 	Amount:              "amount",
 	Currency:            "currency",
-	TaxAmount:           "taxAmount",
-	DiscountAmount:      "discountAmount",
-	TipAmount:           "tipAmount",
-	UserId:              "userId",
-	CustomerName:        "customerName",
-	CustomerEmail:       "customerEmail",
-	CustomerPhone:       "customerPhone",
-	CustomerIp:          "customerIp",
-	CustomerCountry:     "customerCountry",
-	PaymentMethodId:     "paymentMethodId",
-	PaymentMethodType:   "paymentMethodType",
 	Status:              "status",
-	RoutingProfileId:    "routingProfileId",
-	ExpiresAt:           "expiresAt",
-	Requires3ds:         "requires3ds",
-	ThreeDsVersion:      "threeDsVersion",
+	SelectedMethodCode:  "selectedMethodCode",
+	SelectedChannelCode: "selectedChannelCode",
 	Description:         "description",
-	StatementDescriptor: "statementDescriptor",
-	Metadata:            "metadata",
-	PromoCode:           "promoCode",
-	PromoDiscountAmount: "promoDiscountAmount",
-	IdempotencyKeyId:    "idempotencyKeyId",
-	ConfirmedAt:         "confirmedAt",
-	CancelledAt:         "cancelledAt",
+	ExpiresAt:           "expiresAt",
+	PaidAt:              "paidAt",
+	CanceledAt:          "canceledAt",
 	CancellationReason:  "cancellationReason",
+	IdempotencyKey:      "idempotencyKey",
+	SourceSnapshot:      "sourceSnapshot",
+	Metadata:            "metadata",
 	MetaCreatedAt:       "metaCreatedAt",
 	MetaCreatedBy:       "metaCreatedBy",
 	MetaUpdatedAt:       "metaUpdatedAt",
@@ -101,144 +80,162 @@ var PaymentIntentsDTOFieldName = paymentIntentsDTOFieldName{
 	MetaDeletedBy:       "metaDeletedBy",
 }
 
-func NewPaymentIntentsListResponseFromFilterResult(result []model.PaymentIntentsFilterResult, filter model.Filter) PaymentIntentsSelectableListResponse {
-	dtoPaymentIntentsListResponse := PaymentIntentsSelectableListResponse{}
-	for _, paymentIntents := range result {
-		dtoPaymentIntentsResponse := NewPaymentIntentsSelectableResponse(paymentIntents.PaymentIntents, filter)
-		dtoPaymentIntentsListResponse = append(dtoPaymentIntentsListResponse, &dtoPaymentIntentsResponse)
-	}
-	return dtoPaymentIntentsListResponse
-}
-
-func transformPaymentIntentsDTOFieldNameFromStr(field string) (dbField model.PaymentIntentsDBFieldNameType, found bool) {
+func transformPaymentIntentsDTOFieldNameFromStr(field string) (dbField string, found bool) {
 	switch field {
 
 	case string(PaymentIntentsDTOFieldName.Id):
-		return model.PaymentIntentsDBFieldName.Id, true
+		return string(model.PaymentIntentsDBFieldName.Id), true
 
 	case string(PaymentIntentsDTOFieldName.IntentCode):
-		return model.PaymentIntentsDBFieldName.IntentCode, true
+		return string(model.PaymentIntentsDBFieldName.IntentCode), true
+
+	case string(PaymentIntentsDTOFieldName.SourceService):
+		return string(model.PaymentIntentsDBFieldName.SourceService), true
+
+	case string(PaymentIntentsDTOFieldName.SourceType):
+		return string(model.PaymentIntentsDBFieldName.SourceType), true
+
+	case string(PaymentIntentsDTOFieldName.SourceId):
+		return string(model.PaymentIntentsDBFieldName.SourceId), true
 
 	case string(PaymentIntentsDTOFieldName.MerchantId):
-		return model.PaymentIntentsDBFieldName.MerchantId, true
+		return string(model.PaymentIntentsDBFieldName.MerchantId), true
 
-	case string(PaymentIntentsDTOFieldName.OrderId):
-		return model.PaymentIntentsDBFieldName.OrderId, true
-
-	case string(PaymentIntentsDTOFieldName.OrderType):
-		return model.PaymentIntentsDBFieldName.OrderType, true
+	case string(PaymentIntentsDTOFieldName.CustomerId):
+		return string(model.PaymentIntentsDBFieldName.CustomerId), true
 
 	case string(PaymentIntentsDTOFieldName.Amount):
-		return model.PaymentIntentsDBFieldName.Amount, true
+		return string(model.PaymentIntentsDBFieldName.Amount), true
 
 	case string(PaymentIntentsDTOFieldName.Currency):
-		return model.PaymentIntentsDBFieldName.Currency, true
-
-	case string(PaymentIntentsDTOFieldName.TaxAmount):
-		return model.PaymentIntentsDBFieldName.TaxAmount, true
-
-	case string(PaymentIntentsDTOFieldName.DiscountAmount):
-		return model.PaymentIntentsDBFieldName.DiscountAmount, true
-
-	case string(PaymentIntentsDTOFieldName.TipAmount):
-		return model.PaymentIntentsDBFieldName.TipAmount, true
-
-	case string(PaymentIntentsDTOFieldName.UserId):
-		return model.PaymentIntentsDBFieldName.UserId, true
-
-	case string(PaymentIntentsDTOFieldName.CustomerName):
-		return model.PaymentIntentsDBFieldName.CustomerName, true
-
-	case string(PaymentIntentsDTOFieldName.CustomerEmail):
-		return model.PaymentIntentsDBFieldName.CustomerEmail, true
-
-	case string(PaymentIntentsDTOFieldName.CustomerPhone):
-		return model.PaymentIntentsDBFieldName.CustomerPhone, true
-
-	case string(PaymentIntentsDTOFieldName.CustomerIp):
-		return model.PaymentIntentsDBFieldName.CustomerIp, true
-
-	case string(PaymentIntentsDTOFieldName.CustomerCountry):
-		return model.PaymentIntentsDBFieldName.CustomerCountry, true
-
-	case string(PaymentIntentsDTOFieldName.PaymentMethodId):
-		return model.PaymentIntentsDBFieldName.PaymentMethodId, true
-
-	case string(PaymentIntentsDTOFieldName.PaymentMethodType):
-		return model.PaymentIntentsDBFieldName.PaymentMethodType, true
+		return string(model.PaymentIntentsDBFieldName.Currency), true
 
 	case string(PaymentIntentsDTOFieldName.Status):
-		return model.PaymentIntentsDBFieldName.Status, true
+		return string(model.PaymentIntentsDBFieldName.Status), true
 
-	case string(PaymentIntentsDTOFieldName.RoutingProfileId):
-		return model.PaymentIntentsDBFieldName.RoutingProfileId, true
+	case string(PaymentIntentsDTOFieldName.SelectedMethodCode):
+		return string(model.PaymentIntentsDBFieldName.SelectedMethodCode), true
 
-	case string(PaymentIntentsDTOFieldName.ExpiresAt):
-		return model.PaymentIntentsDBFieldName.ExpiresAt, true
-
-	case string(PaymentIntentsDTOFieldName.Requires3ds):
-		return model.PaymentIntentsDBFieldName.Requires3ds, true
-
-	case string(PaymentIntentsDTOFieldName.ThreeDsVersion):
-		return model.PaymentIntentsDBFieldName.ThreeDsVersion, true
+	case string(PaymentIntentsDTOFieldName.SelectedChannelCode):
+		return string(model.PaymentIntentsDBFieldName.SelectedChannelCode), true
 
 	case string(PaymentIntentsDTOFieldName.Description):
-		return model.PaymentIntentsDBFieldName.Description, true
+		return string(model.PaymentIntentsDBFieldName.Description), true
 
-	case string(PaymentIntentsDTOFieldName.StatementDescriptor):
-		return model.PaymentIntentsDBFieldName.StatementDescriptor, true
+	case string(PaymentIntentsDTOFieldName.ExpiresAt):
+		return string(model.PaymentIntentsDBFieldName.ExpiresAt), true
 
-	case string(PaymentIntentsDTOFieldName.Metadata):
-		return model.PaymentIntentsDBFieldName.Metadata, true
+	case string(PaymentIntentsDTOFieldName.PaidAt):
+		return string(model.PaymentIntentsDBFieldName.PaidAt), true
 
-	case string(PaymentIntentsDTOFieldName.PromoCode):
-		return model.PaymentIntentsDBFieldName.PromoCode, true
-
-	case string(PaymentIntentsDTOFieldName.PromoDiscountAmount):
-		return model.PaymentIntentsDBFieldName.PromoDiscountAmount, true
-
-	case string(PaymentIntentsDTOFieldName.IdempotencyKeyId):
-		return model.PaymentIntentsDBFieldName.IdempotencyKeyId, true
-
-	case string(PaymentIntentsDTOFieldName.ConfirmedAt):
-		return model.PaymentIntentsDBFieldName.ConfirmedAt, true
-
-	case string(PaymentIntentsDTOFieldName.CancelledAt):
-		return model.PaymentIntentsDBFieldName.CancelledAt, true
+	case string(PaymentIntentsDTOFieldName.CanceledAt):
+		return string(model.PaymentIntentsDBFieldName.CanceledAt), true
 
 	case string(PaymentIntentsDTOFieldName.CancellationReason):
-		return model.PaymentIntentsDBFieldName.CancellationReason, true
+		return string(model.PaymentIntentsDBFieldName.CancellationReason), true
+
+	case string(PaymentIntentsDTOFieldName.IdempotencyKey):
+		return string(model.PaymentIntentsDBFieldName.IdempotencyKey), true
+
+	case string(PaymentIntentsDTOFieldName.SourceSnapshot):
+		return string(model.PaymentIntentsDBFieldName.SourceSnapshot), true
+
+	case string(PaymentIntentsDTOFieldName.Metadata):
+		return string(model.PaymentIntentsDBFieldName.Metadata), true
 
 	case string(PaymentIntentsDTOFieldName.MetaCreatedAt):
-		return model.PaymentIntentsDBFieldName.MetaCreatedAt, true
+		return string(model.PaymentIntentsDBFieldName.MetaCreatedAt), true
 
 	case string(PaymentIntentsDTOFieldName.MetaCreatedBy):
-		return model.PaymentIntentsDBFieldName.MetaCreatedBy, true
+		return string(model.PaymentIntentsDBFieldName.MetaCreatedBy), true
 
 	case string(PaymentIntentsDTOFieldName.MetaUpdatedAt):
-		return model.PaymentIntentsDBFieldName.MetaUpdatedAt, true
+		return string(model.PaymentIntentsDBFieldName.MetaUpdatedAt), true
 
 	case string(PaymentIntentsDTOFieldName.MetaUpdatedBy):
-		return model.PaymentIntentsDBFieldName.MetaUpdatedBy, true
+		return string(model.PaymentIntentsDBFieldName.MetaUpdatedBy), true
 
 	case string(PaymentIntentsDTOFieldName.MetaDeletedAt):
-		return model.PaymentIntentsDBFieldName.MetaDeletedAt, true
+		return string(model.PaymentIntentsDBFieldName.MetaDeletedAt), true
 
 	case string(PaymentIntentsDTOFieldName.MetaDeletedBy):
-		return model.PaymentIntentsDBFieldName.MetaDeletedBy, true
+		return string(model.PaymentIntentsDBFieldName.MetaDeletedBy), true
 
 	}
-	return "unknown", false
+	if _, found := model.NewPaymentIntentsFilterFieldSpecFromStr(field); found {
+		return field, true
+	}
+	return "", false
+}
+
+func isPaymentIntentsBaseFilterField(field string) bool {
+	spec, found := model.NewPaymentIntentsFilterFieldSpecFromStr(field)
+	return found && spec.Relation == ""
+}
+
+func composePaymentIntentsProjection(source, output string, explicitAlias bool) string {
+	if explicitAlias {
+		return source + " as " + output
+	}
+	return source
+}
+
+func validatePaymentIntentsProjectionOutputPath(path string) error {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return failure.BadRequest(fmt.Errorf("field alias cannot be empty"))
+	}
+	if !strings.Contains(path, ".") {
+		return nil
+	}
+	for _, part := range strings.Split(path, ".") {
+		if strings.TrimSpace(part) == "" {
+			return failure.BadRequest(fmt.Errorf("field alias %s is invalid", path))
+		}
+	}
+	return nil
+}
+
+func transformPaymentIntentsFilterGroupFieldNames(group *model.FilterGroup) (err error) {
+	for index, field := range group.FilterFields {
+		dbField, exist := transformPaymentIntentsDTOFieldNameFromStr(field.Field)
+		if !exist {
+			err = failure.BadRequest(fmt.Errorf("field %s is not found", field.Field))
+			return
+		}
+		group.FilterFields[index].Field = dbField
+	}
+	for index := range group.Groups {
+		err = transformPaymentIntentsFilterGroupFieldNames(&group.Groups[index])
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 func ValidateAndTransformPaymentIntentsFieldNameFilter(filter *model.Filter) (err error) {
 	for index, selectField := range filter.SelectFields {
-		dbField, exist := transformPaymentIntentsDTOFieldNameFromStr(selectField)
+		sourceField, outputField, explicitAlias := model.ParseProjection(selectField)
+		dbField, exist := transformPaymentIntentsDTOFieldNameFromStr(sourceField)
 		if !exist {
-			err = failure.BadRequest(fmt.Errorf("field %s is not found", selectField))
+			err = failure.BadRequest(fmt.Errorf("field %s is not found", sourceField))
 			return
 		}
-		filter.SelectFields[index] = string(dbField)
+		if !isPaymentIntentsBaseFilterField(dbField) {
+			err = failure.BadRequest(fmt.Errorf("field %s cannot be selected in typed filter response", sourceField))
+			return
+		}
+		if !explicitAlias && dbField != sourceField {
+			outputField = sourceField
+			explicitAlias = true
+		}
+		if explicitAlias {
+			if err = validatePaymentIntentsProjectionOutputPath(outputField); err != nil {
+				return
+			}
+		}
+		filter.SelectFields[index] = composePaymentIntentsProjection(dbField, outputField, explicitAlias)
 	}
 	for index, sort := range filter.Sorts {
 		dbField, exist := transformPaymentIntentsDTOFieldNameFromStr(sort.Field)
@@ -246,7 +243,7 @@ func ValidateAndTransformPaymentIntentsFieldNameFilter(filter *model.Filter) (er
 			err = failure.BadRequest(fmt.Errorf("field %s is not found", sort.Field))
 			return
 		}
-		filter.Sorts[index].Field = string(dbField)
+		filter.Sorts[index].Field = dbField
 	}
 	for index, field := range filter.FilterFields {
 		dbField, exist := transformPaymentIntentsDTOFieldNameFromStr(field.Field)
@@ -254,18 +251,40 @@ func ValidateAndTransformPaymentIntentsFieldNameFilter(filter *model.Filter) (er
 			err = failure.BadRequest(fmt.Errorf("field %s is not found", field.Field))
 			return
 		}
-		filter.FilterFields[index].Field = string(dbField)
+		filter.FilterFields[index].Field = dbField
+	}
+	if filter.Where != nil {
+		err = transformPaymentIntentsFilterGroupFieldNames(filter.Where)
+		if err != nil {
+			return
+		}
 	}
 	return
 }
 
 func SetDefaultPaymentIntentsFilter(filter *model.Filter) {
-	if filter.Pagination.Page <= 0 {
-		filter.Pagination.Page = 1
+	if filter.Pagination.Strategy == "" {
+		if filter.Pagination.Page > 0 {
+			filter.Pagination.Strategy = model.PaginationStrategyOffset
+		} else {
+			filter.Pagination.Strategy = model.DefaultPaginationStrategy
+		}
 	}
 
 	if filter.Pagination.PageSize <= 0 {
-		filter.Pagination.PageSize = 10
+		filter.Pagination.PageSize = model.DefaultPageSize
+	}
+
+	if filter.Pagination.PageSize > model.MaxPageSize {
+		filter.Pagination.PageSize = model.MaxPageSize
+	}
+
+	if filter.Pagination.Strategy == model.PaginationStrategyOffset && filter.Pagination.Page <= 0 {
+		filter.Pagination.Page = 1
+	}
+
+	if filter.Pagination.Direction == "" {
+		filter.Pagination.Direction = model.CursorDirectionNext
 	}
 
 	if len(filter.Sorts) == 0 {
@@ -279,43 +298,52 @@ func SetDefaultPaymentIntentsFilter(filter *model.Filter) {
 type PaymentIntentsSelectableResponse map[string]interface{}
 type PaymentIntentsSelectableListResponse []*PaymentIntentsSelectableResponse
 
+func assignPaymentIntentsNestedValue(out map[string]interface{}, path string, value interface{}) {
+	parts := strings.Split(path, ".")
+	current := out
+	for _, part := range parts[:len(parts)-1] {
+		next, ok := current[part].(map[string]interface{})
+		if !ok {
+			next = map[string]interface{}{}
+			current[part] = next
+		}
+		current = next
+	}
+	current[parts[len(parts)-1]] = value
+}
+
+func setPaymentIntentsSelectableValue(out PaymentIntentsSelectableResponse, key string, value interface{}, explicitAlias bool) {
+	if explicitAlias && strings.Contains(key, ".") {
+		assignPaymentIntentsNestedValue(out, key, value)
+		return
+	}
+	out[key] = value
+}
+
 func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, filter model.Filter) PaymentIntentsSelectableResponse {
-	// selected fields has been transformed to be db field name
 	selectFields := filter.SelectFields
 	if len(selectFields) == 0 {
 		selectFields = append(selectFields,
 			string(model.PaymentIntentsDBFieldName.Id),
 			string(model.PaymentIntentsDBFieldName.IntentCode),
+			string(model.PaymentIntentsDBFieldName.SourceService),
+			string(model.PaymentIntentsDBFieldName.SourceType),
+			string(model.PaymentIntentsDBFieldName.SourceId),
 			string(model.PaymentIntentsDBFieldName.MerchantId),
-			string(model.PaymentIntentsDBFieldName.OrderId),
-			string(model.PaymentIntentsDBFieldName.OrderType),
+			string(model.PaymentIntentsDBFieldName.CustomerId),
 			string(model.PaymentIntentsDBFieldName.Amount),
 			string(model.PaymentIntentsDBFieldName.Currency),
-			string(model.PaymentIntentsDBFieldName.TaxAmount),
-			string(model.PaymentIntentsDBFieldName.DiscountAmount),
-			string(model.PaymentIntentsDBFieldName.TipAmount),
-			string(model.PaymentIntentsDBFieldName.UserId),
-			string(model.PaymentIntentsDBFieldName.CustomerName),
-			string(model.PaymentIntentsDBFieldName.CustomerEmail),
-			string(model.PaymentIntentsDBFieldName.CustomerPhone),
-			string(model.PaymentIntentsDBFieldName.CustomerIp),
-			string(model.PaymentIntentsDBFieldName.CustomerCountry),
-			string(model.PaymentIntentsDBFieldName.PaymentMethodId),
-			string(model.PaymentIntentsDBFieldName.PaymentMethodType),
 			string(model.PaymentIntentsDBFieldName.Status),
-			string(model.PaymentIntentsDBFieldName.RoutingProfileId),
-			string(model.PaymentIntentsDBFieldName.ExpiresAt),
-			string(model.PaymentIntentsDBFieldName.Requires3ds),
-			string(model.PaymentIntentsDBFieldName.ThreeDsVersion),
+			string(model.PaymentIntentsDBFieldName.SelectedMethodCode),
+			string(model.PaymentIntentsDBFieldName.SelectedChannelCode),
 			string(model.PaymentIntentsDBFieldName.Description),
-			string(model.PaymentIntentsDBFieldName.StatementDescriptor),
-			string(model.PaymentIntentsDBFieldName.Metadata),
-			string(model.PaymentIntentsDBFieldName.PromoCode),
-			string(model.PaymentIntentsDBFieldName.PromoDiscountAmount),
-			string(model.PaymentIntentsDBFieldName.IdempotencyKeyId),
-			string(model.PaymentIntentsDBFieldName.ConfirmedAt),
-			string(model.PaymentIntentsDBFieldName.CancelledAt),
+			string(model.PaymentIntentsDBFieldName.ExpiresAt),
+			string(model.PaymentIntentsDBFieldName.PaidAt),
+			string(model.PaymentIntentsDBFieldName.CanceledAt),
 			string(model.PaymentIntentsDBFieldName.CancellationReason),
+			string(model.PaymentIntentsDBFieldName.IdempotencyKey),
+			string(model.PaymentIntentsDBFieldName.SourceSnapshot),
+			string(model.PaymentIntentsDBFieldName.Metadata),
 			string(model.PaymentIntentsDBFieldName.MetaCreatedAt),
 			string(model.PaymentIntentsDBFieldName.MetaCreatedBy),
 			string(model.PaymentIntentsDBFieldName.MetaUpdatedAt),
@@ -326,125 +354,203 @@ func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, fi
 	}
 	paymentIntentsSelectableResponse := PaymentIntentsSelectableResponse{}
 	for _, selectField := range selectFields {
-		switch selectField {
+		sourceField, outputField, explicitAlias := model.ParseProjection(selectField)
+		switch sourceField {
 
 		case string(model.PaymentIntentsDBFieldName.Id):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Id)] = paymentIntents.Id
+			key := string(PaymentIntentsDTOFieldName.Id)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Id, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.IntentCode):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.IntentCode)] = paymentIntents.IntentCode
+			key := string(PaymentIntentsDTOFieldName.IntentCode)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.IntentCode, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.SourceService):
+			key := string(PaymentIntentsDTOFieldName.SourceService)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SourceService, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.SourceType):
+			key := string(PaymentIntentsDTOFieldName.SourceType)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SourceType, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.SourceId):
+			key := string(PaymentIntentsDTOFieldName.SourceId)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SourceId, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MerchantId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MerchantId)] = paymentIntents.MerchantId
+			key := string(PaymentIntentsDTOFieldName.MerchantId)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MerchantId, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.OrderId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.OrderId)] = paymentIntents.OrderId
-
-		case string(model.PaymentIntentsDBFieldName.OrderType):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.OrderType)] = paymentIntents.OrderType
+		case string(model.PaymentIntentsDBFieldName.CustomerId):
+			key := string(PaymentIntentsDTOFieldName.CustomerId)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.CustomerId.UUID, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.Amount):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Amount)] = paymentIntents.Amount
+			key := string(PaymentIntentsDTOFieldName.Amount)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Amount, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.Currency):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Currency)] = paymentIntents.Currency
-
-		case string(model.PaymentIntentsDBFieldName.TaxAmount):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.TaxAmount)] = paymentIntents.TaxAmount
-
-		case string(model.PaymentIntentsDBFieldName.DiscountAmount):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.DiscountAmount)] = paymentIntents.DiscountAmount
-
-		case string(model.PaymentIntentsDBFieldName.TipAmount):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.TipAmount)] = paymentIntents.TipAmount
-
-		case string(model.PaymentIntentsDBFieldName.UserId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.UserId)] = paymentIntents.UserId
-
-		case string(model.PaymentIntentsDBFieldName.CustomerName):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CustomerName)] = paymentIntents.CustomerName
-
-		case string(model.PaymentIntentsDBFieldName.CustomerEmail):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CustomerEmail)] = paymentIntents.CustomerEmail
-
-		case string(model.PaymentIntentsDBFieldName.CustomerPhone):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CustomerPhone)] = paymentIntents.CustomerPhone
-
-		case string(model.PaymentIntentsDBFieldName.CustomerIp):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CustomerIp)] = paymentIntents.CustomerIp
-
-		case string(model.PaymentIntentsDBFieldName.CustomerCountry):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CustomerCountry)] = paymentIntents.CustomerCountry
-
-		case string(model.PaymentIntentsDBFieldName.PaymentMethodId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.PaymentMethodId)] = paymentIntents.PaymentMethodId
-
-		case string(model.PaymentIntentsDBFieldName.PaymentMethodType):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.PaymentMethodType)] = paymentIntents.PaymentMethodType
+			key := string(PaymentIntentsDTOFieldName.Currency)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Currency, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.Status):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Status)] = paymentIntents.Status
+			key := string(PaymentIntentsDTOFieldName.Status)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, model.PaymentIntentStatus(paymentIntents.Status), explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.RoutingProfileId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.RoutingProfileId)] = paymentIntents.RoutingProfileId
+		case string(model.PaymentIntentsDBFieldName.SelectedMethodCode):
+			key := string(PaymentIntentsDTOFieldName.SelectedMethodCode)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SelectedMethodCode.String, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.ExpiresAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.ExpiresAt)] = paymentIntents.ExpiresAt
-
-		case string(model.PaymentIntentsDBFieldName.Requires3ds):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Requires3ds)] = paymentIntents.Requires3ds
-
-		case string(model.PaymentIntentsDBFieldName.ThreeDsVersion):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.ThreeDsVersion)] = paymentIntents.ThreeDsVersion
+		case string(model.PaymentIntentsDBFieldName.SelectedChannelCode):
+			key := string(PaymentIntentsDTOFieldName.SelectedChannelCode)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SelectedChannelCode.String, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.Description):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Description)] = paymentIntents.Description
+			key := string(PaymentIntentsDTOFieldName.Description)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Description.String, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.StatementDescriptor):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.StatementDescriptor)] = paymentIntents.StatementDescriptor
+		case string(model.PaymentIntentsDBFieldName.ExpiresAt):
+			key := string(PaymentIntentsDTOFieldName.ExpiresAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.ExpiresAt.Time, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.Metadata):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.Metadata)] = paymentIntents.Metadata
+		case string(model.PaymentIntentsDBFieldName.PaidAt):
+			key := string(PaymentIntentsDTOFieldName.PaidAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.PaidAt.Time, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.PromoCode):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.PromoCode)] = paymentIntents.PromoCode
-
-		case string(model.PaymentIntentsDBFieldName.PromoDiscountAmount):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.PromoDiscountAmount)] = paymentIntents.PromoDiscountAmount
-
-		case string(model.PaymentIntentsDBFieldName.IdempotencyKeyId):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.IdempotencyKeyId)] = paymentIntents.IdempotencyKeyId
-
-		case string(model.PaymentIntentsDBFieldName.ConfirmedAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.ConfirmedAt)] = paymentIntents.ConfirmedAt
-
-		case string(model.PaymentIntentsDBFieldName.CancelledAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CancelledAt)] = paymentIntents.CancelledAt
+		case string(model.PaymentIntentsDBFieldName.CanceledAt):
+			key := string(PaymentIntentsDTOFieldName.CanceledAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.CanceledAt.Time, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.CancellationReason):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.CancellationReason)] = paymentIntents.CancellationReason
+			key := string(PaymentIntentsDTOFieldName.CancellationReason)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.CancellationReason.String, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.IdempotencyKey):
+			key := string(PaymentIntentsDTOFieldName.IdempotencyKey)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.IdempotencyKey, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.SourceSnapshot):
+			key := string(PaymentIntentsDTOFieldName.SourceSnapshot)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SourceSnapshot, explicitAlias)
+
+		case string(model.PaymentIntentsDBFieldName.Metadata):
+			key := string(PaymentIntentsDTOFieldName.Metadata)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Metadata, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaCreatedAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaCreatedAt)] = paymentIntents.MetaCreatedAt
+			key := string(PaymentIntentsDTOFieldName.MetaCreatedAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaCreatedAt, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaCreatedBy):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaCreatedBy)] = paymentIntents.MetaCreatedBy
+			key := string(PaymentIntentsDTOFieldName.MetaCreatedBy)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaCreatedBy, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaUpdatedAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaUpdatedAt)] = paymentIntents.MetaUpdatedAt
+			key := string(PaymentIntentsDTOFieldName.MetaUpdatedAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaUpdatedAt, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaUpdatedBy):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaUpdatedBy)] = paymentIntents.MetaUpdatedBy
+			key := string(PaymentIntentsDTOFieldName.MetaUpdatedBy)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaUpdatedBy.UUID, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaDeletedAt):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaDeletedAt)] = paymentIntents.MetaDeletedAt
+			key := string(PaymentIntentsDTOFieldName.MetaDeletedAt)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaDeletedAt.Time, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaDeletedBy):
-			paymentIntentsSelectableResponse[string(PaymentIntentsDTOFieldName.MetaDeletedBy)] = paymentIntents.MetaDeletedBy
+			key := string(PaymentIntentsDTOFieldName.MetaDeletedBy)
+			if explicitAlias {
+				key = outputField
+			}
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaDeletedBy.UUID, explicitAlias)
 
 		}
 	}
 	return paymentIntentsSelectableResponse
+}
+
+func NewPaymentIntentsListResponseFromFilterResult(result []model.PaymentIntentsFilterResult, filter model.Filter) PaymentIntentsSelectableListResponse {
+	dtoPaymentIntentsListResponse := PaymentIntentsSelectableListResponse{}
+	for _, row := range result {
+		dtoPaymentIntentsResponse := NewPaymentIntentsSelectableResponse(row.PaymentIntents, filter)
+		dtoPaymentIntentsListResponse = append(dtoPaymentIntentsListResponse, &dtoPaymentIntentsResponse)
+	}
+	return dtoPaymentIntentsListResponse
 }
 
 type PaymentIntentsFilterResponse struct {
@@ -452,55 +558,77 @@ type PaymentIntentsFilterResponse struct {
 	Data     PaymentIntentsSelectableListResponse `json:"data"`
 }
 
+func reversePaymentIntentsFilterResults(result []model.PaymentIntentsFilterResult) {
+	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
+		result[i], result[j] = result[j], result[i]
+	}
+}
+
 func NewPaymentIntentsFilterResponse(result []model.PaymentIntentsFilterResult, filter model.Filter) (resp PaymentIntentsFilterResponse) {
+	resp.Metadata.Strategy = filter.Pagination.Strategy
 	resp.Metadata.PageSize = filter.Pagination.PageSize
 	resp.Metadata.Page = filter.Pagination.Page
-	if len(result) > 0 {
-		resp.Metadata.TotalData = result[0].FilterCount
-		resp.Metadata.TotalPage = int(math.Ceil(float64(result[0].FilterCount) / float64(filter.Pagination.PageSize)))
+	dataResult := result
+
+	if filter.Pagination.IsCursorMode() && filter.Pagination.PageSize > 0 {
+		if len(dataResult) > filter.Pagination.PageSize {
+			resp.Metadata.HasMore = true
+			if filter.Pagination.Direction == model.CursorDirectionPrev {
+				resp.Metadata.HasPrev = true
+			} else {
+				resp.Metadata.HasNext = true
+			}
+			dataResult = dataResult[:filter.Pagination.PageSize]
+		}
+		if filter.Pagination.Direction == model.CursorDirectionPrev {
+			reversePaymentIntentsFilterResults(dataResult)
+			if filter.Pagination.Cursor != nil {
+				resp.Metadata.HasNext = true
+			}
+		} else if filter.Pagination.Cursor != nil {
+			resp.Metadata.HasPrev = true
+		}
+		if len(dataResult) > 0 {
+			resp.Metadata.NextCursor = dataResult[len(dataResult)-1].Id
+			resp.Metadata.PrevCursor = dataResult[0].Id
+		}
+		if resp.Metadata.Page <= 0 {
+			resp.Metadata.Page = 1
+		}
+	} else {
+		if len(dataResult) > 0 {
+			resp.Metadata.TotalData = dataResult[0].FilterCount
+			resp.Metadata.TotalPage = int(math.Ceil(float64(resp.Metadata.TotalData) / float64(filter.Pagination.PageSize)))
+			resp.Metadata.HasPrev = filter.Pagination.Page > 1
+			resp.Metadata.HasNext = filter.Pagination.Page < resp.Metadata.TotalPage
+			resp.Metadata.HasMore = resp.Metadata.HasNext
+		}
 	}
-	resp.Data = NewPaymentIntentsListResponseFromFilterResult(result, filter)
+
+	resp.Data = NewPaymentIntentsListResponseFromFilterResult(dataResult, filter)
 	return resp
 }
 
 type PaymentIntentsCreateRequest struct {
-	IntentCode          string                  `json:"intentCode"`
-	MerchantId          uuid.UUID               `json:"merchantId"`
-	OrderId             uuid.UUID               `json:"orderId"`
-	OrderType           string                  `json:"orderType"`
-	Amount              decimal.Decimal         `json:"amount"`
-	Currency            model.PaymentCurrency   `json:"currency" example:"IDR" enums:"IDR,USD,SGD,MYR,PHP,THB,AED,EUR,GBP,JPY"`
-	TaxAmount           decimal.Decimal         `json:"taxAmount"`
-	DiscountAmount      decimal.Decimal         `json:"discountAmount"`
-	TipAmount           decimal.Decimal         `json:"tipAmount"`
-	UserId              uuid.UUID               `json:"userId"`
-	CustomerName        string                  `json:"customerName"`
-	CustomerEmail       string                  `json:"customerEmail"`
-	CustomerPhone       string                  `json:"customerPhone"`
-	CustomerIp          string                  `json:"customerIp"`
-	CustomerCountry     string                  `json:"customerCountry"`
-	PaymentMethodId     uuid.UUID               `json:"paymentMethodId"`
-	PaymentMethodType   model.PaymentMethodType `json:"paymentMethodType" example:"CARD" enums:"CARD,VIRTUAL_ACCOUNT,QRIS,EWALLET,DIRECT_DEBIT,BANK_TRANSFER,PAYLATER,VOUCHER,POINTS,CASH_ON_DELIVERY"`
-	Status              model.PaymentStatus     `json:"status" example:"INITIATED" enums:"INITIATED,PENDING,AUTHORISED,CAPTURED,PARTIALLY_CAPTURED,COMPLETED,FAILED,CANCELLED,EXPIRED,REFUNDING,REFUNDED,PARTIALLY_REFUNDED,DISPUTED,CHARGEBACK_WON,CHARGEBACK_LOST"`
-	RoutingProfileId    uuid.UUID               `json:"routingProfileId"`
-	ExpiresAt           time.Time               `json:"expiresAt"`
-	Requires3ds         bool                    `json:"requires3ds"`
-	ThreeDsVersion      string                  `json:"threeDsVersion"`
-	Description         string                  `json:"description"`
-	StatementDescriptor string                  `json:"statementDescriptor"`
-	Metadata            json.RawMessage         `json:"metadata"`
-	PromoCode           string                  `json:"promoCode"`
-	PromoDiscountAmount decimal.Decimal         `json:"promoDiscountAmount"`
-	IdempotencyKeyId    uuid.UUID               `json:"idempotencyKeyId"`
-	ConfirmedAt         time.Time               `json:"confirmedAt"`
-	CancelledAt         time.Time               `json:"cancelledAt"`
-	CancellationReason  string                  `json:"cancellationReason"`
-	MetaCreatedAt       time.Time               `json:"metaCreatedAt"`
-	MetaCreatedBy       uuid.UUID               `json:"metaCreatedBy"`
-	MetaUpdatedAt       time.Time               `json:"metaUpdatedAt"`
-	MetaUpdatedBy       uuid.UUID               `json:"metaUpdatedBy"`
-	MetaDeletedAt       time.Time               `json:"metaDeletedAt"`
-	MetaDeletedBy       uuid.UUID               `json:"metaDeletedBy"`
+	IntentCode          string                    `json:"intentCode"`
+	SourceService       string                    `json:"sourceService"`
+	SourceType          string                    `json:"sourceType"`
+	SourceId            uuid.UUID                 `json:"sourceId"`
+	MerchantId          uuid.UUID                 `json:"merchantId"`
+	CustomerId          uuid.UUID                 `json:"customerId"`
+	Amount              decimal.Decimal           `json:"amount"`
+	Currency            string                    `json:"currency"`
+	Status              model.PaymentIntentStatus `json:"status" example:"requires_payment_method" enums:"requires_payment_method,requires_confirmation,requires_action,processing,succeeded,canceled"`
+	SelectedMethodCode  string                    `json:"selectedMethodCode"`
+	SelectedChannelCode string                    `json:"selectedChannelCode"`
+	Description         string                    `json:"description"`
+	ExpiresAt           time.Time                 `json:"expiresAt"`
+	PaidAt              time.Time                 `json:"paidAt"`
+	CanceledAt          time.Time                 `json:"canceledAt"`
+	CancellationReason  string                    `json:"cancellationReason"`
+	IdempotencyKey      string                    `json:"idempotencyKey"`
+	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
+	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentIntentsCreateRequest) Validate() (err error) {
@@ -509,46 +637,28 @@ func (d *PaymentIntentsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentIntentsCreateRequest) ToModel() model.PaymentIntents {
-	id, _ := uuid.NewV7()
+	id, _ := uuid.NewV4()
 	return model.PaymentIntents{
 		Id:                  id,
 		IntentCode:          d.IntentCode,
+		SourceService:       d.SourceService,
+		SourceType:          d.SourceType,
+		SourceId:            d.SourceId,
 		MerchantId:          d.MerchantId,
-		OrderId:             nuuid.From(d.OrderId),
-		OrderType:           null.StringFrom(d.OrderType),
+		CustomerId:          nuuid.From(d.CustomerId),
 		Amount:              d.Amount,
 		Currency:            d.Currency,
-		TaxAmount:           d.TaxAmount,
-		DiscountAmount:      d.DiscountAmount,
-		TipAmount:           d.TipAmount,
-		UserId:              nuuid.From(d.UserId),
-		CustomerName:        null.StringFrom(d.CustomerName),
-		CustomerEmail:       null.StringFrom(d.CustomerEmail),
-		CustomerPhone:       null.StringFrom(d.CustomerPhone),
-		CustomerIp:          parseCustomerIP(d.CustomerIp),
-		CustomerCountry:     null.StringFrom(d.CustomerCountry),
-		PaymentMethodId:     nuuid.From(d.PaymentMethodId),
-		PaymentMethodType:   d.PaymentMethodType,
 		Status:              d.Status,
-		RoutingProfileId:    nuuid.From(d.RoutingProfileId),
-		ExpiresAt:           d.ExpiresAt,
-		Requires3ds:         d.Requires3ds,
-		ThreeDsVersion:      null.StringFrom(d.ThreeDsVersion),
+		SelectedMethodCode:  null.StringFrom(d.SelectedMethodCode),
+		SelectedChannelCode: null.StringFrom(d.SelectedChannelCode),
 		Description:         null.StringFrom(d.Description),
-		StatementDescriptor: null.StringFrom(d.StatementDescriptor),
-		Metadata:            d.Metadata,
-		PromoCode:           null.StringFrom(d.PromoCode),
-		PromoDiscountAmount: d.PromoDiscountAmount,
-		IdempotencyKeyId:    nuuid.From(d.IdempotencyKeyId),
-		ConfirmedAt:         null.TimeFrom(d.ConfirmedAt),
-		CancelledAt:         null.TimeFrom(d.CancelledAt),
+		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
+		PaidAt:              null.TimeFrom(d.PaidAt),
+		CanceledAt:          null.TimeFrom(d.CanceledAt),
 		CancellationReason:  null.StringFrom(d.CancellationReason),
-		MetaCreatedAt:       d.MetaCreatedAt,
-		MetaCreatedBy:       d.MetaCreatedBy,
-		MetaUpdatedAt:       d.MetaUpdatedAt,
-		MetaUpdatedBy:       nuuid.From(d.MetaUpdatedBy),
-		MetaDeletedAt:       null.TimeFrom(d.MetaDeletedAt),
-		MetaDeletedBy:       nuuid.From(d.MetaDeletedBy),
+		IdempotencyKey:      d.IdempotencyKey,
+		SourceSnapshot:      d.SourceSnapshot,
+		Metadata:            d.Metadata,
 	}
 }
 
@@ -574,43 +684,25 @@ func (d PaymentIntentsListCreateRequest) ToModelList() []model.PaymentIntents {
 }
 
 type PaymentIntentsUpdateRequest struct {
-	IntentCode          string                  `json:"intentCode"`
-	MerchantId          uuid.UUID               `json:"merchantId"`
-	OrderId             uuid.UUID               `json:"orderId"`
-	OrderType           string                  `json:"orderType"`
-	Amount              decimal.Decimal         `json:"amount"`
-	Currency            model.PaymentCurrency   `json:"currency" example:"IDR" enums:"IDR,USD,SGD,MYR,PHP,THB,AED,EUR,GBP,JPY"`
-	TaxAmount           decimal.Decimal         `json:"taxAmount"`
-	DiscountAmount      decimal.Decimal         `json:"discountAmount"`
-	TipAmount           decimal.Decimal         `json:"tipAmount"`
-	UserId              uuid.UUID               `json:"userId"`
-	CustomerName        string                  `json:"customerName"`
-	CustomerEmail       string                  `json:"customerEmail"`
-	CustomerPhone       string                  `json:"customerPhone"`
-	CustomerIp          string                  `json:"customerIp"`
-	CustomerCountry     string                  `json:"customerCountry"`
-	PaymentMethodId     uuid.UUID               `json:"paymentMethodId"`
-	PaymentMethodType   model.PaymentMethodType `json:"paymentMethodType" example:"CARD" enums:"CARD,VIRTUAL_ACCOUNT,QRIS,EWALLET,DIRECT_DEBIT,BANK_TRANSFER,PAYLATER,VOUCHER,POINTS,CASH_ON_DELIVERY"`
-	Status              model.PaymentStatus     `json:"status" example:"INITIATED" enums:"INITIATED,PENDING,AUTHORISED,CAPTURED,PARTIALLY_CAPTURED,COMPLETED,FAILED,CANCELLED,EXPIRED,REFUNDING,REFUNDED,PARTIALLY_REFUNDED,DISPUTED,CHARGEBACK_WON,CHARGEBACK_LOST"`
-	RoutingProfileId    uuid.UUID               `json:"routingProfileId"`
-	ExpiresAt           time.Time               `json:"expiresAt"`
-	Requires3ds         bool                    `json:"requires3ds"`
-	ThreeDsVersion      string                  `json:"threeDsVersion"`
-	Description         string                  `json:"description"`
-	StatementDescriptor string                  `json:"statementDescriptor"`
-	Metadata            json.RawMessage         `json:"metadata"`
-	PromoCode           string                  `json:"promoCode"`
-	PromoDiscountAmount decimal.Decimal         `json:"promoDiscountAmount"`
-	IdempotencyKeyId    uuid.UUID               `json:"idempotencyKeyId"`
-	ConfirmedAt         time.Time               `json:"confirmedAt"`
-	CancelledAt         time.Time               `json:"cancelledAt"`
-	CancellationReason  string                  `json:"cancellationReason"`
-	MetaCreatedAt       time.Time               `json:"metaCreatedAt"`
-	MetaCreatedBy       uuid.UUID               `json:"metaCreatedBy"`
-	MetaUpdatedAt       time.Time               `json:"metaUpdatedAt"`
-	MetaUpdatedBy       uuid.UUID               `json:"metaUpdatedBy"`
-	MetaDeletedAt       time.Time               `json:"metaDeletedAt"`
-	MetaDeletedBy       uuid.UUID               `json:"metaDeletedBy"`
+	IntentCode          string                    `json:"intentCode"`
+	SourceService       string                    `json:"sourceService"`
+	SourceType          string                    `json:"sourceType"`
+	SourceId            uuid.UUID                 `json:"sourceId"`
+	MerchantId          uuid.UUID                 `json:"merchantId"`
+	CustomerId          uuid.UUID                 `json:"customerId"`
+	Amount              decimal.Decimal           `json:"amount"`
+	Currency            string                    `json:"currency"`
+	Status              model.PaymentIntentStatus `json:"status" example:"requires_payment_method" enums:"requires_payment_method,requires_confirmation,requires_action,processing,succeeded,canceled"`
+	SelectedMethodCode  string                    `json:"selectedMethodCode"`
+	SelectedChannelCode string                    `json:"selectedChannelCode"`
+	Description         string                    `json:"description"`
+	ExpiresAt           time.Time                 `json:"expiresAt"`
+	PaidAt              time.Time                 `json:"paidAt"`
+	CanceledAt          time.Time                 `json:"canceledAt"`
+	CancellationReason  string                    `json:"cancellationReason"`
+	IdempotencyKey      string                    `json:"idempotencyKey"`
+	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
+	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentIntentsUpdateRequest) Validate() (err error) {
@@ -621,84 +713,48 @@ func (d *PaymentIntentsUpdateRequest) Validate() (err error) {
 func (d PaymentIntentsUpdateRequest) ToModel() model.PaymentIntents {
 	return model.PaymentIntents{
 		IntentCode:          d.IntentCode,
+		SourceService:       d.SourceService,
+		SourceType:          d.SourceType,
+		SourceId:            d.SourceId,
 		MerchantId:          d.MerchantId,
-		OrderId:             nuuid.From(d.OrderId),
-		OrderType:           null.StringFrom(d.OrderType),
+		CustomerId:          nuuid.From(d.CustomerId),
 		Amount:              d.Amount,
 		Currency:            d.Currency,
-		TaxAmount:           d.TaxAmount,
-		DiscountAmount:      d.DiscountAmount,
-		TipAmount:           d.TipAmount,
-		UserId:              nuuid.From(d.UserId),
-		CustomerName:        null.StringFrom(d.CustomerName),
-		CustomerEmail:       null.StringFrom(d.CustomerEmail),
-		CustomerPhone:       null.StringFrom(d.CustomerPhone),
-		CustomerIp:          parseCustomerIP(d.CustomerIp),
-		CustomerCountry:     null.StringFrom(d.CustomerCountry),
-		PaymentMethodId:     nuuid.From(d.PaymentMethodId),
-		PaymentMethodType:   d.PaymentMethodType,
 		Status:              d.Status,
-		RoutingProfileId:    nuuid.From(d.RoutingProfileId),
-		ExpiresAt:           d.ExpiresAt,
-		Requires3ds:         d.Requires3ds,
-		ThreeDsVersion:      null.StringFrom(d.ThreeDsVersion),
+		SelectedMethodCode:  null.StringFrom(d.SelectedMethodCode),
+		SelectedChannelCode: null.StringFrom(d.SelectedChannelCode),
 		Description:         null.StringFrom(d.Description),
-		StatementDescriptor: null.StringFrom(d.StatementDescriptor),
-		Metadata:            d.Metadata,
-		PromoCode:           null.StringFrom(d.PromoCode),
-		PromoDiscountAmount: d.PromoDiscountAmount,
-		IdempotencyKeyId:    nuuid.From(d.IdempotencyKeyId),
-		ConfirmedAt:         null.TimeFrom(d.ConfirmedAt),
-		CancelledAt:         null.TimeFrom(d.CancelledAt),
+		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
+		PaidAt:              null.TimeFrom(d.PaidAt),
+		CanceledAt:          null.TimeFrom(d.CanceledAt),
 		CancellationReason:  null.StringFrom(d.CancellationReason),
-		MetaCreatedAt:       d.MetaCreatedAt,
-		MetaCreatedBy:       d.MetaCreatedBy,
-		MetaUpdatedAt:       d.MetaUpdatedAt,
-		MetaUpdatedBy:       nuuid.From(d.MetaUpdatedBy),
-		MetaDeletedAt:       null.TimeFrom(d.MetaDeletedAt),
-		MetaDeletedBy:       nuuid.From(d.MetaDeletedBy),
+		IdempotencyKey:      d.IdempotencyKey,
+		SourceSnapshot:      d.SourceSnapshot,
+		Metadata:            d.Metadata,
 	}
 }
 
 type PaymentIntentsBulkUpdateRequest struct {
-	Id                  uuid.UUID               `json:"id"`
-	IntentCode          string                  `json:"intentCode"`
-	MerchantId          uuid.UUID               `json:"merchantId"`
-	OrderId             uuid.UUID               `json:"orderId"`
-	OrderType           string                  `json:"orderType"`
-	Amount              decimal.Decimal         `json:"amount"`
-	Currency            model.PaymentCurrency   `json:"currency" example:"IDR" enums:"IDR,USD,SGD,MYR,PHP,THB,AED,EUR,GBP,JPY"`
-	TaxAmount           decimal.Decimal         `json:"taxAmount"`
-	DiscountAmount      decimal.Decimal         `json:"discountAmount"`
-	TipAmount           decimal.Decimal         `json:"tipAmount"`
-	UserId              uuid.UUID               `json:"userId"`
-	CustomerName        string                  `json:"customerName"`
-	CustomerEmail       string                  `json:"customerEmail"`
-	CustomerPhone       string                  `json:"customerPhone"`
-	CustomerIp          string                  `json:"customerIp"`
-	CustomerCountry     string                  `json:"customerCountry"`
-	PaymentMethodId     uuid.UUID               `json:"paymentMethodId"`
-	PaymentMethodType   model.PaymentMethodType `json:"paymentMethodType" example:"CARD" enums:"CARD,VIRTUAL_ACCOUNT,QRIS,EWALLET,DIRECT_DEBIT,BANK_TRANSFER,PAYLATER,VOUCHER,POINTS,CASH_ON_DELIVERY"`
-	Status              model.PaymentStatus     `json:"status" example:"INITIATED" enums:"INITIATED,PENDING,AUTHORISED,CAPTURED,PARTIALLY_CAPTURED,COMPLETED,FAILED,CANCELLED,EXPIRED,REFUNDING,REFUNDED,PARTIALLY_REFUNDED,DISPUTED,CHARGEBACK_WON,CHARGEBACK_LOST"`
-	RoutingProfileId    uuid.UUID               `json:"routingProfileId"`
-	ExpiresAt           time.Time               `json:"expiresAt"`
-	Requires3ds         bool                    `json:"requires3ds"`
-	ThreeDsVersion      string                  `json:"threeDsVersion"`
-	Description         string                  `json:"description"`
-	StatementDescriptor string                  `json:"statementDescriptor"`
-	Metadata            json.RawMessage         `json:"metadata"`
-	PromoCode           string                  `json:"promoCode"`
-	PromoDiscountAmount decimal.Decimal         `json:"promoDiscountAmount"`
-	IdempotencyKeyId    uuid.UUID               `json:"idempotencyKeyId"`
-	ConfirmedAt         time.Time               `json:"confirmedAt"`
-	CancelledAt         time.Time               `json:"cancelledAt"`
-	CancellationReason  string                  `json:"cancellationReason"`
-	MetaCreatedAt       time.Time               `json:"metaCreatedAt"`
-	MetaCreatedBy       uuid.UUID               `json:"metaCreatedBy"`
-	MetaUpdatedAt       time.Time               `json:"metaUpdatedAt"`
-	MetaUpdatedBy       uuid.UUID               `json:"metaUpdatedBy"`
-	MetaDeletedAt       time.Time               `json:"metaDeletedAt"`
-	MetaDeletedBy       uuid.UUID               `json:"metaDeletedBy"`
+	Id                  uuid.UUID                 `json:"id"`
+	IntentCode          string                    `json:"intentCode"`
+	SourceService       string                    `json:"sourceService"`
+	SourceType          string                    `json:"sourceType"`
+	SourceId            uuid.UUID                 `json:"sourceId"`
+	MerchantId          uuid.UUID                 `json:"merchantId"`
+	CustomerId          uuid.UUID                 `json:"customerId"`
+	Amount              decimal.Decimal           `json:"amount"`
+	Currency            string                    `json:"currency"`
+	Status              model.PaymentIntentStatus `json:"status" example:"requires_payment_method" enums:"requires_payment_method,requires_confirmation,requires_action,processing,succeeded,canceled"`
+	SelectedMethodCode  string                    `json:"selectedMethodCode"`
+	SelectedChannelCode string                    `json:"selectedChannelCode"`
+	Description         string                    `json:"description"`
+	ExpiresAt           time.Time                 `json:"expiresAt"`
+	PaidAt              time.Time                 `json:"paidAt"`
+	CanceledAt          time.Time                 `json:"canceledAt"`
+	CancellationReason  string                    `json:"cancellationReason"`
+	IdempotencyKey      string                    `json:"idempotencyKey"`
+	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
+	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d PaymentIntentsBulkUpdateRequest) PrimaryID() PaymentIntentsPrimaryID {
@@ -724,126 +780,72 @@ func (d PaymentIntentsBulkUpdateRequest) ToModel() model.PaymentIntents {
 	return model.PaymentIntents{
 		Id:                  d.Id,
 		IntentCode:          d.IntentCode,
+		SourceService:       d.SourceService,
+		SourceType:          d.SourceType,
+		SourceId:            d.SourceId,
 		MerchantId:          d.MerchantId,
-		OrderId:             nuuid.From(d.OrderId),
-		OrderType:           null.StringFrom(d.OrderType),
+		CustomerId:          nuuid.From(d.CustomerId),
 		Amount:              d.Amount,
 		Currency:            d.Currency,
-		TaxAmount:           d.TaxAmount,
-		DiscountAmount:      d.DiscountAmount,
-		TipAmount:           d.TipAmount,
-		UserId:              nuuid.From(d.UserId),
-		CustomerName:        null.StringFrom(d.CustomerName),
-		CustomerEmail:       null.StringFrom(d.CustomerEmail),
-		CustomerPhone:       null.StringFrom(d.CustomerPhone),
-		CustomerIp:          parseCustomerIP(d.CustomerIp),
-		CustomerCountry:     null.StringFrom(d.CustomerCountry),
-		PaymentMethodId:     nuuid.From(d.PaymentMethodId),
-		PaymentMethodType:   d.PaymentMethodType,
 		Status:              d.Status,
-		RoutingProfileId:    nuuid.From(d.RoutingProfileId),
-		ExpiresAt:           d.ExpiresAt,
-		Requires3ds:         d.Requires3ds,
-		ThreeDsVersion:      null.StringFrom(d.ThreeDsVersion),
+		SelectedMethodCode:  null.StringFrom(d.SelectedMethodCode),
+		SelectedChannelCode: null.StringFrom(d.SelectedChannelCode),
 		Description:         null.StringFrom(d.Description),
-		StatementDescriptor: null.StringFrom(d.StatementDescriptor),
-		Metadata:            d.Metadata,
-		PromoCode:           null.StringFrom(d.PromoCode),
-		PromoDiscountAmount: d.PromoDiscountAmount,
-		IdempotencyKeyId:    nuuid.From(d.IdempotencyKeyId),
-		ConfirmedAt:         null.TimeFrom(d.ConfirmedAt),
-		CancelledAt:         null.TimeFrom(d.CancelledAt),
+		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
+		PaidAt:              null.TimeFrom(d.PaidAt),
+		CanceledAt:          null.TimeFrom(d.CanceledAt),
 		CancellationReason:  null.StringFrom(d.CancellationReason),
-		MetaCreatedAt:       d.MetaCreatedAt,
-		MetaCreatedBy:       d.MetaCreatedBy,
-		MetaUpdatedAt:       d.MetaUpdatedAt,
-		MetaUpdatedBy:       nuuid.From(d.MetaUpdatedBy),
-		MetaDeletedAt:       null.TimeFrom(d.MetaDeletedAt),
-		MetaDeletedBy:       nuuid.From(d.MetaDeletedBy),
+		IdempotencyKey:      d.IdempotencyKey,
+		SourceSnapshot:      d.SourceSnapshot,
+		Metadata:            d.Metadata,
 	}
 }
 
 type PaymentIntentsResponse struct {
-	Id                  uuid.UUID               `json:"id" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	IntentCode          string                  `json:"intentCode" validate:"required"`
-	MerchantId          uuid.UUID               `json:"merchantId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	OrderId             uuid.UUID               `json:"orderId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	OrderType           string                  `json:"orderType"`
-	Amount              decimal.Decimal         `json:"amount" validate:"required" format:"decimal" example:"100.50"`
-	Currency            model.PaymentCurrency   `json:"currency" validate:"required,oneof=IDR USD SGD MYR PHP THB AED EUR GBP JPY" enums:"IDR,USD,SGD,MYR,PHP,THB,AED,EUR,GBP,JPY"`
-	TaxAmount           decimal.Decimal         `json:"taxAmount" format:"decimal" example:"100.50"`
-	DiscountAmount      decimal.Decimal         `json:"discountAmount" format:"decimal" example:"100.50"`
-	TipAmount           decimal.Decimal         `json:"tipAmount" format:"decimal" example:"100.50"`
-	UserId              uuid.UUID               `json:"userId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	CustomerName        string                  `json:"customerName"`
-	CustomerEmail       string                  `json:"customerEmail" validate:"email"`
-	CustomerPhone       string                  `json:"customerPhone"`
-	CustomerIp          string                  `json:"customerIp"`
-	CustomerCountry     string                  `json:"customerCountry"`
-	PaymentMethodId     uuid.UUID               `json:"paymentMethodId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	PaymentMethodType   model.PaymentMethodType `json:"paymentMethodType" validate:"required,oneof=CARD VIRTUAL_ACCOUNT QRIS EWALLET DIRECT_DEBIT BANK_TRANSFER PAYLATER VOUCHER POINTS CASH_ON_DELIVERY" enums:"CARD,VIRTUAL_ACCOUNT,QRIS,EWALLET,DIRECT_DEBIT,BANK_TRANSFER,PAYLATER,VOUCHER,POINTS,CASH_ON_DELIVERY"`
-	Status              model.PaymentStatus     `json:"status" validate:"oneof=INITIATED PENDING AUTHORISED CAPTURED PARTIALLY_CAPTURED COMPLETED FAILED CANCELLED EXPIRED REFUNDING REFUNDED PARTIALLY_REFUNDED DISPUTED CHARGEBACK_WON CHARGEBACK_LOST" enums:"INITIATED,PENDING,AUTHORISED,CAPTURED,PARTIALLY_CAPTURED,COMPLETED,FAILED,CANCELLED,EXPIRED,REFUNDING,REFUNDED,PARTIALLY_REFUNDED,DISPUTED,CHARGEBACK_WON,CHARGEBACK_LOST"`
-	RoutingProfileId    uuid.UUID               `json:"routingProfileId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ExpiresAt           time.Time               `json:"expiresAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Requires3ds         bool                    `json:"requires3ds" example:"true"`
-	ThreeDsVersion      string                  `json:"threeDsVersion"`
-	Description         string                  `json:"description"`
-	StatementDescriptor string                  `json:"statementDescriptor"`
-	Metadata            json.RawMessage         `json:"metadata" swaggertype:"object"`
-	PromoCode           string                  `json:"promoCode"`
-	PromoDiscountAmount decimal.Decimal         `json:"promoDiscountAmount" format:"decimal" example:"100.50"`
-	IdempotencyKeyId    uuid.UUID               `json:"idempotencyKeyId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ConfirmedAt         time.Time               `json:"confirmedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	CancelledAt         time.Time               `json:"cancelledAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	CancellationReason  string                  `json:"cancellationReason"`
-	MetaCreatedAt       time.Time               `json:"metaCreatedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	MetaCreatedBy       uuid.UUID               `json:"metaCreatedBy" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	MetaUpdatedAt       time.Time               `json:"metaUpdatedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	MetaUpdatedBy       uuid.UUID               `json:"metaUpdatedBy" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	MetaDeletedAt       time.Time               `json:"metaDeletedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	MetaDeletedBy       uuid.UUID               `json:"metaDeletedBy" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Id                  uuid.UUID                 `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	IntentCode          string                    `json:"intentCode" validate:"required"`
+	SourceService       string                    `json:"sourceService" validate:"required"`
+	SourceType          string                    `json:"sourceType" validate:"required"`
+	SourceId            uuid.UUID                 `json:"sourceId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	MerchantId          uuid.UUID                 `json:"merchantId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	CustomerId          uuid.UUID                 `json:"customerId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Amount              decimal.Decimal           `json:"amount" validate:"required" format:"decimal" example:"100.50"`
+	Currency            string                    `json:"currency"`
+	Status              model.PaymentIntentStatus `json:"status" validate:"oneof=requires_payment_method requires_confirmation requires_action processing succeeded canceled" enums:"requires_payment_method,requires_confirmation,requires_action,processing,succeeded,canceled"`
+	SelectedMethodCode  string                    `json:"selectedMethodCode"`
+	SelectedChannelCode string                    `json:"selectedChannelCode"`
+	Description         string                    `json:"description"`
+	ExpiresAt           time.Time                 `json:"expiresAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
+	PaidAt              time.Time                 `json:"paidAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
+	CanceledAt          time.Time                 `json:"canceledAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
+	CancellationReason  string                    `json:"cancellationReason"`
+	IdempotencyKey      string                    `json:"idempotencyKey" validate:"required"`
+	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot" swaggertype:"object"`
+	Metadata            json.RawMessage           `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentIntentsResponse(paymentIntents model.PaymentIntents) PaymentIntentsResponse {
 	return PaymentIntentsResponse{
 		Id:                  paymentIntents.Id,
 		IntentCode:          paymentIntents.IntentCode,
+		SourceService:       paymentIntents.SourceService,
+		SourceType:          paymentIntents.SourceType,
+		SourceId:            paymentIntents.SourceId,
 		MerchantId:          paymentIntents.MerchantId,
-		OrderId:             paymentIntents.OrderId.UUID,
-		OrderType:           paymentIntents.OrderType.String,
+		CustomerId:          paymentIntents.CustomerId.UUID,
 		Amount:              paymentIntents.Amount,
-		Currency:            model.PaymentCurrency(paymentIntents.Currency),
-		TaxAmount:           paymentIntents.TaxAmount,
-		DiscountAmount:      paymentIntents.DiscountAmount,
-		TipAmount:           paymentIntents.TipAmount,
-		UserId:              paymentIntents.UserId.UUID,
-		CustomerName:        paymentIntents.CustomerName.String,
-		CustomerEmail:       paymentIntents.CustomerEmail.String,
-		CustomerPhone:       paymentIntents.CustomerPhone.String,
-		CustomerIp:          ipAddrToString(paymentIntents.CustomerIp),
-		CustomerCountry:     paymentIntents.CustomerCountry.String,
-		PaymentMethodId:     paymentIntents.PaymentMethodId.UUID,
-		PaymentMethodType:   model.PaymentMethodType(paymentIntents.PaymentMethodType),
-		Status:              model.PaymentStatus(paymentIntents.Status),
-		RoutingProfileId:    paymentIntents.RoutingProfileId.UUID,
-		ExpiresAt:           paymentIntents.ExpiresAt,
-		Requires3ds:         paymentIntents.Requires3ds,
-		ThreeDsVersion:      paymentIntents.ThreeDsVersion.String,
+		Currency:            paymentIntents.Currency,
+		Status:              model.PaymentIntentStatus(paymentIntents.Status),
+		SelectedMethodCode:  paymentIntents.SelectedMethodCode.String,
+		SelectedChannelCode: paymentIntents.SelectedChannelCode.String,
 		Description:         paymentIntents.Description.String,
-		StatementDescriptor: paymentIntents.StatementDescriptor.String,
-		Metadata:            paymentIntents.Metadata,
-		PromoCode:           paymentIntents.PromoCode.String,
-		PromoDiscountAmount: paymentIntents.PromoDiscountAmount,
-		IdempotencyKeyId:    paymentIntents.IdempotencyKeyId.UUID,
-		ConfirmedAt:         paymentIntents.ConfirmedAt.Time,
-		CancelledAt:         paymentIntents.CancelledAt.Time,
+		ExpiresAt:           paymentIntents.ExpiresAt.Time,
+		PaidAt:              paymentIntents.PaidAt.Time,
+		CanceledAt:          paymentIntents.CanceledAt.Time,
 		CancellationReason:  paymentIntents.CancellationReason.String,
-		MetaCreatedAt:       paymentIntents.MetaCreatedAt,
-		MetaCreatedBy:       paymentIntents.MetaCreatedBy,
-		MetaUpdatedAt:       paymentIntents.MetaUpdatedAt,
-		MetaUpdatedBy:       paymentIntents.MetaUpdatedBy.UUID,
-		MetaDeletedAt:       paymentIntents.MetaDeletedAt.Time,
-		MetaDeletedBy:       paymentIntents.MetaDeletedBy.UUID,
+		IdempotencyKey:      paymentIntents.IdempotencyKey,
+		SourceSnapshot:      paymentIntents.SourceSnapshot,
+		Metadata:            paymentIntents.Metadata,
 	}
 }
 
@@ -872,7 +874,7 @@ func (d PaymentIntentsPrimaryIDList) Validate() (err error) {
 }
 
 type PaymentIntentsPrimaryID struct {
-	Id uuid.UUID `json:"id" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Id uuid.UUID `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 func (d *PaymentIntentsPrimaryID) Validate() (err error) {
@@ -883,18 +885,4 @@ func (d PaymentIntentsPrimaryID) ToModel() model.PaymentIntentsPrimaryID {
 	return model.PaymentIntentsPrimaryID{
 		Id: d.Id,
 	}
-}
-
-// parseCustomerIP converts a string IP address to a nullable INET value for storing in PaymentIntents.
-func parseCustomerIP(ipStr string) inetaddr.NullIP {
-	addr, err := inetaddr.FromString(ipStr)
-	if err != nil {
-		return inetaddr.NullIP{}
-	}
-	return addr
-}
-
-// ipAddrToString converts a nullable INET value to string for DTO transfer.
-func ipAddrToString(addr inetaddr.NullIP) string {
-	return addr.String()
 }

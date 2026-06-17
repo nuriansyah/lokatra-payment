@@ -3,29 +3,32 @@ package shared
 import (
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/guregu/null"
 )
 
-type Signature struct {
-	CreatedAt time.Time `db:"created_at"`
-	CreatedBy int64     `db:"created_by"`
-	UpdatedAt null.Time `db:"updated_at"`
-	UpdatedBy null.Int  `db:"updated_by"`
-	DeletedAt null.Time `db:"deleted_at"`
-	DeletedBy null.Int  `db:"deleted_by"`
+type MetaSignature struct {
+	MetaCreatedAt time.Time  `db:"meta_created_at"`
+	MetaCreatedBy uuid.UUID  `db:"meta_created_by"`
+	MetaUpdatedAt null.Time  `db:"meta_updated_at"`
+	MetaUpdatedBy *uuid.UUID `db:"meta_updated_by"`
+	MetaDeletedAt null.Time  `db:"meta_deleted_at"`
+	MetaDeletedBy *uuid.UUID `db:"meta_deleted_by"`
 }
 
-func (s *Signature) SetSignatureUpdate(userId int64) {
-	s.UpdatedAt = null.TimeFrom(time.Now())
-	s.UpdatedBy = null.IntFrom(userId)
+func (s *MetaSignature) SetSignatureMetaUpdate(userId uuid.UUID) *MetaSignature {
+	s.MetaUpdatedAt = null.TimeFrom(time.Now())
+	s.MetaUpdatedBy = &userId
+	return s
 }
 
-func (s *Signature) SetSignatureCreate(userId int64) {
-	s.CreatedAt = time.Now()
-	s.CreatedBy = userId
+func (s *MetaSignature) SetSignatureMetaCreate(userId uuid.UUID) *MetaSignature {
+	s.MetaCreatedAt = time.Now()
+	s.MetaCreatedBy = userId
+	return s
 }
 
-func (s *Signature) SetSignatureDelete(userId int64) {
-	s.DeletedAt = null.TimeFrom(time.Now())
-	s.DeletedBy = null.IntFrom(userId)
+func (s *MetaSignature) SetSignatureMetaDelete(userId uuid.UUID) {
+	s.MetaDeletedAt = null.TimeFrom(time.Now())
+	s.MetaDeletedBy = &userId
 }

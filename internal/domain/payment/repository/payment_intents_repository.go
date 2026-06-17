@@ -12,7 +12,6 @@ import (
 
 	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
-	"github.com/nuriansyah/lokatra-payment/shared/inetaddr"
 )
 
 func composeInsertFieldsAndParamsPaymentIntents(paymentIntentsList []model.PaymentIntents, fieldsInsert ...PaymentIntentsField) (fieldStr string, valueListStr []string, args []interface{}) {
@@ -34,66 +33,42 @@ func composeInsertFieldsAndParamsPaymentIntents(paymentIntentsList []model.Payme
 				args = append(args, paymentIntents.Id)
 			case selectField.IntentCode():
 				args = append(args, paymentIntents.IntentCode)
+			case selectField.SourceService():
+				args = append(args, paymentIntents.SourceService)
+			case selectField.SourceType():
+				args = append(args, paymentIntents.SourceType)
+			case selectField.SourceId():
+				args = append(args, paymentIntents.SourceId)
 			case selectField.MerchantId():
 				args = append(args, paymentIntents.MerchantId)
-			case selectField.OrderId():
-				args = append(args, paymentIntents.OrderId)
-			case selectField.OrderType():
-				args = append(args, paymentIntents.OrderType)
+			case selectField.CustomerId():
+				args = append(args, paymentIntents.CustomerId)
 			case selectField.Amount():
 				args = append(args, paymentIntents.Amount)
 			case selectField.Currency():
 				args = append(args, paymentIntents.Currency)
-			case selectField.TaxAmount():
-				args = append(args, paymentIntents.TaxAmount)
-			case selectField.DiscountAmount():
-				args = append(args, paymentIntents.DiscountAmount)
-			case selectField.TipAmount():
-				args = append(args, paymentIntents.TipAmount)
-			case selectField.UserId():
-				args = append(args, paymentIntents.UserId)
-			case selectField.CustomerName():
-				args = append(args, paymentIntents.CustomerName)
-			case selectField.CustomerEmail():
-				args = append(args, paymentIntents.CustomerEmail)
-			case selectField.CustomerPhone():
-				args = append(args, paymentIntents.CustomerPhone)
-			case selectField.CustomerIp():
-				args = append(args, customerIPValue(paymentIntents.CustomerIp))
-			case selectField.CustomerCountry():
-				args = append(args, paymentIntents.CustomerCountry)
-			case selectField.PaymentMethodId():
-				args = append(args, paymentIntents.PaymentMethodId)
-			case selectField.PaymentMethodType():
-				args = append(args, paymentIntents.PaymentMethodType)
 			case selectField.Status():
 				args = append(args, paymentIntents.Status)
-			case selectField.RoutingProfileId():
-				args = append(args, paymentIntents.RoutingProfileId)
-			case selectField.ExpiresAt():
-				args = append(args, paymentIntents.ExpiresAt)
-			case selectField.Requires3ds():
-				args = append(args, paymentIntents.Requires3ds)
-			case selectField.ThreeDsVersion():
-				args = append(args, paymentIntents.ThreeDsVersion)
+			case selectField.SelectedMethodCode():
+				args = append(args, paymentIntents.SelectedMethodCode)
+			case selectField.SelectedChannelCode():
+				args = append(args, paymentIntents.SelectedChannelCode)
 			case selectField.Description():
 				args = append(args, paymentIntents.Description)
-			case selectField.StatementDescriptor():
-				args = append(args, paymentIntents.StatementDescriptor)
-			case selectField.Metadata():
-				args = append(args, paymentIntents.Metadata)
-			case selectField.PromoCode():
-				args = append(args, paymentIntents.PromoCode)
-			case selectField.PromoDiscountAmount():
-				args = append(args, paymentIntents.PromoDiscountAmount)
-			case selectField.IdempotencyKeyId():
-				args = append(args, paymentIntents.IdempotencyKeyId)
-			case selectField.ConfirmedAt():
-				args = append(args, paymentIntents.ConfirmedAt)
-			case selectField.CancelledAt():
-				args = append(args, paymentIntents.CancelledAt)
+			case selectField.ExpiresAt():
+				args = append(args, paymentIntents.ExpiresAt)
+			case selectField.PaidAt():
+				args = append(args, paymentIntents.PaidAt)
+			case selectField.CanceledAt():
+				args = append(args, paymentIntents.CanceledAt)
 			case selectField.CancellationReason():
 				args = append(args, paymentIntents.CancellationReason)
+			case selectField.IdempotencyKey():
+				args = append(args, paymentIntents.IdempotencyKey)
+			case selectField.SourceSnapshot():
+				args = append(args, paymentIntents.SourceSnapshot)
+			case selectField.Metadata():
+				args = append(args, paymentIntents.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentIntents.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -137,13 +112,6 @@ func composePaymentIntentsCompositePrimaryKeyWhere(primaryIDs []model.PaymentInt
 	return strings.Join(primaryKeyQry, " OR "), params
 }
 
-func customerIPValue(addr inetaddr.NullIP) interface{} {
-	if !addr.Valid {
-		return nil
-	}
-	return addr.String()
-}
-
 func defaultPaymentIntentsSelectFields() string {
 	fields := NewPaymentIntentsSelectFields().All()
 	fieldsStr := []string{}
@@ -177,16 +145,24 @@ func (ss PaymentIntentsSelectFields) IntentCode() PaymentIntentsField {
 	return PaymentIntentsField("intent_code")
 }
 
+func (ss PaymentIntentsSelectFields) SourceService() PaymentIntentsField {
+	return PaymentIntentsField("source_service")
+}
+
+func (ss PaymentIntentsSelectFields) SourceType() PaymentIntentsField {
+	return PaymentIntentsField("source_type")
+}
+
+func (ss PaymentIntentsSelectFields) SourceId() PaymentIntentsField {
+	return PaymentIntentsField("source_id")
+}
+
 func (ss PaymentIntentsSelectFields) MerchantId() PaymentIntentsField {
 	return PaymentIntentsField("merchant_id")
 }
 
-func (ss PaymentIntentsSelectFields) OrderId() PaymentIntentsField {
-	return PaymentIntentsField("order_id")
-}
-
-func (ss PaymentIntentsSelectFields) OrderType() PaymentIntentsField {
-	return PaymentIntentsField("order_type")
+func (ss PaymentIntentsSelectFields) CustomerId() PaymentIntentsField {
+	return PaymentIntentsField("customer_id")
 }
 
 func (ss PaymentIntentsSelectFields) Amount() PaymentIntentsField {
@@ -197,104 +173,48 @@ func (ss PaymentIntentsSelectFields) Currency() PaymentIntentsField {
 	return PaymentIntentsField("currency")
 }
 
-func (ss PaymentIntentsSelectFields) TaxAmount() PaymentIntentsField {
-	return PaymentIntentsField("tax_amount")
-}
-
-func (ss PaymentIntentsSelectFields) DiscountAmount() PaymentIntentsField {
-	return PaymentIntentsField("discount_amount")
-}
-
-func (ss PaymentIntentsSelectFields) TipAmount() PaymentIntentsField {
-	return PaymentIntentsField("tip_amount")
-}
-
-func (ss PaymentIntentsSelectFields) UserId() PaymentIntentsField {
-	return PaymentIntentsField("user_id")
-}
-
-func (ss PaymentIntentsSelectFields) CustomerName() PaymentIntentsField {
-	return PaymentIntentsField("customer_name")
-}
-
-func (ss PaymentIntentsSelectFields) CustomerEmail() PaymentIntentsField {
-	return PaymentIntentsField("customer_email")
-}
-
-func (ss PaymentIntentsSelectFields) CustomerPhone() PaymentIntentsField {
-	return PaymentIntentsField("customer_phone")
-}
-
-func (ss PaymentIntentsSelectFields) CustomerIp() PaymentIntentsField {
-	return PaymentIntentsField("customer_ip")
-}
-
-func (ss PaymentIntentsSelectFields) CustomerCountry() PaymentIntentsField {
-	return PaymentIntentsField("customer_country")
-}
-
-func (ss PaymentIntentsSelectFields) PaymentMethodId() PaymentIntentsField {
-	return PaymentIntentsField("payment_method_id")
-}
-
-func (ss PaymentIntentsSelectFields) PaymentMethodType() PaymentIntentsField {
-	return PaymentIntentsField("payment_method_type")
-}
-
 func (ss PaymentIntentsSelectFields) Status() PaymentIntentsField {
 	return PaymentIntentsField("status")
 }
 
-func (ss PaymentIntentsSelectFields) RoutingProfileId() PaymentIntentsField {
-	return PaymentIntentsField("routing_profile_id")
+func (ss PaymentIntentsSelectFields) SelectedMethodCode() PaymentIntentsField {
+	return PaymentIntentsField("selected_method_code")
 }
 
-func (ss PaymentIntentsSelectFields) ExpiresAt() PaymentIntentsField {
-	return PaymentIntentsField("expires_at")
-}
-
-func (ss PaymentIntentsSelectFields) Requires3ds() PaymentIntentsField {
-	return PaymentIntentsField("requires_3ds")
-}
-
-func (ss PaymentIntentsSelectFields) ThreeDsVersion() PaymentIntentsField {
-	return PaymentIntentsField("three_ds_version")
+func (ss PaymentIntentsSelectFields) SelectedChannelCode() PaymentIntentsField {
+	return PaymentIntentsField("selected_channel_code")
 }
 
 func (ss PaymentIntentsSelectFields) Description() PaymentIntentsField {
 	return PaymentIntentsField("description")
 }
 
-func (ss PaymentIntentsSelectFields) StatementDescriptor() PaymentIntentsField {
-	return PaymentIntentsField("statement_descriptor")
+func (ss PaymentIntentsSelectFields) ExpiresAt() PaymentIntentsField {
+	return PaymentIntentsField("expires_at")
 }
 
-func (ss PaymentIntentsSelectFields) Metadata() PaymentIntentsField {
-	return PaymentIntentsField("metadata")
+func (ss PaymentIntentsSelectFields) PaidAt() PaymentIntentsField {
+	return PaymentIntentsField("paid_at")
 }
 
-func (ss PaymentIntentsSelectFields) PromoCode() PaymentIntentsField {
-	return PaymentIntentsField("promo_code")
-}
-
-func (ss PaymentIntentsSelectFields) PromoDiscountAmount() PaymentIntentsField {
-	return PaymentIntentsField("promo_discount_amount")
-}
-
-func (ss PaymentIntentsSelectFields) IdempotencyKeyId() PaymentIntentsField {
-	return PaymentIntentsField("idempotency_key_id")
-}
-
-func (ss PaymentIntentsSelectFields) ConfirmedAt() PaymentIntentsField {
-	return PaymentIntentsField("confirmed_at")
-}
-
-func (ss PaymentIntentsSelectFields) CancelledAt() PaymentIntentsField {
-	return PaymentIntentsField("cancelled_at")
+func (ss PaymentIntentsSelectFields) CanceledAt() PaymentIntentsField {
+	return PaymentIntentsField("canceled_at")
 }
 
 func (ss PaymentIntentsSelectFields) CancellationReason() PaymentIntentsField {
 	return PaymentIntentsField("cancellation_reason")
+}
+
+func (ss PaymentIntentsSelectFields) IdempotencyKey() PaymentIntentsField {
+	return PaymentIntentsField("idempotency_key")
+}
+
+func (ss PaymentIntentsSelectFields) SourceSnapshot() PaymentIntentsField {
+	return PaymentIntentsField("source_snapshot")
+}
+
+func (ss PaymentIntentsSelectFields) Metadata() PaymentIntentsField {
+	return PaymentIntentsField("metadata")
 }
 
 func (ss PaymentIntentsSelectFields) MetaCreatedAt() PaymentIntentsField {
@@ -325,36 +245,24 @@ func (ss PaymentIntentsSelectFields) All() PaymentIntentsFieldList {
 	return []PaymentIntentsField{
 		ss.Id(),
 		ss.IntentCode(),
+		ss.SourceService(),
+		ss.SourceType(),
+		ss.SourceId(),
 		ss.MerchantId(),
-		ss.OrderId(),
-		ss.OrderType(),
+		ss.CustomerId(),
 		ss.Amount(),
 		ss.Currency(),
-		ss.TaxAmount(),
-		ss.DiscountAmount(),
-		ss.TipAmount(),
-		ss.UserId(),
-		ss.CustomerName(),
-		ss.CustomerEmail(),
-		ss.CustomerPhone(),
-		ss.CustomerIp(),
-		ss.CustomerCountry(),
-		ss.PaymentMethodId(),
-		ss.PaymentMethodType(),
 		ss.Status(),
-		ss.RoutingProfileId(),
-		ss.ExpiresAt(),
-		ss.Requires3ds(),
-		ss.ThreeDsVersion(),
+		ss.SelectedMethodCode(),
+		ss.SelectedChannelCode(),
 		ss.Description(),
-		ss.StatementDescriptor(),
-		ss.Metadata(),
-		ss.PromoCode(),
-		ss.PromoDiscountAmount(),
-		ss.IdempotencyKeyId(),
-		ss.ConfirmedAt(),
-		ss.CancelledAt(),
+		ss.ExpiresAt(),
+		ss.PaidAt(),
+		ss.CanceledAt(),
 		ss.CancellationReason(),
+		ss.IdempotencyKey(),
+		ss.SourceSnapshot(),
+		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -405,36 +313,24 @@ func defaultPaymentIntentsUpdateFields(paymentIntents model.PaymentIntents) (pay
 	paymentIntentsUpdateFieldList = append(paymentIntentsUpdateFieldList,
 		NewPaymentIntentsUpdateField(selectFields.Id(), paymentIntents.Id),
 		NewPaymentIntentsUpdateField(selectFields.IntentCode(), paymentIntents.IntentCode),
+		NewPaymentIntentsUpdateField(selectFields.SourceService(), paymentIntents.SourceService),
+		NewPaymentIntentsUpdateField(selectFields.SourceType(), paymentIntents.SourceType),
+		NewPaymentIntentsUpdateField(selectFields.SourceId(), paymentIntents.SourceId),
 		NewPaymentIntentsUpdateField(selectFields.MerchantId(), paymentIntents.MerchantId),
-		NewPaymentIntentsUpdateField(selectFields.OrderId(), paymentIntents.OrderId),
-		NewPaymentIntentsUpdateField(selectFields.OrderType(), paymentIntents.OrderType),
+		NewPaymentIntentsUpdateField(selectFields.CustomerId(), paymentIntents.CustomerId),
 		NewPaymentIntentsUpdateField(selectFields.Amount(), paymentIntents.Amount),
 		NewPaymentIntentsUpdateField(selectFields.Currency(), paymentIntents.Currency),
-		NewPaymentIntentsUpdateField(selectFields.TaxAmount(), paymentIntents.TaxAmount),
-		NewPaymentIntentsUpdateField(selectFields.DiscountAmount(), paymentIntents.DiscountAmount),
-		NewPaymentIntentsUpdateField(selectFields.TipAmount(), paymentIntents.TipAmount),
-		NewPaymentIntentsUpdateField(selectFields.UserId(), paymentIntents.UserId),
-		NewPaymentIntentsUpdateField(selectFields.CustomerName(), paymentIntents.CustomerName),
-		NewPaymentIntentsUpdateField(selectFields.CustomerEmail(), paymentIntents.CustomerEmail),
-		NewPaymentIntentsUpdateField(selectFields.CustomerPhone(), paymentIntents.CustomerPhone),
-		NewPaymentIntentsUpdateField(selectFields.CustomerIp(), customerIPValue(paymentIntents.CustomerIp)),
-		NewPaymentIntentsUpdateField(selectFields.CustomerCountry(), paymentIntents.CustomerCountry),
-		NewPaymentIntentsUpdateField(selectFields.PaymentMethodId(), paymentIntents.PaymentMethodId),
-		NewPaymentIntentsUpdateField(selectFields.PaymentMethodType(), paymentIntents.PaymentMethodType),
 		NewPaymentIntentsUpdateField(selectFields.Status(), paymentIntents.Status),
-		NewPaymentIntentsUpdateField(selectFields.RoutingProfileId(), paymentIntents.RoutingProfileId),
-		NewPaymentIntentsUpdateField(selectFields.ExpiresAt(), paymentIntents.ExpiresAt),
-		NewPaymentIntentsUpdateField(selectFields.Requires3ds(), paymentIntents.Requires3ds),
-		NewPaymentIntentsUpdateField(selectFields.ThreeDsVersion(), paymentIntents.ThreeDsVersion),
+		NewPaymentIntentsUpdateField(selectFields.SelectedMethodCode(), paymentIntents.SelectedMethodCode),
+		NewPaymentIntentsUpdateField(selectFields.SelectedChannelCode(), paymentIntents.SelectedChannelCode),
 		NewPaymentIntentsUpdateField(selectFields.Description(), paymentIntents.Description),
-		NewPaymentIntentsUpdateField(selectFields.StatementDescriptor(), paymentIntents.StatementDescriptor),
-		NewPaymentIntentsUpdateField(selectFields.Metadata(), paymentIntents.Metadata),
-		NewPaymentIntentsUpdateField(selectFields.PromoCode(), paymentIntents.PromoCode),
-		NewPaymentIntentsUpdateField(selectFields.PromoDiscountAmount(), paymentIntents.PromoDiscountAmount),
-		NewPaymentIntentsUpdateField(selectFields.IdempotencyKeyId(), paymentIntents.IdempotencyKeyId),
-		NewPaymentIntentsUpdateField(selectFields.ConfirmedAt(), paymentIntents.ConfirmedAt),
-		NewPaymentIntentsUpdateField(selectFields.CancelledAt(), paymentIntents.CancelledAt),
+		NewPaymentIntentsUpdateField(selectFields.ExpiresAt(), paymentIntents.ExpiresAt),
+		NewPaymentIntentsUpdateField(selectFields.PaidAt(), paymentIntents.PaidAt),
+		NewPaymentIntentsUpdateField(selectFields.CanceledAt(), paymentIntents.CanceledAt),
 		NewPaymentIntentsUpdateField(selectFields.CancellationReason(), paymentIntents.CancellationReason),
+		NewPaymentIntentsUpdateField(selectFields.IdempotencyKey(), paymentIntents.IdempotencyKey),
+		NewPaymentIntentsUpdateField(selectFields.SourceSnapshot(), paymentIntents.SourceSnapshot),
+		NewPaymentIntentsUpdateField(selectFields.Metadata(), paymentIntents.Metadata),
 		NewPaymentIntentsUpdateField(selectFields.MetaCreatedAt(), paymentIntents.MetaCreatedAt),
 		NewPaymentIntentsUpdateField(selectFields.MetaCreatedBy(), paymentIntents.MetaCreatedBy),
 		NewPaymentIntentsUpdateField(selectFields.MetaUpdatedAt(), paymentIntents.MetaUpdatedAt),
@@ -580,7 +476,7 @@ func (repo *RepositoryImpl) IsExistPaymentIntentsByIDs(ctx context.Context, ids 
 
 	query = repo.db.Read.Rebind(query)
 	var resIds []model.PaymentIntentsPrimaryID
-	err = repo.db.Read.Select(&resIds, query, params...)
+	err = repo.db.Read.SelectContext(ctx, &resIds, query, params...)
 	if err != nil {
 		log.Error().Err(err).Msg("[IsExistPaymentIntentsByIDs] failed get ids")
 		return false, nil, failure.InternalError(err)
@@ -735,95 +631,59 @@ func GetPaymentIntentsFieldType(paymentIntentsField PaymentIntentsField) string 
 	case selectPaymentIntentsFields.IntentCode():
 		return "text"
 
+	case selectPaymentIntentsFields.SourceService():
+		return "text"
+
+	case selectPaymentIntentsFields.SourceType():
+		return "text"
+
+	case selectPaymentIntentsFields.SourceId():
+		return "uuid"
+
 	case selectPaymentIntentsFields.MerchantId():
 		return "uuid"
 
-	case selectPaymentIntentsFields.OrderId():
+	case selectPaymentIntentsFields.CustomerId():
 		return "uuid"
-
-	case selectPaymentIntentsFields.OrderType():
-		return "text"
 
 	case selectPaymentIntentsFields.Amount():
 		return "numeric"
 
 	case selectPaymentIntentsFields.Currency():
-		return "payment_currency"
-
-	case selectPaymentIntentsFields.TaxAmount():
-		return "numeric"
-
-	case selectPaymentIntentsFields.DiscountAmount():
-		return "numeric"
-
-	case selectPaymentIntentsFields.TipAmount():
-		return "numeric"
-
-	case selectPaymentIntentsFields.UserId():
-		return "uuid"
-
-	case selectPaymentIntentsFields.CustomerName():
 		return "text"
-
-	case selectPaymentIntentsFields.CustomerEmail():
-		return "text"
-
-	case selectPaymentIntentsFields.CustomerPhone():
-		return "text"
-
-	case selectPaymentIntentsFields.CustomerIp():
-		return "inet"
-
-	case selectPaymentIntentsFields.CustomerCountry():
-		return "text"
-
-	case selectPaymentIntentsFields.PaymentMethodId():
-		return "uuid"
-
-	case selectPaymentIntentsFields.PaymentMethodType():
-		return "payment_method_type_enum"
 
 	case selectPaymentIntentsFields.Status():
-		return "payment_status_enum"
+		return "payment_intent_status_enum"
 
-	case selectPaymentIntentsFields.RoutingProfileId():
-		return "uuid"
+	case selectPaymentIntentsFields.SelectedMethodCode():
+		return "text"
 
-	case selectPaymentIntentsFields.ExpiresAt():
-		return "timestamptz"
-
-	case selectPaymentIntentsFields.Requires3ds():
-		return "bool"
-
-	case selectPaymentIntentsFields.ThreeDsVersion():
+	case selectPaymentIntentsFields.SelectedChannelCode():
 		return "text"
 
 	case selectPaymentIntentsFields.Description():
 		return "text"
 
-	case selectPaymentIntentsFields.StatementDescriptor():
-		return "text"
-
-	case selectPaymentIntentsFields.Metadata():
-		return "jsonb"
-
-	case selectPaymentIntentsFields.PromoCode():
-		return "text"
-
-	case selectPaymentIntentsFields.PromoDiscountAmount():
-		return "numeric"
-
-	case selectPaymentIntentsFields.IdempotencyKeyId():
-		return "uuid"
-
-	case selectPaymentIntentsFields.ConfirmedAt():
+	case selectPaymentIntentsFields.ExpiresAt():
 		return "timestamptz"
 
-	case selectPaymentIntentsFields.CancelledAt():
+	case selectPaymentIntentsFields.PaidAt():
+		return "timestamptz"
+
+	case selectPaymentIntentsFields.CanceledAt():
 		return "timestamptz"
 
 	case selectPaymentIntentsFields.CancellationReason():
 		return "text"
+
+	case selectPaymentIntentsFields.IdempotencyKey():
+		return "text"
+
+	case selectPaymentIntentsFields.SourceSnapshot():
+		return "jsonb"
+
+	case selectPaymentIntentsFields.Metadata():
+		return "jsonb"
 
 	case selectPaymentIntentsFields.MetaCreatedAt():
 		return "timestamptz"
@@ -903,10 +763,343 @@ func (repo *RepositoryImpl) ResolvePaymentIntentsByFilter(ctx context.Context, f
 		log.Error().Err(err).Msg("[ResolvePaymentIntentsByFilter] failed compose paymentIntents filter")
 		return
 	}
-	err = repo.db.Read.Select(&result, query, args...)
+	err = repo.db.Read.SelectContext(ctx, &result, query, args...)
 	if err != nil {
 		log.Error().Err(err).Msg("[ResolvePaymentIntentsByFilter] failed get paymentIntents by filter")
 		err = failure.InternalError(err)
+	}
+	return
+}
+
+func composePaymentIntentsFilterSQLExpr(spec model.FilterFieldSpec) (string, error) {
+	if spec.Relation == "" {
+		return fmt.Sprintf("base.\"%s\"", spec.Column), nil
+	}
+	joinSpec, found := model.PaymentIntentsFilterJoins[spec.Relation]
+	if !found {
+		return "", failure.BadRequestFromString(fmt.Sprintf("join %s is not allowed", spec.Relation))
+	}
+	return fmt.Sprintf("%s.\"%s\"", joinSpec.Alias, spec.Column), nil
+}
+
+func composePaymentIntentsFilterJoins(requiredJoins map[string]bool) string {
+	if len(requiredJoins) == 0 {
+		return ""
+	}
+	joinQueries := []string{}
+
+	if len(joinQueries) == 0 {
+		return ""
+	}
+	return " " + strings.Join(joinQueries, " ")
+}
+
+func normalizePaymentIntentsSortOrder(order string) (string, error) {
+	order = strings.ToUpper(strings.TrimSpace(order))
+	switch order {
+	case model.SortAsc, model.SortDesc:
+		return order, nil
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("sort order %s is not allowed", order))
+	}
+}
+
+func composePaymentIntentsFilterSelectColumns(filter model.Filter, isCursorMode bool) (selectColumns []string, err error) {
+	selectedColumnCapacity := len(filter.SelectFields) + 1
+	if len(filter.SelectFields) == 0 {
+		selectedColumnCapacity = 26 + 1
+	}
+	selectedColumns := make(map[string]struct{}, selectedColumnCapacity)
+	addColumn := func(field string) error {
+		sourceField, _, _ := model.ParseProjection(field)
+		spec, found := model.NewPaymentIntentsFilterFieldSpecFromStr(sourceField)
+		if !found || !spec.Selectable || spec.Relation != "" {
+			return failure.BadRequestFromString(fmt.Sprintf("field %s is not selectable", sourceField))
+		}
+		if _, selected := selectedColumns[spec.Column]; selected {
+			return nil
+		}
+		selectColumns = append(selectColumns, fmt.Sprintf("base.\"%s\"", spec.Column))
+		selectedColumns[spec.Column] = struct{}{}
+		return nil
+	}
+
+	if len(filter.SelectFields) == 0 {
+		selectColumns = make([]string, 0, 26+1)
+		if _, selected := selectedColumns["id"]; !selected {
+			selectColumns = append(selectColumns, "base.\"id\"")
+			selectedColumns["id"] = struct{}{}
+		}
+		if _, selected := selectedColumns["intent_code"]; !selected {
+			selectColumns = append(selectColumns, "base.\"intent_code\"")
+			selectedColumns["intent_code"] = struct{}{}
+		}
+		if _, selected := selectedColumns["source_service"]; !selected {
+			selectColumns = append(selectColumns, "base.\"source_service\"")
+			selectedColumns["source_service"] = struct{}{}
+		}
+		if _, selected := selectedColumns["source_type"]; !selected {
+			selectColumns = append(selectColumns, "base.\"source_type\"")
+			selectedColumns["source_type"] = struct{}{}
+		}
+		if _, selected := selectedColumns["source_id"]; !selected {
+			selectColumns = append(selectColumns, "base.\"source_id\"")
+			selectedColumns["source_id"] = struct{}{}
+		}
+		if _, selected := selectedColumns["merchant_id"]; !selected {
+			selectColumns = append(selectColumns, "base.\"merchant_id\"")
+			selectedColumns["merchant_id"] = struct{}{}
+		}
+		if _, selected := selectedColumns["customer_id"]; !selected {
+			selectColumns = append(selectColumns, "base.\"customer_id\"")
+			selectedColumns["customer_id"] = struct{}{}
+		}
+		if _, selected := selectedColumns["amount"]; !selected {
+			selectColumns = append(selectColumns, "base.\"amount\"")
+			selectedColumns["amount"] = struct{}{}
+		}
+		if _, selected := selectedColumns["currency"]; !selected {
+			selectColumns = append(selectColumns, "base.\"currency\"")
+			selectedColumns["currency"] = struct{}{}
+		}
+		if _, selected := selectedColumns["status"]; !selected {
+			selectColumns = append(selectColumns, "base.\"status\"")
+			selectedColumns["status"] = struct{}{}
+		}
+		if _, selected := selectedColumns["selected_method_code"]; !selected {
+			selectColumns = append(selectColumns, "base.\"selected_method_code\"")
+			selectedColumns["selected_method_code"] = struct{}{}
+		}
+		if _, selected := selectedColumns["selected_channel_code"]; !selected {
+			selectColumns = append(selectColumns, "base.\"selected_channel_code\"")
+			selectedColumns["selected_channel_code"] = struct{}{}
+		}
+		if _, selected := selectedColumns["description"]; !selected {
+			selectColumns = append(selectColumns, "base.\"description\"")
+			selectedColumns["description"] = struct{}{}
+		}
+		if _, selected := selectedColumns["expires_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"expires_at\"")
+			selectedColumns["expires_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["paid_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"paid_at\"")
+			selectedColumns["paid_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["canceled_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"canceled_at\"")
+			selectedColumns["canceled_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["cancellation_reason"]; !selected {
+			selectColumns = append(selectColumns, "base.\"cancellation_reason\"")
+			selectedColumns["cancellation_reason"] = struct{}{}
+		}
+		if _, selected := selectedColumns["idempotency_key"]; !selected {
+			selectColumns = append(selectColumns, "base.\"idempotency_key\"")
+			selectedColumns["idempotency_key"] = struct{}{}
+		}
+		if _, selected := selectedColumns["source_snapshot"]; !selected {
+			selectColumns = append(selectColumns, "base.\"source_snapshot\"")
+			selectedColumns["source_snapshot"] = struct{}{}
+		}
+		if _, selected := selectedColumns["metadata"]; !selected {
+			selectColumns = append(selectColumns, "base.\"metadata\"")
+			selectedColumns["metadata"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_created_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_created_at\"")
+			selectedColumns["meta_created_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_created_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_created_by\"")
+			selectedColumns["meta_created_by"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_updated_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_updated_at\"")
+			selectedColumns["meta_updated_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_updated_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_updated_by\"")
+			selectedColumns["meta_updated_by"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_deleted_at"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_deleted_at\"")
+			selectedColumns["meta_deleted_at"] = struct{}{}
+		}
+		if _, selected := selectedColumns["meta_deleted_by"]; !selected {
+			selectColumns = append(selectColumns, "base.\"meta_deleted_by\"")
+			selectedColumns["meta_deleted_by"] = struct{}{}
+		}
+
+	} else {
+		selectColumns = make([]string, 0, len(filter.SelectFields)+1)
+		for _, field := range filter.SelectFields {
+			if err = addColumn(field); err != nil {
+				return
+			}
+		}
+	}
+
+	if _, selected := selectedColumns["id"]; isCursorMode && !selected {
+		selectColumns = append(selectColumns, "base.\"id\"")
+		selectedColumns["id"] = struct{}{}
+	}
+
+	return
+}
+
+type paymentIntentsFilterPlaceholder struct {
+	index int
+}
+
+func (p *paymentIntentsFilterPlaceholder) Next() string {
+	placeholder := fmt.Sprintf("$%d", p.index)
+	p.index++
+	return placeholder
+}
+
+func composePaymentIntentsFilterPredicate(filterField model.FilterField, placeholders *paymentIntentsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (string, error) {
+	spec, found := model.NewPaymentIntentsFilterFieldSpecFromStr(filterField.Field)
+	if !found || !spec.Filterable {
+		return "", failure.BadRequestFromString(fmt.Sprintf("field %s is not filterable", filterField.Field))
+	}
+	sqlExpr, err := composePaymentIntentsFilterSQLExpr(spec)
+	if err != nil {
+		return "", err
+	}
+	if spec.Relation != "" {
+		requiredJoins[spec.Relation] = true
+	}
+	switch filterField.Operator {
+	case model.OperatorEqual:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s = %s", sqlExpr, placeholder), nil
+	case model.OperatorRange:
+		valueArray, ok := filterField.Value.([]interface{})
+		if !ok || len(valueArray) != 2 {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		start := placeholders.Next()
+		end := placeholders.Next()
+		*args = append(*args, valueArray...)
+		return fmt.Sprintf("%s BETWEEN %s AND %s", sqlExpr, start, end), nil
+	case model.OperatorIn, model.OperatorNotIn:
+		valueArray, ok := filterField.Value.([]interface{})
+		if !ok || len(valueArray) == 0 {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		placeholder := []string{}
+		for range valueArray {
+			placeholder = append(placeholder, placeholders.Next())
+		}
+		operator := "IN"
+		if filterField.Operator == model.OperatorNotIn {
+			operator = "NOT IN"
+		}
+		*args = append(*args, valueArray...)
+		return fmt.Sprintf("%s %s (%s)", sqlExpr, operator, strings.Join(placeholder, ",")), nil
+	case model.OperatorIsNull:
+		value, ok := filterField.Value.(bool)
+		if !ok {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		if value {
+			return fmt.Sprintf("%s IS NULL", sqlExpr), nil
+		}
+		return fmt.Sprintf("%s IS NOT NULL", sqlExpr), nil
+	case model.OperatorNot:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s != %s", sqlExpr, placeholder), nil
+	case model.OperatorGT:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s > %s", sqlExpr, placeholder), nil
+	case model.OperatorGTE:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s >= %s", sqlExpr, placeholder), nil
+	case model.OperatorLT:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s < %s", sqlExpr, placeholder), nil
+	case model.OperatorLTE:
+		placeholder := placeholders.Next()
+		*args = append(*args, filterField.Value)
+		return fmt.Sprintf("%s <= %s", sqlExpr, placeholder), nil
+	case model.OperatorLike:
+		value, ok := filterField.Value.(string)
+		if !ok {
+			return "", failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
+		}
+		placeholder := placeholders.Next()
+		*args = append(*args, "%"+strings.TrimSpace(value)+"%")
+		return fmt.Sprintf("%s ILIKE %s", sqlExpr, placeholder), nil
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("operator %s is not allowed", filterField.Operator))
+	}
+}
+
+func composePaymentIntentsFilterGroup(group model.FilterGroup, placeholders *paymentIntentsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (string, error) {
+	logic := strings.ToUpper(strings.TrimSpace(group.Logic))
+	if logic == "" {
+		logic = "AND"
+	}
+	switch logic {
+	case "AND", "OR":
+	default:
+		return "", failure.BadRequestFromString(fmt.Sprintf("filter logic %s is not allowed", group.Logic))
+	}
+
+	parts := []string{}
+	for _, filterField := range group.FilterFields {
+		predicate, err := composePaymentIntentsFilterPredicate(filterField, placeholders, args, requiredJoins)
+		if err != nil {
+			return "", err
+		}
+		if predicate != "" {
+			parts = append(parts, predicate)
+		}
+	}
+	for _, child := range group.Groups {
+		childQuery, err := composePaymentIntentsFilterGroup(child, placeholders, args, requiredJoins)
+		if err != nil {
+			return "", err
+		}
+		if childQuery != "" {
+			parts = append(parts, childQuery)
+		}
+	}
+	if len(parts) == 0 {
+		return "", nil
+	}
+	if len(parts) == 1 {
+		return parts[0], nil
+	}
+	return "(" + strings.Join(parts, " "+logic+" ") + ")", nil
+}
+
+func composePaymentIntentsFilterWhereQueries(filter model.Filter, placeholders *paymentIntentsFilterPlaceholder, args *[]interface{}, requiredJoins map[string]bool) (whereQueries []string, err error) {
+	for _, filterField := range filter.FilterFields {
+		predicate, predicateErr := composePaymentIntentsFilterPredicate(filterField, placeholders, args, requiredJoins)
+		if predicateErr != nil {
+			err = predicateErr
+			return
+		}
+		if predicate != "" {
+			whereQueries = append(whereQueries, predicate)
+		}
+	}
+	if filter.Where != nil {
+		groupQuery, groupErr := composePaymentIntentsFilterGroup(*filter.Where, placeholders, args, requiredJoins)
+		if groupErr != nil {
+			err = groupErr
+			return
+		}
+		if groupQuery != "" {
+			whereQueries = append(whereQueries, groupQuery)
+		}
 	}
 	return
 }
@@ -916,83 +1109,99 @@ func composePaymentIntentsFilterQuery(filter model.Filter) (query string, args [
 	if err != nil {
 		return
 	}
-	selectFields := defaultPaymentIntentsSelectFields()
-	index := 1
-	if len(filter.SelectFields) > 0 {
-		fields := PaymentIntentsFieldList{}
-		for _, filterSelectField := range filter.SelectFields {
-			fields = append(fields, PaymentIntentsField(filterSelectField))
-		}
-		selectFields = composePaymentIntentsSelectFields(fields...)
+	isCursorMode := filter.Pagination.IsCursorMode()
+	requiredJoins := map[string]bool{}
+	cursorOperator := ">"
+	cursorSortOrder := model.SortAsc
+	if filter.Pagination.Direction == model.CursorDirectionPrev {
+		cursorOperator = "<"
+		cursorSortOrder = model.SortDesc
 	}
-	selectFields += ", COUNT(*) OVER() as count"
-	query = fmt.Sprintf(paymentIntentsQueries.selectPaymentIntents, selectFields)
-
-	if len(filter.FilterFields) > 0 {
-		var (
-			whereQueries []string
-			whereArgs    []interface{}
-		)
-		for _, filterField := range filter.FilterFields {
-			switch filterField.Operator {
-			case model.OperatorEqual:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" = $%d", filterField.Field, index))
-				whereArgs = append(whereArgs, filterField.Value)
-				index++
-			case model.OperatorRange:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" BETWEEN $%d AND $%d", filterField.Field, index, index+1))
-				valueArray, ok := filterField.Value.([]interface{})
-				if !ok && len(valueArray) != 2 {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				whereArgs = append(whereArgs, valueArray...)
-				index += 2
-			case model.OperatorIn:
-				valueArray, ok := filterField.Value.([]interface{})
-				if !ok {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				var placeholder []string
-				for range valueArray {
-					placeholder = append(placeholder, fmt.Sprintf("$%d", index))
-					index++
-				}
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IN (%s)", filterField.Field, strings.Join(placeholder, ",")))
-				whereArgs = append(whereArgs, valueArray...)
-			case model.OperatorIsNull:
-				value, ok := filterField.Value.(bool)
-				if !ok {
-					err = failure.BadRequestFromString(fmt.Sprintf("invalid value type for operator %s", filterField.Operator))
-					return
-				}
-				if value {
-					whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IS NULL", filterField.Field))
-				} else {
-					whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" IS NOT NULL", filterField.Field))
-				}
-			case model.OperatorNot:
-				whereQueries = append(whereQueries, fmt.Sprintf("\"%s\" != $%d", filterField.Field, index))
-				whereArgs = append(whereArgs, filterField.Value)
-				index++
+	if isCursorMode {
+		if len(filter.Sorts) > 1 {
+			err = failure.BadRequestFromString("cursor pagination only supports the default primary-key sort")
+			return
+		}
+		if len(filter.Sorts) == 1 {
+			sortOrder, sortErr := normalizePaymentIntentsSortOrder(filter.Sorts[0].Order)
+			if sortErr != nil {
+				err = sortErr
+				return
+			}
+			if filter.Sorts[0].Field != "id" || sortOrder != model.SortAsc {
+				err = failure.BadRequestFromString("cursor pagination only supports the default primary-key sort")
+				return
 			}
 		}
+	}
 
-		query += fmt.Sprintf(" WHERE %s", strings.Join(whereQueries, " AND "))
-		args = append(args, whereArgs...)
+	selectColumns, err := composePaymentIntentsFilterSelectColumns(filter, isCursorMode)
+	if err != nil {
+		return
+	}
+	if isCursorMode {
+		selectColumns = append(selectColumns, "0 AS count")
+	} else {
+		selectColumns = append(selectColumns, "COUNT(*) OVER() AS count")
+	}
+
+	placeholders := paymentIntentsFilterPlaceholder{index: 1}
+	whereQueries, err := composePaymentIntentsFilterWhereQueries(filter, &placeholders, &args, requiredJoins)
+	if err != nil {
+		return
+	}
+
+	if isCursorMode && filter.Pagination.Cursor != nil {
+		whereQueries = append(whereQueries, fmt.Sprintf("base.\"id\" %s %s", cursorOperator, placeholders.Next()))
+		args = append(args, filter.Pagination.Cursor)
 	}
 
 	sortQuery := []string{}
-	for _, sort := range filter.Sorts {
-		sortQuery = append(sortQuery, fmt.Sprintf("\"%s\" %s", sort.Field, sort.Order))
+	if isCursorMode {
+		sortQuery = append(sortQuery, fmt.Sprintf("base.\"id\" %s", cursorSortOrder))
+
+	} else {
+		for _, sort := range filter.Sorts {
+			spec, found := model.NewPaymentIntentsFilterFieldSpecFromStr(sort.Field)
+			if !found || !spec.Sortable {
+				err = failure.BadRequestFromString(fmt.Sprintf("field %s is not sortable", sort.Field))
+				return
+			}
+			sqlExpr, exprErr := composePaymentIntentsFilterSQLExpr(spec)
+			if exprErr != nil {
+				err = exprErr
+				return
+			}
+			if spec.Relation != "" {
+				requiredJoins[spec.Relation] = true
+			}
+			sortOrder, sortErr := normalizePaymentIntentsSortOrder(sort.Order)
+			if sortErr != nil {
+				err = sortErr
+				return
+			}
+			sortQuery = append(sortQuery, fmt.Sprintf("%s %s", sqlExpr, sortOrder))
+		}
+		if len(sortQuery) == 0 {
+			sortQuery = append(sortQuery, "base.\"id\" ASC")
+		}
+
+	}
+
+	query = fmt.Sprintf("SELECT %s FROM \"payment_intents\" base%s", strings.Join(selectColumns, ","), composePaymentIntentsFilterJoins(requiredJoins))
+	if len(whereQueries) > 0 {
+		query += fmt.Sprintf(" WHERE %s", strings.Join(whereQueries, " AND "))
 	}
 	if len(sortQuery) > 0 {
 		query += fmt.Sprintf(" ORDER BY %s", strings.Join(sortQuery, ","))
 	}
 	if filter.Pagination.PageSize > 0 {
-		query += fmt.Sprintf(" LIMIT %d", filter.Pagination.PageSize)
-		if filter.Pagination.Page > 0 {
+		limit := filter.Pagination.PageSize
+		if isCursorMode {
+			limit = filter.Pagination.PageSize + 1
+		}
+		query += fmt.Sprintf(" LIMIT %d", limit)
+		if !isCursorMode && filter.Pagination.Page > 0 {
 			query += fmt.Sprintf(" OFFSET %d", (filter.Pagination.Page-1)*filter.Pagination.PageSize)
 		}
 	}
@@ -1004,7 +1213,7 @@ func (repo *RepositoryImpl) IsExistPaymentIntentsByID(ctx context.Context, prima
 	whereQuery, params := composePaymentIntentsCompositePrimaryKeyWhere([]model.PaymentIntentsPrimaryID{primaryID})
 	query := fmt.Sprintf("%s WHERE %s", paymentIntentsQueries.selectCountPaymentIntents, whereQuery)
 	query = repo.db.Read.Rebind(query)
-	err = repo.db.Read.Get(&exists, query, params...)
+	err = repo.db.Read.GetContext(ctx, &exists, query, params...)
 	if err != nil {
 		log.Error().Err(err).Msg("[IsExistPaymentIntentsByID] failed get count")
 		err = failure.InternalError(err)
@@ -1021,7 +1230,7 @@ func (repo *RepositoryImpl) ResolvePaymentIntents(ctx context.Context, selectFie
 	}
 	query := fmt.Sprintf(paymentIntentsQueries.selectPaymentIntents, defaultPaymentIntentsSelectFields)
 
-	err = repo.db.Read.Select(&paymentIntentsList, query)
+	err = repo.db.Read.SelectContext(ctx, &paymentIntentsList, query)
 	if err != nil {
 		log.Error().Err(err).Msg("[ResolvePaymentIntents] failed get paymentIntents list")
 		err = failure.InternalError(err)
@@ -1039,7 +1248,7 @@ func (repo *RepositoryImpl) ResolvePaymentIntentsByID(ctx context.Context, prima
 	whereQry, params := composePaymentIntentsCompositePrimaryKeyWhere([]model.PaymentIntentsPrimaryID{primaryID})
 	query := fmt.Sprintf(paymentIntentsQueries.selectPaymentIntents+" WHERE "+whereQry, defaultPaymentIntentsSelectFields)
 	query = repo.db.Read.Rebind(query)
-	err = repo.db.Read.Get(&paymentIntents, query, params...)
+	err = repo.db.Read.GetContext(ctx, &paymentIntents, query, params...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			err = failure.NotFound(fmt.Sprintf("paymentIntents with id '%s' not found", fmt.Sprint(primaryID)))
@@ -1094,6 +1303,62 @@ func (repo *RepositoryImpl) UpdatePaymentIntentsByID(ctx context.Context, primar
 	return err
 }
 
+func (repo *RepositoryImpl) UpdatePaymentIntentsByFilter(ctx context.Context, filter model.Filter, paymentIntentsUpdateFields ...PaymentIntentsUpdateField) (rowsAffected int64, err error) {
+	if len(filter.FilterFields) == 0 && filter.Where == nil {
+		err = failure.BadRequestFromString("update by filter requires at least one filter predicate")
+		return
+	}
+	if len(paymentIntentsUpdateFields) == 0 {
+		err = failure.BadRequestFromString("update fields are required")
+		return
+	}
+
+	var (
+		updateFields PaymentIntentsUpdateFieldList
+		selectFields = NewPaymentIntentsSelectFields()
+	)
+	for _, updateField := range paymentIntentsUpdateFields {
+		if updateField.paymentIntentsField == selectFields.Id() {
+			continue
+		}
+		updateFields = append(updateFields, updateField)
+	}
+	if len(updateFields) == 0 {
+		err = failure.BadRequestFromString("no mutable update fields provided")
+		return
+	}
+
+	fields, updateArgs := composeUpdateFieldsPaymentIntentsCommand(updateFields, 1)
+	args := append([]interface{}{}, updateArgs...)
+	requiredJoins := map[string]bool{}
+	placeholders := paymentIntentsFilterPlaceholder{index: len(updateArgs) + 1}
+	whereQueries, err := composePaymentIntentsFilterWhereQueries(filter, &placeholders, &args, requiredJoins)
+	if err != nil {
+		return
+	}
+	if len(whereQueries) == 0 {
+		err = failure.BadRequestFromString("update by filter requires at least one filter predicate")
+		return
+	}
+	if len(requiredJoins) > 0 {
+		err = failure.BadRequestFromString("update by filter does not support join fields")
+		return
+	}
+
+	commandQuery := fmt.Sprintf("UPDATE \"payment_intents\" AS base SET %s WHERE %s", strings.Join(fields, ","), strings.Join(whereQueries, " AND "))
+	commandQuery = repo.db.Read.Rebind(commandQuery)
+	result, err := repo.exec(ctx, commandQuery, args)
+	if err != nil {
+		log.Error().Err(err).Msg("[UpdatePaymentIntentsByFilter] error when try to update paymentIntents by filter")
+		return
+	}
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		log.Error().Err(err).Msg("[UpdatePaymentIntentsByFilter] failed get rows affected")
+	}
+	return
+}
+
 var (
 	paymentIntentsQueries = struct {
 		selectPaymentIntents      string
@@ -1116,6 +1381,7 @@ type PaymentIntentsRepository interface {
 	ResolvePaymentIntents(ctx context.Context, selectFields ...PaymentIntentsField) (model.PaymentIntentsList, error)
 	ResolvePaymentIntentsByID(ctx context.Context, primaryID model.PaymentIntentsPrimaryID, selectFields ...PaymentIntentsField) (model.PaymentIntents, error)
 	UpdatePaymentIntentsByID(ctx context.Context, id model.PaymentIntentsPrimaryID, paymentIntents *model.PaymentIntents, paymentIntentsUpdateFields ...PaymentIntentsUpdateField) error
+	UpdatePaymentIntentsByFilter(ctx context.Context, filter model.Filter, paymentIntentsUpdateFields ...PaymentIntentsUpdateField) (rowsAffected int64, err error)
 	BulkUpdatePaymentIntents(ctx context.Context, paymentIntentsListMap map[model.PaymentIntentsPrimaryID]*model.PaymentIntents, PaymentIntentssMapUpdateFieldsRequest map[model.PaymentIntentsPrimaryID]PaymentIntentsUpdateFieldList) (err error)
 	DeletePaymentIntentsByID(ctx context.Context, id model.PaymentIntentsPrimaryID) error
 	BulkDeletePaymentIntentsByIDs(ctx context.Context, ids []model.PaymentIntentsPrimaryID) error
