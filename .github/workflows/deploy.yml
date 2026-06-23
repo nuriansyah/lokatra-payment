@@ -63,20 +63,47 @@ jobs:
           script: |
             set -e
 
+            SERVICE="lokatra-payment"
+            APP_DIR="/opt/lokatra/payment"
+
             echo "$GHCR_TOKEN" | docker login ghcr.io \
               -u "$GITHUB_ACTOR" \
               --password-stdin
 
-            cd /opt/lokatra/payment
+            cd "$APP_DIR"
 
             docker network inspect lokatra-net >/dev/null 2>&1 || docker network create lokatra-net
 
+            echo "Checking compose file..."
+            test -f docker-compose.yml || {
+              echo "ERROR: $APP_DIR/docker-compose.yml not found"
+              exit 1
+            }
+
+            echo "Checking env file..."
+            test -f .env || {
+              echo "ERROR: $APP_DIR/.env not found"
+              exit 1
+            }
+
+            echo "Checking compose services..."
+            docker compose config --services
+
+            docker compose config --services | grep -qx "$SERVICE" || {
+              echo "ERROR: service $SERVICE not found"
+              echo "Current services:"
+              docker compose config --services
+              exit 1
+            }
+
+            mkdir -p "$APP_DIR/secrets"
+
             export IMAGE_TAG="$IMAGE_TAG"
 
-            docker compose pull lokatra-payment
-            docker compose up -d --no-deps --force-recreate lokatra-payment
+            docker compose pull "$SERVICE"
+            docker compose up -d --no-deps --force-recreate "$SERVICE"
 
             docker image prune -f
 
             docker compose ps
-            docker logs --tail=80 lokatra-payment
+            docker logs --tail=80 "$SERVICE"
