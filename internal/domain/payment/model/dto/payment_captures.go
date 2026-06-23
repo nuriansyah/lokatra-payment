@@ -430,7 +430,7 @@ func NewPaymentCapturesSelectableResponse(paymentCaptures model.PaymentCaptures,
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentCapturesDBFieldName.MetaDeletedAt):
 			key := string(PaymentCapturesDTOFieldName.MetaDeletedAt)
@@ -444,7 +444,7 @@ func NewPaymentCapturesSelectableResponse(paymentCaptures model.PaymentCaptures,
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.MetaDeletedBy, explicitAlias)
 
 		}
 	}

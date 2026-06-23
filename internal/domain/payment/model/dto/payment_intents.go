@@ -523,7 +523,7 @@ func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentIntentsDBFieldName.MetaDeletedAt):
 			key := string(PaymentIntentsDTOFieldName.MetaDeletedAt)
@@ -537,7 +537,7 @@ func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.MetaDeletedBy, explicitAlias)
 
 		}
 	}

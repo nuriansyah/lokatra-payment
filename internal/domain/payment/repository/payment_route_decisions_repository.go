@@ -358,7 +358,7 @@ func (repo *RepositoryImpl) BulkDeletePaymentRouteDecisionsByIDs(ctx context.Con
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(paymentRouteDecisionsQueries.deletePaymentRouteDecisions + " WHERE " + whereQuery)
+	commandQuery := paymentRouteDecisionsQueries.deletePaymentRouteDecisions + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -638,7 +638,7 @@ func (repo *RepositoryImpl) DeletePaymentRouteDecisionsByID(ctx context.Context,
 		return
 	}
 	whereQuery, params := composePaymentRouteDecisionsCompositePrimaryKeyWhere([]model.PaymentRouteDecisionsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(paymentRouteDecisionsQueries.deletePaymentRouteDecisions + " WHERE " + whereQuery)
+	commandQuery := paymentRouteDecisionsQueries.deletePaymentRouteDecisions + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

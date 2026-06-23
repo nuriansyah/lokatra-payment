@@ -429,7 +429,7 @@ func NewProviderAccountsSelectableResponse(providerAccounts model.ProviderAccoun
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.MetaUpdatedBy.UUID, explicitAlias)
+			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ProviderAccountsDBFieldName.MetaDeletedAt):
 			key := string(ProviderAccountsDTOFieldName.MetaDeletedAt)
@@ -443,7 +443,7 @@ func NewProviderAccountsSelectableResponse(providerAccounts model.ProviderAccoun
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.MetaDeletedBy.UUID, explicitAlias)
+			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -334,7 +334,7 @@ func NewPaymentMethodsSelectableResponse(paymentMethods model.PaymentMethods, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, paymentMethods.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, paymentMethods.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentMethodsDBFieldName.MetaDeletedAt):
 			key := string(PaymentMethodsDTOFieldName.MetaDeletedAt)
@@ -348,7 +348,7 @@ func NewPaymentMethodsSelectableResponse(paymentMethods model.PaymentMethods, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, paymentMethods.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, paymentMethods.MetaDeletedBy, explicitAlias)
 
 		}
 	}

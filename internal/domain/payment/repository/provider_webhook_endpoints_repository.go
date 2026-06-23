@@ -350,7 +350,7 @@ func (repo *RepositoryImpl) BulkDeleteProviderWebhookEndpointsByIDs(ctx context.
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(providerWebhookEndpointsQueries.deleteProviderWebhookEndpoints + " WHERE " + whereQuery)
+	commandQuery := providerWebhookEndpointsQueries.deleteProviderWebhookEndpoints + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -627,7 +627,7 @@ func (repo *RepositoryImpl) DeleteProviderWebhookEndpointsByID(ctx context.Conte
 		return
 	}
 	whereQuery, params := composeProviderWebhookEndpointsCompositePrimaryKeyWhere([]model.ProviderWebhookEndpointsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(providerWebhookEndpointsQueries.deleteProviderWebhookEndpoints + " WHERE " + whereQuery)
+	commandQuery := providerWebhookEndpointsQueries.deleteProviderWebhookEndpoints + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

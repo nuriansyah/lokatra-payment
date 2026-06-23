@@ -430,7 +430,7 @@ func NewIdempotencyKeysSelectableResponse(idempotencyKeys model.IdempotencyKeys,
 			if explicitAlias {
 				key = outputField
 			}
-			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.MetaUpdatedBy.UUID, explicitAlias)
+			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.MetaUpdatedBy, explicitAlias)
 
 		case string(model.IdempotencyKeysDBFieldName.MetaDeletedAt):
 			key := string(IdempotencyKeysDTOFieldName.MetaDeletedAt)
@@ -444,7 +444,7 @@ func NewIdempotencyKeysSelectableResponse(idempotencyKeys model.IdempotencyKeys,
 			if explicitAlias {
 				key = outputField
 			}
-			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.MetaDeletedBy.UUID, explicitAlias)
+			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.MetaDeletedBy, explicitAlias)
 
 		}
 	}

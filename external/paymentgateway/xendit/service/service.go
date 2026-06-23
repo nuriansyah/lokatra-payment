@@ -151,7 +151,7 @@ func (s *ServiceImpl) VerifyWebhook(ctx context.Context, req pg.VerifyWebhookReq
 	// Some newer Xendit products also send webhook-id and/or HMAC headers. If configured, verify HMAC SHA256 over raw body.
 	if s.cfg.WebhookSecret != "" {
 		sig := firstNonEmpty(req.Headers.Get("x-callback-signature"), req.Headers.Get("X-Callback-Signature"))
-		if sig != "" && !pg.SecureEqualHex(pg.HMACSHA256Hex(s.cfg.WebhookSecret, req.RawBody), sig) {
+		if sig == "" || !pg.SecureEqualHex(pg.HMACSHA256Hex(s.cfg.WebhookSecret, req.RawBody), sig) {
 			return pg.VerifyWebhookResult{ProviderCode: s.ProviderCode(), SignatureValid: false, Reason: "signature mismatch"}, pg.NewGatewayError(s.ProviderCode(), pg.ErrorCodeWebhookInvalid, 0, "xendit signature mismatch", false, pg.ErrInvalidWebhook)
 		}
 	}

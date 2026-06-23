@@ -398,7 +398,7 @@ func (repo *RepositoryImpl) BulkDeleteCashCollectionSessionsByIDs(ctx context.Co
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(cashCollectionSessionsQueries.deleteCashCollectionSessions + " WHERE " + whereQuery)
+	commandQuery := cashCollectionSessionsQueries.deleteCashCollectionSessions + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -693,7 +693,7 @@ func (repo *RepositoryImpl) DeleteCashCollectionSessionsByID(ctx context.Context
 		return
 	}
 	whereQuery, params := composeCashCollectionSessionsCompositePrimaryKeyWhere([]model.CashCollectionSessionsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(cashCollectionSessionsQueries.deleteCashCollectionSessions + " WHERE " + whereQuery)
+	commandQuery := cashCollectionSessionsQueries.deleteCashCollectionSessions + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

@@ -382,7 +382,7 @@ func (repo *RepositoryImpl) BulkDeleteIdempotencyKeysByIDs(ctx context.Context, 
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(idempotencyKeysQueries.deleteIdempotencyKeys + " WHERE " + whereQuery)
+	commandQuery := idempotencyKeysQueries.deleteIdempotencyKeys + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -671,7 +671,7 @@ func (repo *RepositoryImpl) DeleteIdempotencyKeysByID(ctx context.Context, prima
 		return
 	}
 	whereQuery, params := composeIdempotencyKeysCompositePrimaryKeyWhere([]model.IdempotencyKeysPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(idempotencyKeysQueries.deleteIdempotencyKeys + " WHERE " + whereQuery)
+	commandQuery := idempotencyKeysQueries.deleteIdempotencyKeys + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

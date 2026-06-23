@@ -438,7 +438,7 @@ func (repo *RepositoryImpl) BulkDeletePaymentRouteCandidatesRuntimeByIDs(ctx con
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(paymentRouteCandidatesRuntimeQueries.deletePaymentRouteCandidatesRuntime + " WHERE " + whereQuery)
+	commandQuery := paymentRouteCandidatesRuntimeQueries.deletePaymentRouteCandidatesRuntime + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -748,7 +748,7 @@ func (repo *RepositoryImpl) DeletePaymentRouteCandidatesRuntimeByID(ctx context.
 		return
 	}
 	whereQuery, params := composePaymentRouteCandidatesRuntimeCompositePrimaryKeyWhere([]model.PaymentRouteCandidatesRuntimePrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(paymentRouteCandidatesRuntimeQueries.deletePaymentRouteCandidatesRuntime + " WHERE " + whereQuery)
+	commandQuery := paymentRouteCandidatesRuntimeQueries.deletePaymentRouteCandidatesRuntime + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

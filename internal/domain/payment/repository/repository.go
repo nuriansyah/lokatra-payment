@@ -12,6 +12,17 @@ import (
 
 type Repository interface {
 	PaymentProvidersRepository
+	PaymentIntentsRepository
+	PaymentAttemptsRepository
+	PaymentInstructionsRepository
+	PaymentRouteDecisionsRepository
+	PaymentRefundsRepository
+	ProviderWebhookEventsRepository
+	ManualPaymentEvidenceRepository
+	PaymentOverpaymentsRepository
+	CashCollectionSessionsRepository
+	PaymentInstallmentsRepository
+	PaymentAuthorizationsRepository
 }
 
 // RepositoryImpl is the Postgres-backed implementation of Repository.

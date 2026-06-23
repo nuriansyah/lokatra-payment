@@ -441,7 +441,7 @@ func NewProviderCircuitBreakersSelectableResponse(providerCircuitBreakers model.
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.MetaUpdatedBy.UUID, explicitAlias)
+			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ProviderCircuitBreakersDBFieldName.MetaDeletedAt):
 			key := string(ProviderCircuitBreakersDTOFieldName.MetaDeletedAt)
@@ -455,7 +455,7 @@ func NewProviderCircuitBreakersSelectableResponse(providerCircuitBreakers model.
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.MetaDeletedBy.UUID, explicitAlias)
+			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.MetaDeletedBy, explicitAlias)
 
 		}
 	}

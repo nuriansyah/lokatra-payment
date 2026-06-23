@@ -80,16 +80,30 @@ type Config struct {
 				BaseURL        string `mapstructure:"BASE_URL"`
 				ChargePath     string `mapstructure:"CHARGE_PATH"`
 				SecretKey      string `mapstructure:"SECRET_KEY"`
+				WebhookToken   string `mapstructure:"WEBHOOK_TOKEN"`
+				WebhookSecret  string `mapstructure:"WEBHOOK_SECRET"`
 				TimeoutSeconds int    `mapstructure:"TIMEOUT_SECONDS"`
 			} `mapstructure:"XENDIT"`
+			Durianpay struct {
+				AccountID      string `mapstructure:"ACCOUNT_ID"`
+				Enabled        bool   `mapstructure:"ENABLED"`
+				BaseURL        string `mapstructure:"BASE_URL"`
+				APIKey         string `mapstructure:"API_KEY"`
+				WebhookSecret  string `mapstructure:"WEBHOOK_SECRET"`
+				TimeoutSeconds int    `mapstructure:"TIMEOUT_SECONDS"`
+			} `mapstructure:"DURIANPAY"`
 		} `mapstructure:"PROVIDERS"`
 	} `mapstructure:"EXTERNALS"`
 	Internal struct {
 		Payment struct {
-			Routing struct {
-				DefaultStrategy     string `mapstructure:"DEFAULT_STRATEGY"`
-				DefaultUseCase      string `mapstructure:"DEFAULT_USE_CASE"`
-				UseDatabaseFallback bool   `mapstructure:"USE_DATABASE_FALLBACK"`
+			AdminToken string `mapstructure:"ADMIN_TOKEN"`
+			Routing    struct {
+				RulesJSON          string `mapstructure:"RULES_JSON"`
+				DefaultProviders   string `mapstructure:"DEFAULT_PROVIDERS"`
+				MaxAttempts        int    `mapstructure:"MAX_ATTEMPTS"`
+				FailureThreshold   int    `mapstructure:"FAILURE_THRESHOLD"`
+				CooldownSeconds    int    `mapstructure:"COOLDOWN_SECONDS"`
+				RetryBackoffMillis int    `mapstructure:"RETRY_BACKOFF_MILLIS"`
 			} `mapstructure:"ROUTING"`
 		} `mapstructure:"PAYMENT"`
 	} `mapstructure:"INTERNAL"`
@@ -116,6 +130,8 @@ var (
 func Get() *Config {
 
 	once.Do(func() {
+		bindPaymentEnvironment()
+		viper.AutomaticEnv()
 		viper.SetConfigFile(".env")
 		err := viper.ReadInConfig()
 
@@ -130,4 +146,34 @@ func Get() *Config {
 	})
 
 	return &conf
+}
+
+func bindPaymentEnvironment() {
+	bindings := map[string]string{
+		"internal.payment.admin_token":                  "INTERNAL_PAYMENT_ADMIN_TOKEN",
+		"internal.payment.routing.rules_json":           "INTERNAL_PAYMENT_ROUTING_RULES_JSON",
+		"internal.payment.routing.default_providers":    "INTERNAL_PAYMENT_ROUTING_DEFAULT_PROVIDERS",
+		"internal.payment.routing.max_attempts":         "INTERNAL_PAYMENT_ROUTING_MAX_ATTEMPTS",
+		"internal.payment.routing.failure_threshold":    "INTERNAL_PAYMENT_ROUTING_FAILURE_THRESHOLD",
+		"internal.payment.routing.cooldown_seconds":     "INTERNAL_PAYMENT_ROUTING_COOLDOWN_SECONDS",
+		"internal.payment.routing.retry_backoff_millis": "INTERNAL_PAYMENT_ROUTING_RETRY_BACKOFF_MILLIS",
+		"externals.providers.midtrans.enabled":          "EXTERNALS_PROVIDERS_MIDTRANS_ENABLED",
+		"externals.providers.midtrans.account_id":       "EXTERNALS_PROVIDERS_MIDTRANS_ACCOUNT_ID",
+		"externals.providers.midtrans.base_url":         "EXTERNALS_PROVIDERS_MIDTRANS_BASE_URL",
+		"externals.providers.midtrans.server_key":       "EXTERNALS_PROVIDERS_MIDTRANS_SERVER_KEY",
+		"externals.providers.xendit.enabled":            "EXTERNALS_PROVIDERS_XENDIT_ENABLED",
+		"externals.providers.xendit.account_id":         "EXTERNALS_PROVIDERS_XENDIT_ACCOUNT_ID",
+		"externals.providers.xendit.base_url":           "EXTERNALS_PROVIDERS_XENDIT_BASE_URL",
+		"externals.providers.xendit.secret_key":         "EXTERNALS_PROVIDERS_XENDIT_SECRET_KEY",
+		"externals.providers.xendit.webhook_token":      "EXTERNALS_PROVIDERS_XENDIT_WEBHOOK_TOKEN",
+		"externals.providers.xendit.webhook_secret":     "EXTERNALS_PROVIDERS_XENDIT_WEBHOOK_SECRET",
+		"externals.providers.durianpay.enabled":         "EXTERNALS_PROVIDERS_DURIANPAY_ENABLED",
+		"externals.providers.durianpay.account_id":      "EXTERNALS_PROVIDERS_DURIANPAY_ACCOUNT_ID",
+		"externals.providers.durianpay.base_url":        "EXTERNALS_PROVIDERS_DURIANPAY_BASE_URL",
+		"externals.providers.durianpay.api_key":         "EXTERNALS_PROVIDERS_DURIANPAY_API_KEY",
+		"externals.providers.durianpay.webhook_secret":  "EXTERNALS_PROVIDERS_DURIANPAY_WEBHOOK_SECRET",
+	}
+	for key, environment := range bindings {
+		_ = viper.BindEnv(key, environment)
+	}
 }

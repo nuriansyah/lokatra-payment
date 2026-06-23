@@ -445,7 +445,7 @@ func NewPaymentOverpaymentsSelectableResponse(paymentOverpayments model.PaymentO
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentOverpaymentsDBFieldName.MetaDeletedAt):
 			key := string(PaymentOverpaymentsDTOFieldName.MetaDeletedAt)
@@ -459,7 +459,7 @@ func NewPaymentOverpaymentsSelectableResponse(paymentOverpayments model.PaymentO
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.MetaDeletedBy, explicitAlias)
 
 		}
 	}

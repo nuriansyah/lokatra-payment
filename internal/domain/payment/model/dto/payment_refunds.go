@@ -588,7 +588,7 @@ func NewPaymentRefundsSelectableResponse(paymentRefunds model.PaymentRefunds, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentRefundsDBFieldName.MetaDeletedAt):
 			key := string(PaymentRefundsDTOFieldName.MetaDeletedAt)
@@ -602,7 +602,7 @@ func NewPaymentRefundsSelectableResponse(paymentRefunds model.PaymentRefunds, fi
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -422,7 +422,7 @@ func (repo *RepositoryImpl) BulkDeleteProviderApiRequestsByIDs(ctx context.Conte
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(providerApiRequestsQueries.deleteProviderApiRequests + " WHERE " + whereQuery)
+	commandQuery := providerApiRequestsQueries.deleteProviderApiRequests + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -726,7 +726,7 @@ func (repo *RepositoryImpl) DeleteProviderApiRequestsByID(ctx context.Context, p
 		return
 	}
 	whereQuery, params := composeProviderApiRequestsCompositePrimaryKeyWhere([]model.ProviderApiRequestsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(providerApiRequestsQueries.deleteProviderApiRequests + " WHERE " + whereQuery)
+	commandQuery := providerApiRequestsQueries.deleteProviderApiRequests + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

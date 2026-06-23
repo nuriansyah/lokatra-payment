@@ -2,415 +2,452 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"sort"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gofrs/uuid"
-	"github.com/rs/zerolog/log"
-
-	paymentmodel "github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
-	paymentrepository "github.com/nuriansyah/lokatra-payment/internal/domain/payment/repository"
-	routingmodel "github.com/nuriansyah/lokatra-payment/internal/domain/routing/model"
-	routingrepository "github.com/nuriansyah/lokatra-payment/internal/domain/routing/repository"
+	"github.com/nuriansyah/lokatra-payment/configs"
+	pg "github.com/nuriansyah/lokatra-payment/external/paymentgateway"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
 )
 
-// RoutingEngine performs config-first resolution with database fallback.
+const (
+	defaultFailureThreshold = 3
+	defaultMaxAttempts      = 3
+	defaultCooldown         = 30 * time.Second
+	defaultRetryBackoff     = 100 * time.Millisecond
+)
+
+type RoutingRule struct {
+	Method      pg.PaymentMethod  `json:"method"`
+	Channel     string            `json:"channel,omitempty"`
+	Providers   []pg.ProviderCode `json:"providers"`
+	MaxAttempts int               `json:"maxAttempts,omitempty"`
+}
+
+type RoutingConfig struct {
+	Rules            []RoutingRule
+	DefaultProviders []pg.ProviderCode
+	MaxAttempts      int
+	FailureThreshold int
+	Cooldown         time.Duration
+	RetryBackoff     time.Duration
+}
+
+type RoutingRequest struct {
+	Method      pg.PaymentMethod
+	Channel     string
+	Currency    string
+	GatewayCall pg.CreatePaymentRequest
+}
+
+type RouteCandidate struct {
+	ProviderCode pg.ProviderCode `json:"providerCode"`
+	AccountID    uuid.UUID       `json:"accountId"`
+	Priority     int             `json:"priority"`
+	MaxAttempts  int             `json:"maxAttempts"`
+	Reason       string          `json:"reason"`
+	Skipped      bool            `json:"skipped"`
+	SkipReason   string          `json:"skipReason,omitempty"`
+}
+
+type ProviderAttempt struct {
+	ProviderCode pg.ProviderCode `json:"providerCode"`
+	AccountID    uuid.UUID       `json:"accountId"`
+	Attempt      int             `json:"attempt"`
+	StartedAt    time.Time       `json:"startedAt"`
+	Duration     time.Duration   `json:"duration"`
+	Error        string          `json:"error,omitempty"`
+}
+
+type RoutingResult struct {
+	Selected   RouteCandidate           `json:"selected"`
+	Candidates []RouteCandidate         `json:"candidates"`
+	Attempts   []ProviderAttempt        `json:"attempts"`
+	Payment    pg.CreatePaymentResponse `json:"payment"`
+}
+
+type CircuitBreaker interface {
+	Allow(key string, now time.Time) bool
+	RecordFailure(key string, now time.Time)
+	RecordSuccess(key string)
+}
+
+type circuitState struct {
+	failures  int
+	openUntil time.Time
+	halfOpen  bool
+}
+
+// MemoryCircuitBreaker is O(1), concurrency-safe, and hidden behind an
+// interface so a distributed Redis implementation can replace it unchanged.
+type MemoryCircuitBreaker struct {
+	mu        sync.Mutex
+	states    map[string]circuitState
+	threshold int
+	cooldown  time.Duration
+}
+
+type RedisCircuitBreaker struct {
+	client    redis.UniversalClient
+	threshold int
+	cooldown  time.Duration
+	prefix    string
+}
+
+var recordCircuitFailure = redis.NewScript(`
+local failures = redis.call('INCR', KEYS[1])
+if failures >= tonumber(ARGV[1]) then
+  redis.call('SET', KEYS[2], '1', 'PX', ARGV[2])
+  redis.call('PEXPIRE', KEYS[1], tonumber(ARGV[2]) * 2)
+else
+  redis.call('PEXPIRE', KEYS[1], ARGV[2])
+end
+redis.call('DEL', KEYS[3])
+return failures
+`)
+
+var allowCircuitRequest = redis.NewScript(`
+if redis.call('EXISTS', KEYS[2]) == 1 then
+  return 0
+end
+local failures = tonumber(redis.call('GET', KEYS[1]) or '0')
+if failures >= tonumber(ARGV[1]) then
+  if redis.call('SET', KEYS[3], '1', 'NX', 'PX', ARGV[2]) then
+    return 1
+  end
+  return 0
+end
+return 1
+`)
+
+func ProvideCircuitBreaker(cfg *configs.Config, client *redis.Client) CircuitBreaker {
+	routing := NewRoutingConfig(cfg)
+	if cfg == nil || client == nil || strings.TrimSpace(cfg.Cache.Redis.Primary.Host) == "" || strings.TrimSpace(cfg.Cache.Redis.Primary.Port) == "" {
+		return NewMemoryCircuitBreaker(routing.FailureThreshold, routing.Cooldown)
+	}
+	return &RedisCircuitBreaker{client: client, threshold: routing.FailureThreshold, cooldown: routing.Cooldown, prefix: "payment:routing:circuit"}
+}
+
+func (b *RedisCircuitBreaker) Allow(key string, _ time.Time) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	allowed, err := allowCircuitRequest.Run(ctx, b.client, []string{b.failureKey(key), b.openKey(key), b.probeKey(key)}, b.threshold, (10 * time.Second).Milliseconds()).Int()
+	return err != nil || allowed == 1
+}
+
+func (b *RedisCircuitBreaker) RecordFailure(key string, _ time.Time) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	_, _ = recordCircuitFailure.Run(ctx, b.client, []string{b.failureKey(key), b.openKey(key), b.probeKey(key)}, b.threshold, b.cooldown.Milliseconds()).Result()
+}
+
+func (b *RedisCircuitBreaker) RecordSuccess(key string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	_, _ = b.client.Del(ctx, b.failureKey(key), b.openKey(key), b.probeKey(key)).Result()
+}
+
+func (b *RedisCircuitBreaker) failureKey(key string) string { return b.prefix + ":failures:" + key }
+func (b *RedisCircuitBreaker) openKey(key string) string    { return b.prefix + ":open:" + key }
+func (b *RedisCircuitBreaker) probeKey(key string) string   { return b.prefix + ":probe:" + key }
+
+func NewMemoryCircuitBreaker(threshold int, cooldown time.Duration) *MemoryCircuitBreaker {
+	if threshold <= 0 {
+		threshold = defaultFailureThreshold
+	}
+	if cooldown <= 0 {
+		cooldown = defaultCooldown
+	}
+	return &MemoryCircuitBreaker{states: make(map[string]circuitState), threshold: threshold, cooldown: cooldown}
+}
+
+func (b *MemoryCircuitBreaker) Allow(key string, now time.Time) bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	state, exists := b.states[key]
+	if !exists {
+		return true
+	}
+	if !state.openUntil.IsZero() && now.Before(state.openUntil) {
+		return false
+	}
+	if state.failures >= b.threshold {
+		if state.halfOpen {
+			return false
+		}
+		state.openUntil = time.Time{}
+		state.halfOpen = true
+		b.states[key] = state
+	}
+	return true
+}
+
+func (b *MemoryCircuitBreaker) RecordFailure(key string, now time.Time) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	state := b.states[key]
+	state.failures++
+	if state.failures >= b.threshold {
+		state.openUntil = now.Add(b.cooldown)
+		state.halfOpen = false
+	}
+	b.states[key] = state
+}
+
+func (b *MemoryCircuitBreaker) RecordSuccess(key string) {
+	b.mu.Lock()
+	delete(b.states, key)
+	b.mu.Unlock()
+}
+
 type RoutingEngine struct {
-	config          PaymentServiceConfig
-	paymentRepo     paymentrepository.Repository
-	routingRepo     routingrepository.Repository
-	gatewayRegistry GatewayRegistry
+	registry     *pg.Registry
+	accountIDs   map[pg.ProviderCode]uuid.UUID
+	breaker      CircuitBreaker
+	config       RoutingConfig
+	capabilities map[pg.ProviderCode][]pg.Capability
 }
 
-func NewRoutingEngine(config PaymentServiceConfig, paymentRepo paymentrepository.Repository, routingRepo routingrepository.Repository, gatewayRegistry GatewayRegistry) *RoutingEngine {
-	return &RoutingEngine{
-		config:          config,
-		paymentRepo:     paymentRepo,
-		routingRepo:     routingRepo,
-		gatewayRegistry: gatewayRegistry,
-	}
-}
-
-func (re *RoutingEngine) Resolve(ctx context.Context, request PaymentFlowRequest) (RoutingDecision, error) {
-	policyDecision, ok := re.resolveFromPolicies(request)
-	if ok {
-		return policyDecision, nil
-	}
-
-	if re.config.UseDatabaseFallback {
-		decision, err := re.resolveFromDatabase(ctx, request)
-		if err == nil {
-			return decision, nil
-		}
-		log.Debug().Err(err).Msg("[routing] database fallback failed")
-	}
-
-	return re.resolveDefault(request)
-}
-
-func (re *RoutingEngine) resolveFromPolicies(request PaymentFlowRequest) (RoutingDecision, bool) {
-	matching := make([]RoutingPolicy, 0, len(re.config.Policies))
-	for _, policy := range re.config.Policies {
-		if !policy.Enabled {
-			continue
-		}
-		if policy.matches(request) {
-			matching = append(matching, policy)
-		}
-	}
-
-	if len(matching) == 0 {
-		return RoutingDecision{}, false
-	}
-
-	sort.SliceStable(matching, func(i, j int) bool {
-		if matching[i].Priority == matching[j].Priority {
-			return matching[i].Name < matching[j].Name
-		}
-		return matching[i].Priority < matching[j].Priority
-	})
-
-	for _, policy := range matching {
-		if decision, ok := re.buildPolicyDecision(policy, request); ok {
-			return decision, true
-		}
-	}
-
-	return RoutingDecision{}, false
-}
-
-func (re *RoutingEngine) buildPolicyDecision(policy RoutingPolicy, request PaymentFlowRequest) (RoutingDecision, bool) {
-	candidates := re.collectCandidates(policy, request)
-	if len(candidates) == 0 {
-		return RoutingDecision{}, false
-	}
-
-	sort.SliceStable(candidates, func(i, j int) bool {
-		if candidates[i].Score == candidates[j].Score {
-			return candidates[i].AccountLabel < candidates[j].AccountLabel
-		}
-		return candidates[i].Score > candidates[j].Score
-	})
-
-	selected := candidates[0]
-	return RoutingDecision{
-		Strategy:        policy.strategyOrDefault(re.config.DefaultStrategy),
-		PolicyName:      policy.Name,
-		PSP:             selected.PSP,
-		PSPAccountID:    selected.AccountID,
-		PSPAccountLabel: selected.AccountLabel,
-		Reason:          selected.Reason,
-		Candidates:      candidates,
-	}, true
-}
-
-func (re *RoutingEngine) collectCandidates(policy RoutingPolicy, request PaymentFlowRequest) []RoutingCandidate {
-	candidates := make([]RoutingCandidate, 0, len(re.config.Providers))
-	for _, provider := range re.config.Providers {
-		if !provider.Enabled {
-			continue
-		}
-		if !provider.supports(request.PaymentMethodType, request.Currency) {
-			continue
-		}
-
-		score := 0
-		reasons := make([]string, 0, 3)
-		if policy.PreferredPSP == provider.PSP {
-			score += 100
-			reasons = append(reasons, "preferred psp")
-		}
-		if policy.PreferredAccount != uuid.Nil && policy.PreferredAccount == provider.AccountID {
-			score += 80
-			reasons = append(reasons, "preferred account")
-		}
-		if len(policy.Countries) > 0 && containsString(policy.Countries, strings.ToUpper(request.CustomerCountry)) {
-			score += 10
-			reasons = append(reasons, "country match")
-		}
-		if len(policy.Currencies) == 0 || containsCurrency(policy.Currencies, request.Currency) {
-			score += 10
-		}
-		if len(policy.PaymentMethods) == 0 || containsPaymentMethod(policy.PaymentMethods, request.PaymentMethodType) {
-			score += 10
-		}
-		if len(reasons) == 0 {
-			reasons = append(reasons, "provider compatible")
-		}
-
-		candidates = append(candidates, RoutingCandidate{
-			PSP:          provider.PSP,
-			AccountID:    provider.AccountID,
-			AccountLabel: provider.AccountLabel,
-			Score:        score,
-			Reason:       strings.Join(reasons, ", "),
-		})
-	}
-
-	return candidates
-}
-
-func (re *RoutingEngine) resolveFromDatabase(ctx context.Context, request PaymentFlowRequest) (RoutingDecision, error) {
-	if re.routingRepo == nil {
-		return RoutingDecision{}, failure.Unimplemented("routing database fallback")
-	}
-
-	profiles := []routingmodel.RoutingProfilesFilterResult{}
-	var err error
-
-	profiles = append(profiles, re.fetchProfilesByMerchant(ctx, request.MerchantID)...)
-	if len(profiles) == 0 {
-		profiles = append(profiles, re.fetchGlobalProfiles(ctx)...)
-	}
-
-	if len(profiles) == 0 {
-		return RoutingDecision{}, failure.NotFound("routing profile")
-	}
-
-	sort.SliceStable(profiles, func(i, j int) bool {
-		return profiles[i].RoutingProfiles.MetaCreatedAt.After(profiles[j].RoutingProfiles.MetaCreatedAt)
-	})
-
-	for _, profile := range profiles {
-		decision, found, ruleErr := re.resolveProfileRules(ctx, profile.RoutingProfiles, request)
-		if ruleErr != nil {
-			err = ruleErr
-			continue
-		}
-		if found {
-			return decision, nil
-		}
-	}
-
-	if err != nil {
-		return RoutingDecision{}, err
-	}
-	return RoutingDecision{}, failure.NotFound("routing rule")
-}
-
-func (re *RoutingEngine) fetchProfilesByMerchant(ctx context.Context, merchantID uuid.UUID) []routingmodel.RoutingProfilesFilterResult {
-	filter := routingmodel.Filter{
-		FilterFields: []routingmodel.FilterField{{Field: string(routingmodel.RoutingProfilesDBFieldName.MerchantId), Operator: routingmodel.OperatorEqual, Value: merchantID}, {Field: string(routingmodel.RoutingProfilesDBFieldName.IsActive), Operator: routingmodel.OperatorEqual, Value: true}},
-		Sorts:        []routingmodel.Sort{{Field: string(routingmodel.RoutingProfilesDBFieldName.MetaCreatedAt), Order: routingmodel.SortDesc}},
-		Pagination:   routingmodel.Pagination{Page: 1, PageSize: 10},
-	}
-	profiles, err := re.routingRepo.ResolveRoutingProfilesByFilter(ctx, filter)
-	if err != nil {
-		log.Debug().Err(err).Msg("[routing] merchant profile lookup failed")
-		return nil
-	}
-	return profiles
-}
-
-func (re *RoutingEngine) fetchGlobalProfiles(ctx context.Context) []routingmodel.RoutingProfilesFilterResult {
-	filter := routingmodel.Filter{
-		FilterFields: []routingmodel.FilterField{{Field: string(routingmodel.RoutingProfilesDBFieldName.MerchantId), Operator: routingmodel.OperatorIsNull, Value: true}, {Field: string(routingmodel.RoutingProfilesDBFieldName.IsActive), Operator: routingmodel.OperatorEqual, Value: true}},
-		Sorts:        []routingmodel.Sort{{Field: string(routingmodel.RoutingProfilesDBFieldName.MetaCreatedAt), Order: routingmodel.SortDesc}},
-		Pagination:   routingmodel.Pagination{Page: 1, PageSize: 10},
-	}
-	profiles, err := re.routingRepo.ResolveRoutingProfilesByFilter(ctx, filter)
-	if err != nil {
-		log.Debug().Err(err).Msg("[routing] global profile lookup failed")
-		return nil
-	}
-	return profiles
-}
-
-func (re *RoutingEngine) resolveProfileRules(ctx context.Context, profile routingmodel.RoutingProfiles, request PaymentFlowRequest) (RoutingDecision, bool, error) {
-	filter := routingmodel.Filter{
-		FilterFields: []routingmodel.FilterField{{Field: string(routingmodel.RoutingRulesDBFieldName.ProfileId), Operator: routingmodel.OperatorEqual, Value: profile.Id}, {Field: string(routingmodel.RoutingRulesDBFieldName.IsActive), Operator: routingmodel.OperatorEqual, Value: true}},
-		Sorts:        []routingmodel.Sort{{Field: string(routingmodel.RoutingRulesDBFieldName.Priority), Order: routingmodel.SortAsc}},
-		Pagination:   routingmodel.Pagination{Page: 1, PageSize: 100},
-	}
-	rules, err := re.routingRepo.ResolveRoutingRulesByFilter(ctx, filter)
-	if err != nil {
-		return RoutingDecision{}, false, err
-	}
-
-	for _, rule := range rules {
-		if !ruleMatchesRequest(rule.RoutingRules, request) {
-			continue
-		}
-		if rule.RoutingRules.MatchCardBin.Valid && request.CardBIN != "" && !strings.HasPrefix(request.CardBIN, rule.RoutingRules.MatchCardBin.String) {
-			continue
-		}
-
-		candidatePolicy := RoutingPolicy{
-			Name:             profile.Name,
-			Enabled:          true,
-			Strategy:         routingmodel.RoutingStrategy(profile.Strategy),
-			PreferredPSP:     paymentmodel.Psp(""),
-			DatabaseFallback: true,
-		}
-		candidates := re.collectCandidates(candidatePolicy, request)
-		if len(candidates) == 0 {
-			continue
-		}
-
-		sort.SliceStable(candidates, func(i, j int) bool {
-			if candidates[i].Score == candidates[j].Score {
-				return candidates[i].AccountLabel < candidates[j].AccountLabel
-			}
-			return candidates[i].Score > candidates[j].Score
-		})
-
-		selected := candidates[0]
-		return RoutingDecision{
-			Strategy:        routingmodel.RoutingStrategy(profile.Strategy),
-			PolicyName:      profile.Name,
-			ProfileID:       profile.Id,
-			ProfileMatched:  true,
-			RuleID:          rule.RoutingRules.Id,
-			RuleMatched:     true,
-			PSP:             selected.PSP,
-			PSPAccountID:    selected.AccountID,
-			PSPAccountLabel: selected.AccountLabel,
-			Reason:          fmt.Sprintf("matched routing rule %s; %s", rule.RoutingRules.Name, selected.Reason),
-			FallbackUsed:    true,
-			Candidates:      candidates,
-		}, true, nil
-	}
-
-	if profile.FallbackProfileId.Valid {
-		fallbackFilter := routingmodel.Filter{
-			FilterFields: []routingmodel.FilterField{{Field: string(routingmodel.RoutingProfilesDBFieldName.Id), Operator: routingmodel.OperatorEqual, Value: profile.FallbackProfileId.UUID}, {Field: string(routingmodel.RoutingProfilesDBFieldName.IsActive), Operator: routingmodel.OperatorEqual, Value: true}},
-		}
-		fallbackProfiles, err := re.routingRepo.ResolveRoutingProfilesByFilter(ctx, fallbackFilter)
+func NewRoutingEngine(registry *pg.Registry, accountIDs map[pg.ProviderCode]uuid.UUID, breaker CircuitBreaker, config RoutingConfig) *RoutingEngine {
+	engine := &RoutingEngine{registry: registry, accountIDs: accountIDs, breaker: breaker, config: config, capabilities: make(map[pg.ProviderCode][]pg.Capability)}
+	for _, provider := range config.allProviders() {
+		gateway, err := registry.Get(provider)
 		if err != nil {
-			return RoutingDecision{}, false, err
-		}
-		for _, fallbackProfile := range fallbackProfiles {
-			return re.resolveProfileRules(ctx, fallbackProfile.RoutingProfiles, request)
-		}
-	}
-
-	return RoutingDecision{}, false, nil
-}
-
-func (re *RoutingEngine) resolveDefault(request PaymentFlowRequest) (RoutingDecision, error) {
-	for _, provider := range re.config.Providers {
-		if !provider.Enabled {
 			continue
 		}
-		if provider.supports(request.PaymentMethodType, request.Currency) {
-			return RoutingDecision{
-				Strategy:        re.config.DefaultStrategy,
-				PolicyName:      "default",
-				PSP:             provider.PSP,
-				PSPAccountID:    provider.AccountID,
-				PSPAccountLabel: provider.AccountLabel,
-				Reason:          "default provider selection",
-				FallbackUsed:    true,
-			}, nil
+		response, err := gateway.Capabilities(context.Background(), pg.CapabilitiesRequest{})
+		if err == nil {
+			engine.capabilities[provider] = response.Items
 		}
 	}
-
-	return RoutingDecision{}, failure.NotFound("payment gateway")
+	return engine
 }
 
-func ruleMatchesRequest(rule routingmodel.RoutingRules, request PaymentFlowRequest) bool {
-	if rule.MatchPaymentMethod != "" && rule.MatchPaymentMethod != routingmodel.PaymentMethodType(request.PaymentMethodType) {
-		return false
+func NewRoutingConfig(cfg *configs.Config) RoutingConfig {
+	config := RoutingConfig{
+		DefaultProviders: []pg.ProviderCode{pg.ProviderXendit, pg.ProviderDurianpay, pg.ProviderMidtrans},
+		MaxAttempts:      defaultMaxAttempts,
+		FailureThreshold: defaultFailureThreshold,
+		Cooldown:         defaultCooldown,
+		RetryBackoff:     defaultRetryBackoff,
 	}
-	if rule.MatchCurrency != "" && rule.MatchCurrency != routingmodel.PaymentCurrency(request.Currency) {
-		return false
+	if cfg == nil {
+		return config
 	}
-	if rule.MatchAmountMin.Valid && request.Amount.LessThan(rule.MatchAmountMin.Decimal) {
-		return false
+	routing := cfg.Internal.Payment.Routing
+	if routing.MaxAttempts > 0 {
+		config.MaxAttempts = routing.MaxAttempts
 	}
-	if rule.MatchAmountMax.Valid && request.Amount.GreaterThan(rule.MatchAmountMax.Decimal) {
-		return false
+	if routing.FailureThreshold > 0 {
+		config.FailureThreshold = routing.FailureThreshold
 	}
-	if rule.MatchUserCountry.Valid && !strings.EqualFold(rule.MatchUserCountry.String, request.CustomerCountry) {
-		return false
+	if routing.CooldownSeconds > 0 {
+		config.Cooldown = time.Duration(routing.CooldownSeconds) * time.Second
 	}
-	if rule.MatchProductType.Valid && !strings.EqualFold(rule.MatchProductType.String, request.ProductType) {
-		return false
+	if routing.RetryBackoffMillis > 0 {
+		config.RetryBackoff = time.Duration(routing.RetryBackoffMillis) * time.Millisecond
 	}
-	return true
+	if providers := parseProviderList(strings.Split(routing.DefaultProviders, ",")); len(providers) > 0 {
+		config.DefaultProviders = providers
+	}
+	if strings.TrimSpace(routing.RulesJSON) != "" {
+		var rules []RoutingRule
+		if json.Unmarshal([]byte(routing.RulesJSON), &rules) == nil {
+			config.Rules = normalizeRules(rules, config.MaxAttempts)
+		}
+	}
+	return config
 }
 
-func containsString(values []string, target string) bool {
-	for _, value := range values {
-		if strings.EqualFold(value, target) {
+func (e *RoutingEngine) Execute(ctx context.Context, request RoutingRequest) (RoutingResult, error) {
+	candidates := e.resolveCandidates(request)
+	result := RoutingResult{Candidates: candidates}
+	if len(candidates) == 0 {
+		return result, failure.New(424, fmt.Errorf("no configured provider supports %s/%s in %s", request.Method, request.Channel, request.Currency))
+	}
+	var lastErr error
+	for index := range result.Candidates {
+		candidate := &result.Candidates[index]
+		key := circuitKey(candidate.ProviderCode, request.Method, request.Channel)
+		if !e.breaker.Allow(key, time.Now().UTC()) {
+			candidate.Skipped, candidate.SkipReason = true, "circuit_open"
+			continue
+		}
+		gateway, err := e.registry.Get(candidate.ProviderCode)
+		if err != nil {
+			candidate.Skipped, candidate.SkipReason = true, "provider_disabled"
+			continue
+		}
+		for attempt := 1; attempt <= candidate.MaxAttempts; attempt++ {
+			started := time.Now().UTC()
+			payment, callErr := gateway.CreatePayment(ctx, request.GatewayCall)
+			providerAttempt := ProviderAttempt{ProviderCode: candidate.ProviderCode, AccountID: candidate.AccountID, Attempt: attempt, StartedAt: started, Duration: time.Since(started)}
+			if callErr == nil {
+				e.breaker.RecordSuccess(key)
+				result.Selected, result.Payment = *candidate, payment
+				result.Attempts = append(result.Attempts, providerAttempt)
+				return result, nil
+			}
+			lastErr = callErr
+			providerAttempt.Error = callErr.Error()
+			result.Attempts = append(result.Attempts, providerAttempt)
+			if canFallback(callErr) {
+				e.breaker.RecordFailure(key, time.Now().UTC())
+			}
+			if !pg.IsRetryable(callErr) || attempt == candidate.MaxAttempts {
+				break
+			}
+			if err := waitForRetry(ctx, e.config.RetryBackoff, attempt); err != nil {
+				return result, err
+			}
+		}
+		if lastErr != nil && !canFallback(lastErr) {
+			return result, lastErr
+		}
+	}
+	if lastErr == nil {
+		lastErr = errors.New("all payment providers were skipped")
+	}
+	return result, failure.New(424, fmt.Errorf("payment routing exhausted: %w", lastErr))
+}
+
+func (e *RoutingEngine) resolveCandidates(request RoutingRequest) []RouteCandidate {
+	providers, maxAttempts, reason := e.matchRule(request.Method, request.Channel)
+	result := make([]RouteCandidate, 0, len(providers))
+	seen := make(map[pg.ProviderCode]struct{}, len(providers))
+	for priority, provider := range providers {
+		if _, duplicate := seen[provider]; duplicate {
+			continue
+		}
+		seen[provider] = struct{}{}
+		accountID := e.accountIDs[provider]
+		if accountID == uuid.Nil {
+			continue
+		}
+		if _, err := e.registry.Get(provider); err != nil || !e.supports(provider, request.Method, request.Channel, request.Currency) {
+			continue
+		}
+		result = append(result, RouteCandidate{ProviderCode: provider, AccountID: accountID, Priority: priority + 1, MaxAttempts: maxAttempts, Reason: reason})
+	}
+	return result
+}
+
+func (e *RoutingEngine) matchRule(method pg.PaymentMethod, channel string) ([]pg.ProviderCode, int, string) {
+	channel = strings.ToLower(strings.TrimSpace(channel))
+	for _, rule := range e.config.Rules {
+		if rule.Method == method && strings.EqualFold(strings.TrimSpace(rule.Channel), channel) {
+			return rule.Providers, positiveOr(rule.MaxAttempts, e.config.MaxAttempts), "method_channel_rule"
+		}
+	}
+	for _, rule := range e.config.Rules {
+		if rule.Method == method && (strings.TrimSpace(rule.Channel) == "" || rule.Channel == "*") {
+			return rule.Providers, positiveOr(rule.MaxAttempts, e.config.MaxAttempts), "method_rule"
+		}
+	}
+	return e.config.DefaultProviders, e.config.MaxAttempts, "default_rule"
+}
+
+func (e *RoutingEngine) supports(provider pg.ProviderCode, method pg.PaymentMethod, channel, currency string) bool {
+	for _, capability := range e.capabilities[provider] {
+		channelMatch := channel == "" || capability.ChannelCode == "" || strings.EqualFold(capability.ChannelCode, channel) || genericChannelMatch(method, capability.ChannelCode)
+		currencyMatch := currency == "" || capability.Currency == "" || strings.EqualFold(capability.Currency, currency)
+		if capability.Method == method && channelMatch && currencyMatch {
 			return true
 		}
 	}
 	return false
 }
 
-func containsCurrency(values []paymentmodel.PaymentCurrency, target paymentmodel.PaymentCurrency) bool {
-	for _, value := range values {
-		if value == target {
-			return true
+func genericChannelMatch(method pg.PaymentMethod, capabilityChannel string) bool {
+	return (method == pg.PaymentMethodVirtualAccount && strings.EqualFold(capabilityChannel, "va")) || (method == pg.PaymentMethodQRIS && strings.EqualFold(capabilityChannel, "qris"))
+}
+
+func (c RoutingConfig) allProviders() []pg.ProviderCode {
+	providers := append([]pg.ProviderCode{}, c.DefaultProviders...)
+	for _, rule := range c.Rules {
+		providers = append(providers, rule.Providers...)
+	}
+	return providers
+}
+
+func normalizeRules(rules []RoutingRule, defaultAttempts int) []RoutingRule {
+	result := make([]RoutingRule, 0, len(rules))
+	for _, rule := range rules {
+		rule.Method = pg.PaymentMethod(strings.ToLower(strings.TrimSpace(string(rule.Method))))
+		rule.Channel = strings.ToLower(strings.TrimSpace(rule.Channel))
+		rule.Providers = normalizeProviders(rule.Providers)
+		rule.MaxAttempts = positiveOr(rule.MaxAttempts, defaultAttempts)
+		if rule.Method != "" && len(rule.Providers) > 0 {
+			result = append(result, rule)
 		}
 	}
-	return false
+	return result
 }
 
-func containsPaymentMethod(values []paymentmodel.PaymentMethodType, target paymentmodel.PaymentMethodType) bool {
+func parseProviderList(values []string) []pg.ProviderCode {
+	providers := make([]pg.ProviderCode, 0, len(values))
 	for _, value := range values {
-		if value == target {
-			return true
-		}
+		providers = append(providers, pg.ProviderCode(strings.ToLower(strings.TrimSpace(value))))
 	}
-	return false
+	return normalizeProviders(providers)
 }
 
-func (policy RoutingPolicy) matches(request PaymentFlowRequest) bool {
-	if len(policy.UseCases) > 0 && !containsUseCase(policy.UseCases, request.UseCase) {
-		return false
-	}
-	if len(policy.MerchantIDs) > 0 && !containsUUID(policy.MerchantIDs, request.MerchantID) {
-		return false
-	}
-	if len(policy.OrderTypes) > 0 && !containsString(policy.OrderTypes, request.OrderType) {
-		return false
-	}
-	if len(policy.ProductTypes) > 0 && !containsString(policy.ProductTypes, request.ProductType) {
-		return false
-	}
-	if len(policy.PaymentMethods) > 0 && !containsPaymentMethod(policy.PaymentMethods, request.PaymentMethodType) {
-		return false
-	}
-	if len(policy.Currencies) > 0 && !containsCurrency(policy.Currencies, request.Currency) {
-		return false
-	}
-	if len(policy.Countries) > 0 && !containsString(policy.Countries, request.CustomerCountry) {
-		return false
-	}
-	if policy.MinAmount != nil && request.Amount.LessThan(*policy.MinAmount) {
-		return false
-	}
-	if policy.MaxAmount != nil && request.Amount.GreaterThan(*policy.MaxAmount) {
-		return false
-	}
-	return true
-}
-
-func (policy RoutingPolicy) strategyOrDefault(defaultStrategy routingmodel.RoutingStrategy) routingmodel.RoutingStrategy {
-	if policy.Strategy != "" {
-		return policy.Strategy
-	}
-	return defaultStrategy
-}
-
-func containsUseCase(values []PaymentUseCase, target PaymentUseCase) bool {
+func normalizeProviders(values []pg.ProviderCode) []pg.ProviderCode {
+	result := make([]pg.ProviderCode, 0, len(values))
+	seen := make(map[pg.ProviderCode]struct{}, len(values))
 	for _, value := range values {
-		if value == target {
-			return true
+		provider := pg.ProviderCode(strings.ToLower(strings.TrimSpace(string(value))))
+		if provider == "" {
+			continue
 		}
+		if _, exists := seen[provider]; exists {
+			continue
+		}
+		seen[provider] = struct{}{}
+		result = append(result, provider)
 	}
-	return false
+	return result
 }
 
-func containsUUID(values []uuid.UUID, target uuid.UUID) bool {
-	for _, value := range values {
-		if value == target {
-			return true
-		}
+func circuitKey(provider pg.ProviderCode, method pg.PaymentMethod, channel string) string {
+	return strings.Join([]string{string(provider), string(method), strings.ToLower(strings.TrimSpace(channel))}, ":")
+}
+
+func waitForRetry(ctx context.Context, base time.Duration, attempt int) error {
+	if base <= 0 {
+		return nil
 	}
-	return false
+	delay := base * time.Duration(1<<(attempt-1))
+	if delay > 2*time.Second {
+		delay = 2 * time.Second
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+func canFallback(err error) bool {
+	var gatewayErr *pg.GatewayError
+	if !errors.As(err, &gatewayErr) {
+		return true
+	}
+	return gatewayErr.Code != pg.ErrorCodeInvalidRequest
+}
+
+func positiveOr(value, fallback int) int {
+	if value > 0 {
+		return value
+	}
+	return fallback
 }

@@ -494,7 +494,7 @@ func NewProviderApiRequestsSelectableResponse(providerApiRequests model.Provider
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.MetaUpdatedBy.UUID, explicitAlias)
+			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ProviderApiRequestsDBFieldName.MetaDeletedAt):
 			key := string(ProviderApiRequestsDTOFieldName.MetaDeletedAt)
@@ -508,7 +508,7 @@ func NewProviderApiRequestsSelectableResponse(providerApiRequests model.Provider
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.MetaDeletedBy.UUID, explicitAlias)
+			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -430,7 +430,7 @@ func NewProviderHealthSnapshotsSelectableResponse(providerHealthSnapshots model.
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.MetaUpdatedBy.UUID, explicitAlias)
+			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ProviderHealthSnapshotsDBFieldName.MetaDeletedAt):
 			key := string(ProviderHealthSnapshotsDTOFieldName.MetaDeletedAt)
@@ -444,7 +444,7 @@ func NewProviderHealthSnapshotsSelectableResponse(providerHealthSnapshots model.
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.MetaDeletedBy.UUID, explicitAlias)
+			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.MetaDeletedBy, explicitAlias)
 
 		}
 	}

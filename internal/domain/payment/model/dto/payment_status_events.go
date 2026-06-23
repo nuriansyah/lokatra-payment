@@ -443,7 +443,7 @@ func NewPaymentStatusEventsSelectableResponse(paymentStatusEvents model.PaymentS
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentStatusEventsDBFieldName.MetaDeletedAt):
 			key := string(PaymentStatusEventsDTOFieldName.MetaDeletedAt)
@@ -457,7 +457,7 @@ func NewPaymentStatusEventsSelectableResponse(paymentStatusEvents model.PaymentS
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.MetaDeletedBy, explicitAlias)
 
 		}
 	}

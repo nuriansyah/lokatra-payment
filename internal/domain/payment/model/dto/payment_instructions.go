@@ -493,7 +493,7 @@ func NewPaymentInstructionsSelectableResponse(paymentInstructions model.PaymentI
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentInstructionsDBFieldName.MetaDeletedAt):
 			key := string(PaymentInstructionsDTOFieldName.MetaDeletedAt)
@@ -507,7 +507,7 @@ func NewPaymentInstructionsSelectableResponse(paymentInstructions model.PaymentI
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -382,7 +382,7 @@ func (repo *RepositoryImpl) BulkDeletePaymentCapturesByIDs(ctx context.Context, 
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(paymentCapturesQueries.deletePaymentCaptures + " WHERE " + whereQuery)
+	commandQuery := paymentCapturesQueries.deletePaymentCaptures + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -671,7 +671,7 @@ func (repo *RepositoryImpl) DeletePaymentCapturesByID(ctx context.Context, prima
 		return
 	}
 	whereQuery, params := composePaymentCapturesCompositePrimaryKeyWhere([]model.PaymentCapturesPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(paymentCapturesQueries.deletePaymentCaptures + " WHERE " + whereQuery)
+	commandQuery := paymentCapturesQueries.deletePaymentCaptures + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

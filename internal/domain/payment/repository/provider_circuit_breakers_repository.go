@@ -390,7 +390,7 @@ func (repo *RepositoryImpl) BulkDeleteProviderCircuitBreakersByIDs(ctx context.C
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(providerCircuitBreakersQueries.deleteProviderCircuitBreakers + " WHERE " + whereQuery)
+	commandQuery := providerCircuitBreakersQueries.deleteProviderCircuitBreakers + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -682,7 +682,7 @@ func (repo *RepositoryImpl) DeleteProviderCircuitBreakersByID(ctx context.Contex
 		return
 	}
 	whereQuery, params := composeProviderCircuitBreakersCompositePrimaryKeyWhere([]model.ProviderCircuitBreakersPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(providerCircuitBreakersQueries.deleteProviderCircuitBreakers + " WHERE " + whereQuery)
+	commandQuery := providerCircuitBreakersQueries.deleteProviderCircuitBreakers + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

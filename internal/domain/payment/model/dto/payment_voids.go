@@ -430,7 +430,7 @@ func NewPaymentVoidsSelectableResponse(paymentVoids model.PaymentVoids, filter m
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentVoidsDBFieldName.MetaDeletedAt):
 			key := string(PaymentVoidsDTOFieldName.MetaDeletedAt)
@@ -444,7 +444,7 @@ func NewPaymentVoidsSelectableResponse(paymentVoids model.PaymentVoids, filter m
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.MetaDeletedBy, explicitAlias)
 
 		}
 	}

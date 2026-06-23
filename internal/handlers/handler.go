@@ -24,16 +24,24 @@ func ProvideHandler(
 
 func (h *Handler) Router(r chi.Router) {
 	r.Use(middleware.RequestID)
-	r.Route("/payments", func(pr chi.Router) {
-		r.Group(func(r chi.Router) {
-			pr.Post("/flows/quote", h.quotePaymentFlow)
-			pr.Post("/flows/execute", h.executePaymentFlow)
-		})
-		// Webhook routes (typically not authenticated for PSP callbacks)
-		pr.Route("/webhooks", func(wr chi.Router) {
-			wr.Post("/midtrans", h.HandleMidtransWebhook)
-			wr.Post("/xendit", h.HandleXenditWebhook)
-			wr.Get("/health", h.HandleWebhookTest)
-		})
+
+	r.Route("/payment-intents", func(r chi.Router) {
+		r.Use(middleware.IdempotencyMiddleware)
+		r.Post("/", h.CreatePaymentIntent)
+		r.Get("/{paymentIntentID}", h.GetPaymentIntent)
+		r.Post("/{paymentIntentID}/{action}", h.PaymentIntentAction)
+	})
+	r.Post("/webhooks/{provider}", h.HandleWebhook)
+	r.With(middleware.IdempotencyMiddleware).Post("/refunds", h.CreateRefund)
+	r.Route("/admin", func(r chi.Router) {
+		r.Use(middleware.RequireAdminToken(h.config))
+		r.Post("/refunds/{refundID}/{action}", h.RefundAction)
+		r.Post("/webhooks/{webhookID}/{action}", h.AdminWebhookAction)
+		r.Post("/manual-payment-evidence/{evidenceID}/{action}", h.ManualPaymentEvidenceAction)
+		r.Post("/overpayments/{overpaymentID}/{action}", h.OverpaymentAction)
+		r.Post("/cash-sessions", h.OpenCashCollectionSession)
+		r.Post("/cash-sessions/{cashSessionID}/{action}", h.CashCollectionSessionAction)
+		r.Post("/payment-installments/{installmentID}/{action}", h.PaymentInstallmentAction)
+		r.Post("/payment-authorizations/{authorizationID}/{action}", h.PaymentAuthorizationAction)
 	})
 }

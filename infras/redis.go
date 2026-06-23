@@ -1,7 +1,6 @@
 package infras
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
@@ -22,12 +21,6 @@ func RedisNewClient(config *configs.Config) *redis.Client {
 		Password: config.Cache.Redis.Primary.Password,
 		DB:       config.Cache.Redis.Primary.DB,
 	})
-
-	pong, err := client.Ping(context.Background()).Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(pong, err)
 
 	return client
 }

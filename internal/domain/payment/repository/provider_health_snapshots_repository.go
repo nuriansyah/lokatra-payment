@@ -382,7 +382,7 @@ func (repo *RepositoryImpl) BulkDeleteProviderHealthSnapshotsByIDs(ctx context.C
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(providerHealthSnapshotsQueries.deleteProviderHealthSnapshots + " WHERE " + whereQuery)
+	commandQuery := providerHealthSnapshotsQueries.deleteProviderHealthSnapshots + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -671,7 +671,7 @@ func (repo *RepositoryImpl) DeleteProviderHealthSnapshotsByID(ctx context.Contex
 		return
 	}
 	whereQuery, params := composeProviderHealthSnapshotsCompositePrimaryKeyWhere([]model.ProviderHealthSnapshotsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(providerHealthSnapshotsQueries.deleteProviderHealthSnapshots + " WHERE " + whereQuery)
+	commandQuery := providerHealthSnapshotsQueries.deleteProviderHealthSnapshots + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

@@ -502,7 +502,7 @@ func (repo *RepositoryImpl) BulkDeletePaymentAttemptsByIDs(ctx context.Context, 
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(paymentAttemptsQueries.deletePaymentAttempts + " WHERE " + whereQuery)
+	commandQuery := paymentAttemptsQueries.deletePaymentAttempts + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -836,7 +836,7 @@ func (repo *RepositoryImpl) DeletePaymentAttemptsByID(ctx context.Context, prima
 		return
 	}
 	whereQuery, params := composePaymentAttemptsCompositePrimaryKeyWhere([]model.PaymentAttemptsPrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(paymentAttemptsQueries.deletePaymentAttempts + " WHERE " + whereQuery)
+	commandQuery := paymentAttemptsQueries.deletePaymentAttempts + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

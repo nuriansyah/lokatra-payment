@@ -458,7 +458,7 @@ func NewCashCollectionSessionsSelectableResponse(cashCollectionSessions model.Ca
 			if explicitAlias {
 				key = outputField
 			}
-			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.MetaUpdatedBy.UUID, explicitAlias)
+			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.MetaUpdatedBy, explicitAlias)
 
 		case string(model.CashCollectionSessionsDBFieldName.MetaDeletedAt):
 			key := string(CashCollectionSessionsDTOFieldName.MetaDeletedAt)
@@ -472,7 +472,7 @@ func NewCashCollectionSessionsSelectableResponse(cashCollectionSessions model.Ca
 			if explicitAlias {
 				key = outputField
 			}
-			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.MetaDeletedBy.UUID, explicitAlias)
+			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -432,7 +432,7 @@ func NewCashCollectionItemsSelectableResponse(cashCollectionItems model.CashColl
 			if explicitAlias {
 				key = outputField
 			}
-			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.MetaUpdatedBy.UUID, explicitAlias)
+			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.MetaUpdatedBy, explicitAlias)
 
 		case string(model.CashCollectionItemsDBFieldName.MetaDeletedAt):
 			key := string(CashCollectionItemsDTOFieldName.MetaDeletedAt)
@@ -446,7 +446,7 @@ func NewCashCollectionItemsSelectableResponse(cashCollectionItems model.CashColl
 			if explicitAlias {
 				key = outputField
 			}
-			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.MetaDeletedBy.UUID, explicitAlias)
+			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.MetaDeletedBy, explicitAlias)
 
 		}
 	}

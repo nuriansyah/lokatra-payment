@@ -390,7 +390,7 @@ func NewPaymentRouteDecisionsSelectableResponse(paymentRouteDecisions model.Paym
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentRouteDecisionsDBFieldName.MetaDeletedAt):
 			key := string(PaymentRouteDecisionsDTOFieldName.MetaDeletedAt)
@@ -404,7 +404,7 @@ func NewPaymentRouteDecisionsSelectableResponse(paymentRouteDecisions model.Paym
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.MetaDeletedBy, explicitAlias)
 
 		}
 	}

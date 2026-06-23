@@ -549,7 +549,7 @@ func NewManualPaymentEvidenceSelectableResponse(manualPaymentEvidence model.Manu
 			if explicitAlias {
 				key = outputField
 			}
-			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.MetaUpdatedBy.UUID, explicitAlias)
+			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ManualPaymentEvidenceDBFieldName.MetaDeletedAt):
 			key := string(ManualPaymentEvidenceDTOFieldName.MetaDeletedAt)
@@ -563,7 +563,7 @@ func NewManualPaymentEvidenceSelectableResponse(manualPaymentEvidence model.Manu
 			if explicitAlias {
 				key = outputField
 			}
-			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.MetaDeletedBy.UUID, explicitAlias)
+			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.MetaDeletedBy, explicitAlias)
 
 		}
 	}

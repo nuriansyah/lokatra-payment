@@ -454,7 +454,7 @@ func (repo *RepositoryImpl) BulkDeleteManualPaymentEvidenceByIDs(ctx context.Con
 		params = append(params, id.Id.String())
 	}
 
-	commandQuery := fmt.Sprintf(manualPaymentEvidenceQueries.deleteManualPaymentEvidence + " WHERE " + whereQuery)
+	commandQuery := manualPaymentEvidenceQueries.deleteManualPaymentEvidence + " WHERE " + whereQuery
 
 	commandQuery, params, err = sqlx.In(commandQuery, params)
 	if err != nil {
@@ -770,7 +770,7 @@ func (repo *RepositoryImpl) DeleteManualPaymentEvidenceByID(ctx context.Context,
 		return
 	}
 	whereQuery, params := composeManualPaymentEvidenceCompositePrimaryKeyWhere([]model.ManualPaymentEvidencePrimaryID{primaryID})
-	commandQuery := fmt.Sprintf(manualPaymentEvidenceQueries.deleteManualPaymentEvidence + " WHERE " + whereQuery)
+	commandQuery := manualPaymentEvidenceQueries.deleteManualPaymentEvidence + " WHERE " + whereQuery
 	commandQuery = repo.db.Read.Rebind(commandQuery)
 	_, err = repo.exec(ctx, commandQuery, params)
 	if err != nil {

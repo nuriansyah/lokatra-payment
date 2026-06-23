@@ -471,7 +471,7 @@ func NewPaymentAuthorizationsSelectableResponse(paymentAuthorizations model.Paym
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentAuthorizationsDBFieldName.MetaDeletedAt):
 			key := string(PaymentAuthorizationsDTOFieldName.MetaDeletedAt)
@@ -485,7 +485,7 @@ func NewPaymentAuthorizationsSelectableResponse(paymentAuthorizations model.Paym
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.MetaDeletedBy, explicitAlias)
 
 		}
 	}

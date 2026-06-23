@@ -522,7 +522,7 @@ func NewPaymentRouteCandidatesRuntimeSelectableResponse(paymentRouteCandidatesRu
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.MetaUpdatedBy.UUID, explicitAlias)
+			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.MetaUpdatedBy, explicitAlias)
 
 		case string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaDeletedAt):
 			key := string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaDeletedAt)
@@ -536,7 +536,7 @@ func NewPaymentRouteCandidatesRuntimeSelectableResponse(paymentRouteCandidatesRu
 			if explicitAlias {
 				key = outputField
 			}
-			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.MetaDeletedBy.UUID, explicitAlias)
+			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.MetaDeletedBy, explicitAlias)
 
 		}
 	}

@@ -573,7 +573,7 @@ func NewProviderWebhookEventsSelectableResponse(providerWebhookEvents model.Prov
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.MetaUpdatedBy.UUID, explicitAlias)
+			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.MetaUpdatedBy, explicitAlias)
 
 		case string(model.ProviderWebhookEventsDBFieldName.MetaDeletedAt):
 			key := string(ProviderWebhookEventsDTOFieldName.MetaDeletedAt)
@@ -587,7 +587,7 @@ func NewProviderWebhookEventsSelectableResponse(providerWebhookEvents model.Prov
 			if explicitAlias {
 				key = outputField
 			}
-			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.MetaDeletedBy.UUID, explicitAlias)
+			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.MetaDeletedBy, explicitAlias)
 
 		}
 	}
