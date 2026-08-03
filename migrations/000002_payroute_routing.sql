@@ -179,7 +179,7 @@ CREATE TABLE payroute_psp_health (
   meta_created_at       timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_psp_health_lookup
+CREATE UNIQUE INDEX idx_psp_health_lookup
   ON payroute_psp_health(provider_account_id, method_code, window_start DESC);
 
 CREATE INDEX idx_psp_health_scope
