@@ -6,8 +6,14 @@ import (
 
 	"github.com/gofrs/uuid"
 	pg "github.com/nuriansyah/lokatra-payment/external/paymentgateway"
+	"github.com/nuriansyah/lokatra-payment/shared"
+	"github.com/nuriansyah/lokatra-payment/shared/failure"
 	"github.com/shopspring/decimal"
 )
+
+// ---------------------------------------------------------------------------
+// CreatePaymentIntentRequest
+// ---------------------------------------------------------------------------
 
 type CreatePaymentIntentRequest struct {
 	ActorID            uuid.UUID       `json:"actorId"`
@@ -24,8 +30,42 @@ type CreatePaymentIntentRequest struct {
 	ExpiresAt          *time.Time      `json:"expiresAt,omitempty"`
 	IdempotencyKey     string          `json:"idempotencyKey,omitempty"`
 	SourceSnapshot     json.RawMessage `json:"sourceSnapshot,omitempty"`
-	Metadata           json.RawMessage `json:"metadata,omitempty"`
 }
+
+func (d CreatePaymentIntentRequest) Validate() error {
+	if d.ActorID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidActorID, "actorId is required")
+	}
+	if d.MerchantID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidMerchantID, "merchantId is required")
+	}
+	if d.SourceID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidSourceID, "sourceId is required")
+	}
+	if d.SourceService == "" {
+		return failure.WithCode(shared.ErrInvalidSourceService, "sourceService is required")
+	}
+	if d.SourceType == "" {
+		return failure.WithCode(shared.ErrInvalidSourceType, "sourceType is required")
+	}
+	if d.Amount.LessThanOrEqual(decimal.Zero) {
+		return failure.WithCode(shared.ErrInvalidAmount, "amount must be positive")
+	}
+	if d.Currency == "" {
+		return failure.WithCode(shared.ErrInvalidCurrency, "currency is required")
+	}
+	if d.ExpiresAt != nil && !d.ExpiresAt.After(time.Now().UTC()) {
+		return failure.WithCode(shared.ErrInvalidExpiryDate, "expiresAt must be in the future")
+	}
+	if len(d.SourceSnapshot) > 0 && !json.Valid(d.SourceSnapshot) {
+		return failure.WithCode(shared.ErrInvalidMetadata, "sourceSnapshot must contain valid JSON")
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// CreateRefundRequest
+// ---------------------------------------------------------------------------
 
 type CreateRefundRequest struct {
 	ActorID          uuid.UUID       `json:"actorId"`
@@ -35,8 +75,24 @@ type CreateRefundRequest struct {
 	Currency         string          `json:"currency"`
 	Reason           string          `json:"reason"`
 	IdempotencyKey   string          `json:"idempotencyKey,omitempty"`
-	Metadata         json.RawMessage `json:"metadata,omitempty"`
 }
+
+func (d CreateRefundRequest) Validate() error {
+	if d.ActorID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidActorID, "actorId is required")
+	}
+	if d.PaymentIntentID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidID, "paymentIntentId is required")
+	}
+	if d.Amount.LessThanOrEqual(decimal.Zero) {
+		return failure.WithCode(shared.ErrInvalidAmount, "refund amount must be positive")
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// OpenCashSessionRequest
+// ---------------------------------------------------------------------------
 
 type OpenCashSessionRequest struct {
 	ActorID            uuid.UUID       `json:"actorId"`
@@ -46,11 +102,31 @@ type OpenCashSessionRequest struct {
 	OpeningFloatAmount decimal.Decimal `json:"openingFloatAmount"`
 	Currency           string          `json:"currency"`
 	Notes              string          `json:"notes,omitempty"`
-	Metadata           json.RawMessage `json:"metadata,omitempty"`
 }
 
-// ActionCommand contains audit data and action-specific values. Callers cannot
-// submit an arbitrary status; each aggregate controls its allowed transitions.
+func (d OpenCashSessionRequest) Validate() error {
+	if d.ActorID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidActorID, "actorId is required")
+	}
+	if d.MerchantID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidMerchantID, "merchantId is required")
+	}
+	if d.CollectorID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidCollectorID, "collectorId is required")
+	}
+	if d.OpeningFloatAmount.IsNegative() {
+		return failure.WithCode(shared.ErrInvalidAmount, "openingFloatAmount cannot be negative")
+	}
+	if d.Currency == "" {
+		return failure.WithCode(shared.ErrInvalidCurrency, "currency is required")
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// ActionCommand
+// ---------------------------------------------------------------------------
+
 type ActionCommand struct {
 	ActorID        uuid.UUID       `json:"actorId"`
 	Reason         string          `json:"reason,omitempty"`
@@ -59,6 +135,17 @@ type ActionCommand struct {
 	FailureMessage string          `json:"failureMessage,omitempty"`
 	Amount         decimal.Decimal `json:"amount,omitempty"`
 }
+
+func (d ActionCommand) Validate() error {
+	if d.ActorID == uuid.Nil {
+		return failure.WithCode(shared.ErrInvalidActorID, "actorId is required")
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// Webhook / Routing DTOs
+// ---------------------------------------------------------------------------
 
 type WebhookReceipt struct {
 	Provider       string    `json:"provider"`

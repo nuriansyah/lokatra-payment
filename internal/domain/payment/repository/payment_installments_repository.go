@@ -51,8 +51,6 @@ func composeInsertFieldsAndParamsPaymentInstallments(paymentInstallmentsList []m
 				args = append(args, paymentInstallments.PaidAt)
 			case selectField.OverdueAt():
 				args = append(args, paymentInstallments.OverdueAt)
-			case selectField.Metadata():
-				args = append(args, paymentInstallments.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentInstallments.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -165,10 +163,6 @@ func (ss PaymentInstallmentsSelectFields) OverdueAt() PaymentInstallmentsField {
 	return PaymentInstallmentsField("overdue_at")
 }
 
-func (ss PaymentInstallmentsSelectFields) Metadata() PaymentInstallmentsField {
-	return PaymentInstallmentsField("metadata")
-}
-
 func (ss PaymentInstallmentsSelectFields) MetaCreatedAt() PaymentInstallmentsField {
 	return PaymentInstallmentsField("meta_created_at")
 }
@@ -206,7 +200,6 @@ func (ss PaymentInstallmentsSelectFields) All() PaymentInstallmentsFieldList {
 		ss.Status(),
 		ss.PaidAt(),
 		ss.OverdueAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -266,7 +259,6 @@ func defaultPaymentInstallmentsUpdateFields(paymentInstallments model.PaymentIns
 		NewPaymentInstallmentsUpdateField(selectFields.Status(), paymentInstallments.Status),
 		NewPaymentInstallmentsUpdateField(selectFields.PaidAt(), paymentInstallments.PaidAt),
 		NewPaymentInstallmentsUpdateField(selectFields.OverdueAt(), paymentInstallments.OverdueAt),
-		NewPaymentInstallmentsUpdateField(selectFields.Metadata(), paymentInstallments.Metadata),
 		NewPaymentInstallmentsUpdateField(selectFields.MetaCreatedAt(), paymentInstallments.MetaCreatedAt),
 		NewPaymentInstallmentsUpdateField(selectFields.MetaCreatedBy(), paymentInstallments.MetaCreatedBy),
 		NewPaymentInstallmentsUpdateField(selectFields.MetaUpdatedAt(), paymentInstallments.MetaUpdatedAt),
@@ -593,9 +585,6 @@ func GetPaymentInstallmentsFieldType(paymentInstallmentsField PaymentInstallment
 
 	case selectPaymentInstallmentsFields.OverdueAt():
 		return "timestamptz"
-
-	case selectPaymentInstallmentsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentInstallmentsFields.MetaCreatedAt():
 		return "timestamptz"

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -26,7 +25,6 @@ type paymentPlansDBFieldName struct {
 	DefaultGracePeriodSeconds PaymentPlansDBFieldNameType
 	CompletedAt               PaymentPlansDBFieldNameType
 	CanceledAt                PaymentPlansDBFieldNameType
-	Metadata                  PaymentPlansDBFieldNameType
 	MetaCreatedAt             PaymentPlansDBFieldNameType
 	MetaCreatedBy             PaymentPlansDBFieldNameType
 	MetaUpdatedAt             PaymentPlansDBFieldNameType
@@ -48,7 +46,6 @@ var PaymentPlansDBFieldName = paymentPlansDBFieldName{
 	DefaultGracePeriodSeconds: "default_grace_period_seconds",
 	CompletedAt:               "completed_at",
 	CanceledAt:                "canceled_at",
-	Metadata:                  "metadata",
 	MetaCreatedAt:             "meta_created_at",
 	MetaCreatedBy:             "meta_created_by",
 	MetaUpdatedAt:             "meta_updated_at",
@@ -95,9 +92,6 @@ func NewPaymentPlansDBFieldNameFromStr(field string) (dbField PaymentPlansDBFiel
 
 	case string(PaymentPlansDBFieldName.CanceledAt):
 		return PaymentPlansDBFieldName.CanceledAt, true
-
-	case string(PaymentPlansDBFieldName.Metadata):
-		return PaymentPlansDBFieldName.Metadata, true
 
 	case string(PaymentPlansDBFieldName.MetaCreatedAt):
 		return PaymentPlansDBFieldName.MetaCreatedAt, true
@@ -228,15 +222,6 @@ var PaymentPlansFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "canceledAt",
 		Column:            "canceled_at",
 		SQLAlias:          "canceled_at",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -384,7 +369,6 @@ type PaymentPlans struct {
 	DefaultGracePeriodSeconds int                 `db:"default_grace_period_seconds"`
 	CompletedAt               null.Time           `db:"completed_at"`
 	CanceledAt                null.Time           `db:"canceled_at"`
-	Metadata                  json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

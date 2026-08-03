@@ -33,7 +33,6 @@ type idempotencyKeysDTOFieldName struct {
 	ResponseBody   IdempotencyKeysDTOFieldNameType
 	LockedUntil    IdempotencyKeysDTOFieldNameType
 	CompletedAt    IdempotencyKeysDTOFieldNameType
-	Metadata       IdempotencyKeysDTOFieldNameType
 	MetaCreatedAt  IdempotencyKeysDTOFieldNameType
 	MetaCreatedBy  IdempotencyKeysDTOFieldNameType
 	MetaUpdatedAt  IdempotencyKeysDTOFieldNameType
@@ -55,7 +54,6 @@ var IdempotencyKeysDTOFieldName = idempotencyKeysDTOFieldName{
 	ResponseBody:   "responseBody",
 	LockedUntil:    "lockedUntil",
 	CompletedAt:    "completedAt",
-	Metadata:       "metadata",
 	MetaCreatedAt:  "metaCreatedAt",
 	MetaCreatedBy:  "metaCreatedBy",
 	MetaUpdatedAt:  "metaUpdatedAt",
@@ -103,9 +101,6 @@ func transformIdempotencyKeysDTOFieldNameFromStr(field string) (dbField string, 
 	case string(IdempotencyKeysDTOFieldName.CompletedAt):
 		return string(model.IdempotencyKeysDBFieldName.CompletedAt), true
 
-	case string(IdempotencyKeysDTOFieldName.Metadata):
-		return string(model.IdempotencyKeysDBFieldName.Metadata), true
-
 	case string(IdempotencyKeysDTOFieldName.MetaCreatedAt):
 		return string(model.IdempotencyKeysDBFieldName.MetaCreatedAt), true
 
@@ -117,12 +112,6 @@ func transformIdempotencyKeysDTOFieldNameFromStr(field string) (dbField string, 
 
 	case string(IdempotencyKeysDTOFieldName.MetaUpdatedBy):
 		return string(model.IdempotencyKeysDBFieldName.MetaUpdatedBy), true
-
-	case string(IdempotencyKeysDTOFieldName.MetaDeletedAt):
-		return string(model.IdempotencyKeysDBFieldName.MetaDeletedAt), true
-
-	case string(IdempotencyKeysDTOFieldName.MetaDeletedBy):
-		return string(model.IdempotencyKeysDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewIdempotencyKeysFilterFieldSpecFromStr(field); found {
@@ -299,7 +288,6 @@ func NewIdempotencyKeysSelectableResponse(idempotencyKeys model.IdempotencyKeys,
 			string(model.IdempotencyKeysDBFieldName.ResponseBody),
 			string(model.IdempotencyKeysDBFieldName.LockedUntil),
 			string(model.IdempotencyKeysDBFieldName.CompletedAt),
-			string(model.IdempotencyKeysDBFieldName.Metadata),
 			string(model.IdempotencyKeysDBFieldName.MetaCreatedAt),
 			string(model.IdempotencyKeysDBFieldName.MetaCreatedBy),
 			string(model.IdempotencyKeysDBFieldName.MetaUpdatedAt),
@@ -396,13 +384,6 @@ func NewIdempotencyKeysSelectableResponse(idempotencyKeys model.IdempotencyKeys,
 				key = outputField
 			}
 			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.CompletedAt.Time, explicitAlias)
-
-		case string(model.IdempotencyKeysDBFieldName.Metadata):
-			key := string(IdempotencyKeysDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setIdempotencyKeysSelectableValue(idempotencyKeysSelectableResponse, key, idempotencyKeys.Metadata, explicitAlias)
 
 		case string(model.IdempotencyKeysDBFieldName.MetaCreatedAt):
 			key := string(IdempotencyKeysDTOFieldName.MetaCreatedAt)
@@ -528,7 +509,6 @@ type IdempotencyKeysCreateRequest struct {
 	ResponseBody   json.RawMessage         `json:"responseBody"`
 	LockedUntil    time.Time               `json:"lockedUntil"`
 	CompletedAt    time.Time               `json:"completedAt"`
-	Metadata       json.RawMessage         `json:"metadata"`
 }
 
 func (d *IdempotencyKeysCreateRequest) Validate() (err error) {
@@ -551,7 +531,6 @@ func (d *IdempotencyKeysCreateRequest) ToModel() model.IdempotencyKeys {
 		ResponseBody:   d.ResponseBody,
 		LockedUntil:    null.TimeFrom(d.LockedUntil),
 		CompletedAt:    null.TimeFrom(d.CompletedAt),
-		Metadata:       d.Metadata,
 	}
 }
 
@@ -588,7 +567,6 @@ type IdempotencyKeysUpdateRequest struct {
 	ResponseBody   json.RawMessage         `json:"responseBody"`
 	LockedUntil    time.Time               `json:"lockedUntil"`
 	CompletedAt    time.Time               `json:"completedAt"`
-	Metadata       json.RawMessage         `json:"metadata"`
 }
 
 func (d *IdempotencyKeysUpdateRequest) Validate() (err error) {
@@ -609,7 +587,6 @@ func (d IdempotencyKeysUpdateRequest) ToModel() model.IdempotencyKeys {
 		ResponseBody:   d.ResponseBody,
 		LockedUntil:    null.TimeFrom(d.LockedUntil),
 		CompletedAt:    null.TimeFrom(d.CompletedAt),
-		Metadata:       d.Metadata,
 	}
 }
 
@@ -626,7 +603,6 @@ type IdempotencyKeysBulkUpdateRequest struct {
 	ResponseBody   json.RawMessage         `json:"responseBody"`
 	LockedUntil    time.Time               `json:"lockedUntil"`
 	CompletedAt    time.Time               `json:"completedAt"`
-	Metadata       json.RawMessage         `json:"metadata"`
 }
 
 func (d IdempotencyKeysBulkUpdateRequest) PrimaryID() IdempotencyKeysPrimaryID {
@@ -662,7 +638,6 @@ func (d IdempotencyKeysBulkUpdateRequest) ToModel() model.IdempotencyKeys {
 		ResponseBody:   d.ResponseBody,
 		LockedUntil:    null.TimeFrom(d.LockedUntil),
 		CompletedAt:    null.TimeFrom(d.CompletedAt),
-		Metadata:       d.Metadata,
 	}
 }
 
@@ -679,7 +654,6 @@ type IdempotencyKeysResponse struct {
 	ResponseBody   json.RawMessage         `json:"responseBody" validate:"required" swaggertype:"object"`
 	LockedUntil    time.Time               `json:"lockedUntil" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	CompletedAt    time.Time               `json:"completedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata       json.RawMessage         `json:"metadata" swaggertype:"object"`
 }
 
 func NewIdempotencyKeysResponse(idempotencyKeys model.IdempotencyKeys) IdempotencyKeysResponse {
@@ -696,7 +670,6 @@ func NewIdempotencyKeysResponse(idempotencyKeys model.IdempotencyKeys) Idempoten
 		ResponseBody:   idempotencyKeys.ResponseBody,
 		LockedUntil:    idempotencyKeys.LockedUntil.Time,
 		CompletedAt:    idempotencyKeys.CompletedAt.Time,
-		Metadata:       idempotencyKeys.Metadata,
 	}
 }
 

@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsIdempotencyKeys(idempotencyKeysList []model.Ide
 				args = append(args, idempotencyKeys.LockedUntil)
 			case selectField.CompletedAt():
 				args = append(args, idempotencyKeys.CompletedAt)
-			case selectField.Metadata():
-				args = append(args, idempotencyKeys.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, idempotencyKeys.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss IdempotencyKeysSelectFields) CompletedAt() IdempotencyKeysField {
 	return IdempotencyKeysField("completed_at")
 }
 
-func (ss IdempotencyKeysSelectFields) Metadata() IdempotencyKeysField {
-	return IdempotencyKeysField("metadata")
-}
-
 func (ss IdempotencyKeysSelectFields) MetaCreatedAt() IdempotencyKeysField {
 	return IdempotencyKeysField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss IdempotencyKeysSelectFields) All() IdempotencyKeysFieldList {
 		ss.ResponseBody(),
 		ss.LockedUntil(),
 		ss.CompletedAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultIdempotencyKeysUpdateFields(idempotencyKeys model.IdempotencyKeys) (
 		NewIdempotencyKeysUpdateField(selectFields.ResponseBody(), idempotencyKeys.ResponseBody),
 		NewIdempotencyKeysUpdateField(selectFields.LockedUntil(), idempotencyKeys.LockedUntil),
 		NewIdempotencyKeysUpdateField(selectFields.CompletedAt(), idempotencyKeys.CompletedAt),
-		NewIdempotencyKeysUpdateField(selectFields.Metadata(), idempotencyKeys.Metadata),
 		NewIdempotencyKeysUpdateField(selectFields.MetaCreatedAt(), idempotencyKeys.MetaCreatedAt),
 		NewIdempotencyKeysUpdateField(selectFields.MetaCreatedBy(), idempotencyKeys.MetaCreatedBy),
 		NewIdempotencyKeysUpdateField(selectFields.MetaUpdatedAt(), idempotencyKeys.MetaUpdatedAt),
@@ -604,9 +596,6 @@ func GetIdempotencyKeysFieldType(idempotencyKeysField IdempotencyKeysField) stri
 
 	case selectIdempotencyKeysFields.CompletedAt():
 		return "timestamptz"
-
-	case selectIdempotencyKeysFields.Metadata():
-		return "jsonb"
 
 	case selectIdempotencyKeysFields.MetaCreatedAt():
 		return "timestamptz"

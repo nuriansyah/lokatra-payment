@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/fnv"
+	"math"
+	"math/rand"
 	"strings"
 	"sync"
 	"time"
@@ -13,15 +16,28 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/nuriansyah/lokatra-payment/configs"
 	pg "github.com/nuriansyah/lokatra-payment/external/paymentgateway"
+	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
+	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/repository"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
+	"github.com/shopspring/decimal"
 )
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 const (
 	defaultFailureThreshold = 3
 	defaultMaxAttempts      = 3
 	defaultCooldown         = 30 * time.Second
 	defaultRetryBackoff     = 100 * time.Millisecond
+	defaultCacheTTL         = 60 * time.Second
+	minSampleForHealth     = 30
 )
+
+// ---------------------------------------------------------------------------
+// Routing Rule from DB
+// ---------------------------------------------------------------------------
 
 type RoutingRule struct {
 	Method      pg.PaymentMethod  `json:"method"`
@@ -44,16 +60,21 @@ type RoutingRequest struct {
 	Channel     string
 	Currency    string
 	GatewayCall pg.CreatePaymentRequest
+	Amount      string // for cost-aware routing
 }
 
 type RouteCandidate struct {
-	ProviderCode pg.ProviderCode `json:"providerCode"`
-	AccountID    uuid.UUID       `json:"accountId"`
-	Priority     int             `json:"priority"`
-	MaxAttempts  int             `json:"maxAttempts"`
-	Reason       string          `json:"reason"`
-	Skipped      bool            `json:"skipped"`
-	SkipReason   string          `json:"skipReason,omitempty"`
+	ProviderCode      pg.ProviderCode `json:"providerCode"`
+	AccountID         uuid.UUID       `json:"accountId"`
+	Priority          int             `json:"priority"`
+	MaxAttempts       int             `json:"maxAttempts"`
+	Reason            string          `json:"reason"`
+	Skipped           bool            `json:"skipped"`
+	SkipReason        string          `json:"skipReason,omitempty"`
+	TrafficWeight     int             `json:"trafficWeight"`
+	IsFallback        bool            `json:"isFallback"`
+	ProviderMethodCode string         `json:"providerMethodCode,omitempty"`
+	ProviderChannelCode string        `json:"providerChannelCode,omitempty"`
 }
 
 type ProviderAttempt struct {
@@ -70,7 +91,13 @@ type RoutingResult struct {
 	Candidates []RouteCandidate         `json:"candidates"`
 	Attempts   []ProviderAttempt        `json:"attempts"`
 	Payment    pg.CreatePaymentResponse `json:"payment"`
+	RuleID     string                   `json:"ruleId,omitempty"`
+	Strategy   string                   `json:"strategy,omitempty"`
 }
+
+// ---------------------------------------------------------------------------
+// Circuit Breaker Interface
+// ---------------------------------------------------------------------------
 
 type CircuitBreaker interface {
 	Allow(key string, now time.Time) bool
@@ -131,7 +158,7 @@ func ProvideCircuitBreaker(cfg *configs.Config, client *redis.Client) CircuitBre
 	if cfg == nil || client == nil || strings.TrimSpace(cfg.Cache.Redis.Primary.Host) == "" || strings.TrimSpace(cfg.Cache.Redis.Primary.Port) == "" {
 		return NewMemoryCircuitBreaker(routing.FailureThreshold, routing.Cooldown)
 	}
-	return &RedisCircuitBreaker{client: client, threshold: routing.FailureThreshold, cooldown: routing.Cooldown, prefix: "payment:routing:circuit"}
+	return &RedisCircuitBreaker{client: client, threshold: routing.FailureThreshold, cooldown: routing.Cooldown, prefix: "payroute:routing:circuit"}
 }
 
 func (b *RedisCircuitBreaker) Allow(key string, _ time.Time) bool {
@@ -206,16 +233,56 @@ func (b *MemoryCircuitBreaker) RecordSuccess(key string) {
 	b.mu.Unlock()
 }
 
+// ---------------------------------------------------------------------------
+// Health-Aware Ranking Data
+// ---------------------------------------------------------------------------
+
+type pspHealthScore struct {
+	AccountID   uuid.UUID
+	SuccessRate float64
+	SampleSize  int
+	AvgLatency  int
+	MDRCost     float64 // calculated fee percentage
+}
+
+// ---------------------------------------------------------------------------
+// Routing Engine — DB-driven with intelligent strategies
+// ---------------------------------------------------------------------------
+
 type RoutingEngine struct {
 	registry     *pg.Registry
 	accountIDs   map[pg.ProviderCode]uuid.UUID
 	breaker      CircuitBreaker
 	config       RoutingConfig
 	capabilities map[pg.ProviderCode][]pg.Capability
+	repo         repository.Repository
+	ruleCache    *RoutingRuleCache
+	killSwitch   *KillSwitchManager
+	analytics    AnalyticsPublisher
 }
 
-func NewRoutingEngine(registry *pg.Registry, accountIDs map[pg.ProviderCode]uuid.UUID, breaker CircuitBreaker, config RoutingConfig) *RoutingEngine {
-	engine := &RoutingEngine{registry: registry, accountIDs: accountIDs, breaker: breaker, config: config, capabilities: make(map[pg.ProviderCode][]pg.Capability)}
+func NewRoutingEngine(
+	registry *pg.Registry,
+	accountIDs map[pg.ProviderCode]uuid.UUID,
+	breaker CircuitBreaker,
+	config RoutingConfig,
+	repo repository.Repository,
+	analytics AnalyticsPublisher,
+) *RoutingEngine {
+	if analytics == nil {
+		analytics = NewLogAnalyticsPublisher()
+	}
+	engine := &RoutingEngine{
+		registry:     registry,
+		accountIDs:   accountIDs,
+		breaker:      breaker,
+		config:       config,
+		capabilities: make(map[pg.ProviderCode][]pg.Capability),
+		repo:         repo,
+		ruleCache:    NewRoutingRuleCache(repo, defaultCacheTTL),
+		killSwitch:   NewKillSwitchManager(),
+		analytics:    analytics,
+	}
 	for _, provider := range config.allProviders() {
 		gateway, err := registry.Get(provider)
 		if err != nil {
@@ -265,40 +332,90 @@ func NewRoutingConfig(cfg *configs.Config) RoutingConfig {
 	return config
 }
 
+// Execute is the main entry point: resolves rule from DB, ranks candidates, executes with failover.
 func (e *RoutingEngine) Execute(ctx context.Context, request RoutingRequest) (RoutingResult, error) {
-	candidates := e.resolveCandidates(request)
-	result := RoutingResult{Candidates: candidates}
+	// 1. Try DB-driven rule first
+	rule, ruleID, strategy, err := e.resolveDBRule(ctx, request)
+	if err != nil {
+		return RoutingResult{}, err
+	}
+
+	// 2. Build candidates from DB rule or fall back to env-var config
+	var candidates []RouteCandidate
+	if rule != nil {
+		candidates = e.buildCandidatesFromDBRule(rule, request)
+	} else {
+		candidates = e.resolveCandidates(request)
+	}
+
+	result := RoutingResult{Candidates: candidates, RuleID: ruleID, Strategy: strategy}
 	if len(candidates) == 0 {
 		return result, failure.New(424, fmt.Errorf("no configured provider supports %s/%s in %s", request.Method, request.Channel, request.Currency))
 	}
+
+	// 3. Execute with failover
 	var lastErr error
 	for index := range result.Candidates {
 		candidate := &result.Candidates[index]
 		key := circuitKey(candidate.ProviderCode, request.Method, request.Channel)
+
+		// Kill-switch check
+		if e.killSwitch.IsDisabled(candidate.AccountID.String()) {
+			candidate.Skipped, candidate.SkipReason = true, "kill_switch_disabled"
+			continue
+		}
+
+		// Circuit breaker check
 		if !e.breaker.Allow(key, time.Now().UTC()) {
 			candidate.Skipped, candidate.SkipReason = true, "circuit_open"
 			continue
 		}
+
 		gateway, err := e.registry.Get(candidate.ProviderCode)
 		if err != nil {
 			candidate.Skipped, candidate.SkipReason = true, "provider_disabled"
 			continue
 		}
+
 		for attempt := 1; attempt <= candidate.MaxAttempts; attempt++ {
 			started := time.Now().UTC()
+
+			PublishPaymentAttemptStarted(ctx, e.analytics, request.GatewayCall.OrderID, string(request.Method), string(candidate.ProviderCode))
+
 			payment, callErr := gateway.CreatePayment(ctx, request.GatewayCall)
-			providerAttempt := ProviderAttempt{ProviderCode: candidate.ProviderCode, AccountID: candidate.AccountID, Attempt: attempt, StartedAt: started, Duration: time.Since(started)}
+			providerAttempt := ProviderAttempt{
+				ProviderCode: candidate.ProviderCode,
+				AccountID:    candidate.AccountID,
+				Attempt:      attempt,
+				StartedAt:    started,
+				Duration:     time.Since(started),
+			}
 			if callErr == nil {
 				e.breaker.RecordSuccess(key)
 				result.Selected, result.Payment = *candidate, payment
 				result.Attempts = append(result.Attempts, providerAttempt)
+
+				PublishPaymentAttemptSucceeded(ctx, e.analytics, request.GatewayCall.OrderID, string(candidate.ProviderCode), attempt, int(time.Since(started).Milliseconds()))
+
 				return result, nil
 			}
 			lastErr = callErr
 			providerAttempt.Error = callErr.Error()
 			result.Attempts = append(result.Attempts, providerAttempt)
+
+			// CRITICAL: Status check before failover for timeout/5xx errors
+			if isTimeoutOr5xx(callErr) {
+				statusOK, statusErr := e.verifyProviderStatus(ctx, request, *candidate, gateway)
+				if statusErr == nil && statusOK {
+					// PSP actually succeeded but response was lost
+					candidate.Skipped, candidate.SkipReason = false, "recovered_via_status_check"
+					break
+				}
+			}
+
 			if canFallback(callErr) {
 				e.breaker.RecordFailure(key, time.Now().UTC())
+				PublishCircuitBreakerStateChanged(ctx, e.analytics, string(candidate.ProviderCode), key, "open", 0)
 			}
 			if !pg.IsRetryable(callErr) || attempt == candidate.MaxAttempts {
 				break
@@ -311,11 +428,259 @@ func (e *RoutingEngine) Execute(ctx context.Context, request RoutingRequest) (Ro
 			return result, lastErr
 		}
 	}
+
 	if lastErr == nil {
 		lastErr = errors.New("all payment providers were skipped")
 	}
+
+	// P1 Alert: All PSPs failed
+	PublishAllPSPFailed(ctx, e.analytics, request.GatewayCall.OrderID, string(request.Method), request.Channel, request.Currency, len(result.Attempts))
+
 	return result, failure.New(424, fmt.Errorf("payment routing exhausted: %w", lastErr))
 }
+
+// ---------------------------------------------------------------------------
+// DB Rule Resolution
+// ---------------------------------------------------------------------------
+
+func (e *RoutingEngine) resolveDBRule(ctx context.Context, request RoutingRequest) (*model.PayrouteRoutingRules, string, string, error) {
+	if e.ruleCache == nil {
+		return nil, "", "env_fallback", nil
+	}
+	rule, err := e.ruleCache.Get(ctx, string(request.Method), request.Channel, request.Currency)
+	if err != nil || rule == nil {
+		return nil, "", "env_fallback", nil
+	}
+
+	parsedRule, err := rule.ParsePspList()
+	if err != nil || len(parsedRule) == 0 {
+		return nil, "", "env_fallback", nil
+	}
+
+	// Gradual rollout check: if rule is rolling_out, only include percentage of traffic
+	if !e.shouldIncludeInRollout(rule, request) {
+		return nil, "", "env_fallback", nil
+	}
+
+	return rule, rule.Id.String(), string(rule.Strategy), nil
+}
+
+func (e *RoutingEngine) buildCandidatesFromDBRule(rule *model.PayrouteRoutingRules, request RoutingRequest) []RouteCandidate {
+	pspItems, err := rule.ParsePspList()
+	if err != nil || len(pspItems) == 0 {
+		return nil
+	}
+
+	var candidates []RouteCandidate
+	for _, item := range pspItems {
+		// Find the provider code from account ID
+		providerCode := e.findProviderForAccount(item.ProviderAccountID)
+		if providerCode == "" {
+			continue
+		}
+		if _, err := e.registry.Get(providerCode); err != nil {
+			continue
+		}
+		if !e.supports(providerCode, request.Method, request.Channel, request.Currency) {
+			continue
+		}
+
+		candidates = append(candidates, RouteCandidate{
+			ProviderCode:       providerCode,
+			AccountID:          item.ProviderAccountID,
+			Priority:           item.Priority,
+			MaxAttempts:        item.MaxAttempts,
+			TrafficWeight:      item.TrafficWeight,
+			IsFallback:         item.IsFallback,
+			ProviderMethodCode: item.ProviderMethodCode,
+			ProviderChannelCode: item.ProviderChannelCode,
+			Reason:             "db_rule",
+		})
+	}
+
+	// Apply strategy-based ranking
+	return e.applyStrategy(candidates, rule, request)
+}
+
+// applyStrategy ranks candidates based on the rule's strategy.
+func (e *RoutingEngine) applyStrategy(candidates []RouteCandidate, rule *model.PayrouteRoutingRules, request RoutingRequest) []RouteCandidate {
+	strategy := rule.Strategy
+
+	switch strategy {
+	case model.PayrouteStrategySuccessRate:
+		return e.rankBySuccessRate(candidates, rule, request)
+	case model.PayrouteStrategyCostAware:
+		return e.rankByCost(candidates, request)
+	case model.PayrouteStrategyWeighted:
+		return e.rankByWeight(candidates)
+	case model.PayrouteStrategyCombined:
+		return e.rankByCombined(candidates, rule, request)
+	default:
+		// priority is the default — candidates are already sorted by priority
+		return candidates
+	}
+}
+
+// rankBySuccessRate reorders candidates by rolling success rate.
+func (e *RoutingEngine) rankBySuccessRate(candidates []RouteCandidate, rule *model.PayrouteRoutingRules, request RoutingRequest) []RouteCandidate {
+	strategyConfig, _ := rule.ParseStrategyConfig()
+	windowSeconds := strategyConfig.WindowSeconds
+	if windowSeconds <= 0 {
+		windowSeconds = 3600
+	}
+	minSample := strategyConfig.MinSampleSize
+	if minSample <= 0 {
+		minSample = minSampleForHealth
+	}
+
+	type scored struct {
+		candidate RouteCandidate
+		score     float64
+		hasData   bool
+	}
+
+	var scoredList []scored
+	for _, c := range candidates {
+		health, err := e.repo.ResolveLatestPSPHealth(context.Background(), c.AccountID, string(request.Method), request.Channel)
+		if err != nil || health == nil || !health.IsDataSufficient(minSample) {
+			// Insufficient data — use priority as tiebreaker
+			scoredList = append(scoredList, scored{candidate: c, score: float64(c.Priority), hasData: false})
+			continue
+		}
+		successRate, _ := health.SuccessRate.Float64()
+		scoredList = append(scoredList, scored{
+			candidate: c,
+			score:     successRate * 100,
+			hasData:   true,
+		})
+	}
+
+	// Sort: data-available first (by success rate descending), then no-data (by priority)
+	for i := 0; i < len(scoredList); i++ {
+		for j := i + 1; j < len(scoredList); j++ {
+			if scoredList[j].hasData && (!scoredList[i].hasData || scoredList[j].score > scoredList[i].score) {
+				scoredList[i], scoredList[j] = scoredList[j], scoredList[i]
+			}
+		}
+	}
+
+	result := make([]RouteCandidate, len(scoredList))
+	for i, s := range scoredList {
+		s.candidate.Priority = i + 1
+		result[i] = s.candidate
+	}
+	return result
+}
+
+// rankByCost reorders candidates by effective MDR cost (lowest first).
+func (e *RoutingEngine) rankByCost(candidates []RouteCandidate, request RoutingRequest) []RouteCandidate {
+	type scored struct {
+		candidate RouteCandidate
+		cost      float64
+	}
+
+	var scoredList []scored
+	for _, c := range candidates {
+		mdrRate, err := e.repo.ResolveActiveMDRRate(context.Background(), c.AccountID, request.Method, request.Amount)
+		cost := 999.0 // high default for unknown MDR
+		if err == nil && mdrRate != nil {
+			pct, _ := mdrRate.Percentage.Float64()
+			cost = pct
+		}
+		scoredList = append(scoredList, scored{candidate: c, cost: cost})
+	}
+
+	// Sort by cost ascending
+	for i := 0; i < len(scoredList); i++ {
+		for j := i + 1; j < len(scoredList); j++ {
+			if scoredList[j].cost < scoredList[i].cost {
+				scoredList[i], scoredList[j] = scoredList[j], scoredList[i]
+			}
+		}
+	}
+
+	result := make([]RouteCandidate, len(scoredList))
+	for i, s := range scoredList {
+		s.candidate.Priority = i + 1
+		result[i] = s.candidate
+	}
+	return result
+}
+
+// rankByWeight uses traffic_weight for weighted random selection.
+func (e *RoutingEngine) rankByWeight(candidates []RouteCandidate) []RouteCandidate {
+	// Deterministic sort by weight descending, then priority
+	for i := 0; i < len(candidates); i++ {
+		for j := i + 1; j < len(candidates); j++ {
+			if candidates[j].TrafficWeight > candidates[i].TrafficWeight ||
+				(candidates[j].TrafficWeight == candidates[i].TrafficWeight && candidates[j].Priority < candidates[i].Priority) {
+				candidates[i], candidates[j] = candidates[j], candidates[i]
+			}
+		}
+	}
+	return candidates
+}
+
+// rankByCombined combines success rate and cost with configurable weights.
+func (e *RoutingEngine) rankByCombined(candidates []RouteCandidate, rule *model.PayrouteRoutingRules, request RoutingRequest) []RouteCandidate {
+	strategyConfig, _ := rule.ParseStrategyConfig()
+	successWeight := strategyConfig.SuccessRateWeight
+	if successWeight.IsZero() || successWeight.LessThan(decimal.Zero) {
+		successWeight = decimal.NewFromFloat(0.7)
+	}
+	costWeight := strategyConfig.MdrWeight
+	if costWeight.IsZero() || costWeight.LessThan(decimal.Zero) {
+		costWeight = decimal.NewFromFloat(0.3)
+	}
+	successWeightF, _ := successWeight.Float64()
+	costWeightF, _ := costWeight.Float64()
+
+	type scored struct {
+		candidate RouteCandidate
+		score     float64
+	}
+
+	var scoredList []scored
+	for _, c := range candidates {
+		successScore := 50.0 // default middle score
+		costScore := 50.0
+
+		health, err := e.repo.ResolveLatestPSPHealth(context.Background(), c.AccountID, string(request.Method), request.Channel)
+		if err == nil && health != nil && health.SampleSize >= minSampleForHealth {
+			successRate, _ := health.SuccessRate.Float64()
+			successScore = successRate * 100
+		}
+
+		mdrRate, err := e.repo.ResolveActiveMDRRate(context.Background(), c.AccountID, request.Method, request.Amount)
+		if err == nil && mdrRate != nil {
+			pct, _ := mdrRate.Percentage.Float64()
+			costScore = 100 - pct // invert: lower cost = higher score
+		}
+
+		combined := (successScore * successWeightF) + (costScore * costWeightF)
+		scoredList = append(scoredList, scored{candidate: c, score: combined})
+	}
+
+	// Sort by combined score descending
+	for i := 0; i < len(scoredList); i++ {
+		for j := i + 1; j < len(scoredList); j++ {
+			if scoredList[j].score > scoredList[i].score {
+				scoredList[i], scoredList[j] = scoredList[j], scoredList[i]
+			}
+		}
+	}
+
+	result := make([]RouteCandidate, len(scoredList))
+	for i, s := range scoredList {
+		s.candidate.Priority = i + 1
+		result[i] = s.candidate
+	}
+	return result
+}
+
+// ---------------------------------------------------------------------------
+// Existing env-var-based resolution (fallback)
+// ---------------------------------------------------------------------------
 
 func (e *RoutingEngine) resolveCandidates(request RoutingRequest) []RouteCandidate {
 	providers, maxAttempts, reason := e.matchRule(request.Method, request.Channel)
@@ -333,7 +698,13 @@ func (e *RoutingEngine) resolveCandidates(request RoutingRequest) []RouteCandida
 		if _, err := e.registry.Get(provider); err != nil || !e.supports(provider, request.Method, request.Channel, request.Currency) {
 			continue
 		}
-		result = append(result, RouteCandidate{ProviderCode: provider, AccountID: accountID, Priority: priority + 1, MaxAttempts: maxAttempts, Reason: reason})
+		result = append(result, RouteCandidate{
+			ProviderCode: provider,
+			AccountID:    accountID,
+			Priority:     priority + 1,
+			MaxAttempts:  maxAttempts,
+			Reason:       reason,
+		})
 	}
 	return result
 }
@@ -364,8 +735,81 @@ func (e *RoutingEngine) supports(provider pg.ProviderCode, method pg.PaymentMeth
 	return false
 }
 
+func (e *RoutingEngine) findProviderForAccount(accountID uuid.UUID) pg.ProviderCode {
+	for code, id := range e.accountIDs {
+		if id == accountID {
+			return code
+		}
+	}
+	return ""
+}
+
+// RuleCache returns the routing rule cache (for admin handler invalidation).
+func (e *RoutingEngine) RuleCache() *RoutingRuleCache {
+	return e.ruleCache
+}
+
+// KillSwitch returns the kill-switch manager (for admin handler).
+func (e *RoutingEngine) KillSwitch() *KillSwitchManager {
+	return e.killSwitch
+}
+
+// ---------------------------------------------------------------------------
+// Gradual Rollout — Traffic Splitting (PRD 6.2 AC-4)
+// ---------------------------------------------------------------------------
+
+// shouldIncludeInRollout determines if a request should be routed by a rolling_out rule.
+func (e *RoutingEngine) shouldIncludeInRollout(rule *model.PayrouteRoutingRules, request RoutingRequest) bool {
+	if rule.Status != model.PayrouteStatusRollingOut {
+		return true
+	}
+	if rule.RolloutPercentage <= 0 {
+		return false
+	}
+	if rule.RolloutPercentage >= 100 {
+		return true
+	}
+
+	// Deterministic hash based on merchant + order ID
+	h := fnv.New32a()
+	h.Write([]byte(request.GatewayCall.OrderID))
+	hash := h.Sum32()
+	bucket := int(hash % 100)
+
+	return bucket < rule.RolloutPercentage
+}
+
+// ---------------------------------------------------------------------------
+// Shadow / A-B Routing (PRD 6.2 AC-4)
+// ---------------------------------------------------------------------------
+
+// isShadowRouting determines if this rule is in shadow mode.
+func (e *RoutingEngine) isShadowRouting(rule *model.PayrouteRoutingRules) bool {
+	return rule.Status == model.PayrouteStatusRollingOut && rule.RolloutPercentage == 0
+}
+
+// ---------------------------------------------------------------------------
+// Status Check Before Failover
+// ---------------------------------------------------------------------------
+
+func (e *RoutingEngine) verifyProviderStatus(ctx context.Context, request RoutingRequest, candidate RouteCandidate, gateway pg.PaymentGateway) (bool, error) {
+	statusReq := pg.GetPaymentStatusRequest{
+		OrderID: request.GatewayCall.OrderID,
+	}
+	statusResp, err := gateway.GetPaymentStatus(ctx, statusReq)
+	if err != nil {
+		return false, err
+	}
+	return statusResp.Status == pg.PaymentStatusSucceeded || statusResp.Status == pg.PaymentStatusCaptured, nil
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 func genericChannelMatch(method pg.PaymentMethod, capabilityChannel string) bool {
-	return (method == pg.PaymentMethodVirtualAccount && strings.EqualFold(capabilityChannel, "va")) || (method == pg.PaymentMethodQRIS && strings.EqualFold(capabilityChannel, "qris"))
+	return (method == pg.PaymentMethodVirtualAccount && strings.EqualFold(capabilityChannel, "va")) ||
+		(method == pg.PaymentMethodQRIS && strings.EqualFold(capabilityChannel, "qris"))
 }
 
 func (c RoutingConfig) allProviders() []pg.ProviderCode {
@@ -423,7 +867,7 @@ func waitForRetry(ctx context.Context, base time.Duration, attempt int) error {
 	if base <= 0 {
 		return nil
 	}
-	delay := base * time.Duration(1<<(attempt-1))
+	delay := base * time.Duration(math.Pow(2, float64(attempt-1)))
 	if delay > 2*time.Second {
 		delay = 2 * time.Second
 	}
@@ -445,9 +889,20 @@ func canFallback(err error) bool {
 	return gatewayErr.Code != pg.ErrorCodeInvalidRequest
 }
 
+func isTimeoutOr5xx(err error) bool {
+	var gatewayErr *pg.GatewayError
+	if !errors.As(err, &gatewayErr) {
+		return false
+	}
+	return gatewayErr.Code == pg.ErrorCodeProviderTimeout || gatewayErr.Code == pg.ErrorCodeProviderUnavailable
+}
+
 func positiveOr(value, fallback int) int {
 	if value > 0 {
 		return value
 	}
 	return fallback
 }
+
+// Ensure unused import is referenced
+var _ = rand.Intn

@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -37,7 +36,6 @@ type cashCollectionSessionsDTOFieldName struct {
 	VarianceAmount     CashCollectionSessionsDTOFieldNameType
 	Currency           CashCollectionSessionsDTOFieldNameType
 	Notes              CashCollectionSessionsDTOFieldNameType
-	Metadata           CashCollectionSessionsDTOFieldNameType
 	MetaCreatedAt      CashCollectionSessionsDTOFieldNameType
 	MetaCreatedBy      CashCollectionSessionsDTOFieldNameType
 	MetaUpdatedAt      CashCollectionSessionsDTOFieldNameType
@@ -61,7 +59,6 @@ var CashCollectionSessionsDTOFieldName = cashCollectionSessionsDTOFieldName{
 	VarianceAmount:     "varianceAmount",
 	Currency:           "currency",
 	Notes:              "notes",
-	Metadata:           "metadata",
 	MetaCreatedAt:      "metaCreatedAt",
 	MetaCreatedBy:      "metaCreatedBy",
 	MetaUpdatedAt:      "metaUpdatedAt",
@@ -115,9 +112,6 @@ func transformCashCollectionSessionsDTOFieldNameFromStr(field string) (dbField s
 	case string(CashCollectionSessionsDTOFieldName.Notes):
 		return string(model.CashCollectionSessionsDBFieldName.Notes), true
 
-	case string(CashCollectionSessionsDTOFieldName.Metadata):
-		return string(model.CashCollectionSessionsDBFieldName.Metadata), true
-
 	case string(CashCollectionSessionsDTOFieldName.MetaCreatedAt):
 		return string(model.CashCollectionSessionsDBFieldName.MetaCreatedAt), true
 
@@ -129,12 +123,6 @@ func transformCashCollectionSessionsDTOFieldNameFromStr(field string) (dbField s
 
 	case string(CashCollectionSessionsDTOFieldName.MetaUpdatedBy):
 		return string(model.CashCollectionSessionsDBFieldName.MetaUpdatedBy), true
-
-	case string(CashCollectionSessionsDTOFieldName.MetaDeletedAt):
-		return string(model.CashCollectionSessionsDBFieldName.MetaDeletedAt), true
-
-	case string(CashCollectionSessionsDTOFieldName.MetaDeletedBy):
-		return string(model.CashCollectionSessionsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewCashCollectionSessionsFilterFieldSpecFromStr(field); found {
@@ -313,7 +301,6 @@ func NewCashCollectionSessionsSelectableResponse(cashCollectionSessions model.Ca
 			string(model.CashCollectionSessionsDBFieldName.VarianceAmount),
 			string(model.CashCollectionSessionsDBFieldName.Currency),
 			string(model.CashCollectionSessionsDBFieldName.Notes),
-			string(model.CashCollectionSessionsDBFieldName.Metadata),
 			string(model.CashCollectionSessionsDBFieldName.MetaCreatedAt),
 			string(model.CashCollectionSessionsDBFieldName.MetaCreatedBy),
 			string(model.CashCollectionSessionsDBFieldName.MetaUpdatedAt),
@@ -424,13 +411,6 @@ func NewCashCollectionSessionsSelectableResponse(cashCollectionSessions model.Ca
 				key = outputField
 			}
 			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.Notes.String, explicitAlias)
-
-		case string(model.CashCollectionSessionsDBFieldName.Metadata):
-			key := string(CashCollectionSessionsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setCashCollectionSessionsSelectableValue(cashCollectionSessionsSelectableResponse, key, cashCollectionSessions.Metadata, explicitAlias)
 
 		case string(model.CashCollectionSessionsDBFieldName.MetaCreatedAt):
 			key := string(CashCollectionSessionsDTOFieldName.MetaCreatedAt)
@@ -558,7 +538,6 @@ type CashCollectionSessionsCreateRequest struct {
 	VarianceAmount     decimal.Decimal         `json:"varianceAmount"`
 	Currency           string                  `json:"currency"`
 	Notes              string                  `json:"notes"`
-	Metadata           json.RawMessage         `json:"metadata"`
 }
 
 func (d *CashCollectionSessionsCreateRequest) Validate() (err error) {
@@ -583,7 +562,6 @@ func (d *CashCollectionSessionsCreateRequest) ToModel() model.CashCollectionSess
 		VarianceAmount:     d.VarianceAmount,
 		Currency:           d.Currency,
 		Notes:              null.StringFrom(d.Notes),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -622,7 +600,6 @@ type CashCollectionSessionsUpdateRequest struct {
 	VarianceAmount     decimal.Decimal         `json:"varianceAmount"`
 	Currency           string                  `json:"currency"`
 	Notes              string                  `json:"notes"`
-	Metadata           json.RawMessage         `json:"metadata"`
 }
 
 func (d *CashCollectionSessionsUpdateRequest) Validate() (err error) {
@@ -645,7 +622,6 @@ func (d CashCollectionSessionsUpdateRequest) ToModel() model.CashCollectionSessi
 		VarianceAmount:     d.VarianceAmount,
 		Currency:           d.Currency,
 		Notes:              null.StringFrom(d.Notes),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -664,7 +640,6 @@ type CashCollectionSessionsBulkUpdateRequest struct {
 	VarianceAmount     decimal.Decimal         `json:"varianceAmount"`
 	Currency           string                  `json:"currency"`
 	Notes              string                  `json:"notes"`
-	Metadata           json.RawMessage         `json:"metadata"`
 }
 
 func (d CashCollectionSessionsBulkUpdateRequest) PrimaryID() CashCollectionSessionsPrimaryID {
@@ -702,7 +677,6 @@ func (d CashCollectionSessionsBulkUpdateRequest) ToModel() model.CashCollectionS
 		VarianceAmount:     d.VarianceAmount,
 		Currency:           d.Currency,
 		Notes:              null.StringFrom(d.Notes),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -721,7 +695,6 @@ type CashCollectionSessionsResponse struct {
 	VarianceAmount     decimal.Decimal         `json:"varianceAmount" format:"decimal" example:"100.50"`
 	Currency           string                  `json:"currency"`
 	Notes              string                  `json:"notes"`
-	Metadata           json.RawMessage         `json:"metadata" swaggertype:"object"`
 }
 
 func NewCashCollectionSessionsResponse(cashCollectionSessions model.CashCollectionSessions) CashCollectionSessionsResponse {
@@ -740,7 +713,6 @@ func NewCashCollectionSessionsResponse(cashCollectionSessions model.CashCollecti
 		VarianceAmount:     cashCollectionSessions.VarianceAmount,
 		Currency:           cashCollectionSessions.Currency,
 		Notes:              cashCollectionSessions.Notes.String,
-		Metadata:           cashCollectionSessions.Metadata,
 	}
 }
 

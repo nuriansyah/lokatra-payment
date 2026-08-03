@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -33,13 +32,13 @@ type paymentPlansDTOFieldName struct {
 	DefaultGracePeriodSeconds PaymentPlansDTOFieldNameType
 	CompletedAt               PaymentPlansDTOFieldNameType
 	CanceledAt                PaymentPlansDTOFieldNameType
-	Metadata                  PaymentPlansDTOFieldNameType
-	MetaCreatedAt             PaymentPlansDTOFieldNameType
-	MetaCreatedBy             PaymentPlansDTOFieldNameType
-	MetaUpdatedAt             PaymentPlansDTOFieldNameType
-	MetaUpdatedBy             PaymentPlansDTOFieldNameType
-	MetaDeletedAt             PaymentPlansDTOFieldNameType
-	MetaDeletedBy             PaymentPlansDTOFieldNameType
+
+	MetaCreatedAt PaymentPlansDTOFieldNameType
+	MetaCreatedBy PaymentPlansDTOFieldNameType
+	MetaUpdatedAt PaymentPlansDTOFieldNameType
+	MetaUpdatedBy PaymentPlansDTOFieldNameType
+	MetaDeletedAt PaymentPlansDTOFieldNameType
+	MetaDeletedBy PaymentPlansDTOFieldNameType
 }
 
 var PaymentPlansDTOFieldName = paymentPlansDTOFieldName{
@@ -55,13 +54,13 @@ var PaymentPlansDTOFieldName = paymentPlansDTOFieldName{
 	DefaultGracePeriodSeconds: "defaultGracePeriodSeconds",
 	CompletedAt:               "completedAt",
 	CanceledAt:                "canceledAt",
-	Metadata:                  "metadata",
-	MetaCreatedAt:             "metaCreatedAt",
-	MetaCreatedBy:             "metaCreatedBy",
-	MetaUpdatedAt:             "metaUpdatedAt",
-	MetaUpdatedBy:             "metaUpdatedBy",
-	MetaDeletedAt:             "metaDeletedAt",
-	MetaDeletedBy:             "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentPlansDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -103,9 +102,6 @@ func transformPaymentPlansDTOFieldNameFromStr(field string) (dbField string, fou
 	case string(PaymentPlansDTOFieldName.CanceledAt):
 		return string(model.PaymentPlansDBFieldName.CanceledAt), true
 
-	case string(PaymentPlansDTOFieldName.Metadata):
-		return string(model.PaymentPlansDBFieldName.Metadata), true
-
 	case string(PaymentPlansDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentPlansDBFieldName.MetaCreatedAt), true
 
@@ -117,12 +113,6 @@ func transformPaymentPlansDTOFieldNameFromStr(field string) (dbField string, fou
 
 	case string(PaymentPlansDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentPlansDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentPlansDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentPlansDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentPlansDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentPlansDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentPlansFilterFieldSpecFromStr(field); found {
@@ -299,7 +289,6 @@ func NewPaymentPlansSelectableResponse(paymentPlans model.PaymentPlans, filter m
 			string(model.PaymentPlansDBFieldName.DefaultGracePeriodSeconds),
 			string(model.PaymentPlansDBFieldName.CompletedAt),
 			string(model.PaymentPlansDBFieldName.CanceledAt),
-			string(model.PaymentPlansDBFieldName.Metadata),
 			string(model.PaymentPlansDBFieldName.MetaCreatedAt),
 			string(model.PaymentPlansDBFieldName.MetaCreatedBy),
 			string(model.PaymentPlansDBFieldName.MetaUpdatedAt),
@@ -396,13 +385,6 @@ func NewPaymentPlansSelectableResponse(paymentPlans model.PaymentPlans, filter m
 				key = outputField
 			}
 			setPaymentPlansSelectableValue(paymentPlansSelectableResponse, key, paymentPlans.CanceledAt.Time, explicitAlias)
-
-		case string(model.PaymentPlansDBFieldName.Metadata):
-			key := string(PaymentPlansDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentPlansSelectableValue(paymentPlansSelectableResponse, key, paymentPlans.Metadata, explicitAlias)
 
 		case string(model.PaymentPlansDBFieldName.MetaCreatedAt):
 			key := string(PaymentPlansDTOFieldName.MetaCreatedAt)
@@ -528,7 +510,6 @@ type PaymentPlansCreateRequest struct {
 	DefaultGracePeriodSeconds int                     `json:"defaultGracePeriodSeconds"`
 	CompletedAt               time.Time               `json:"completedAt"`
 	CanceledAt                time.Time               `json:"canceledAt"`
-	Metadata                  json.RawMessage         `json:"metadata"`
 }
 
 func (d *PaymentPlansCreateRequest) Validate() (err error) {
@@ -551,7 +532,6 @@ func (d *PaymentPlansCreateRequest) ToModel() model.PaymentPlans {
 		DefaultGracePeriodSeconds: d.DefaultGracePeriodSeconds,
 		CompletedAt:               null.TimeFrom(d.CompletedAt),
 		CanceledAt:                null.TimeFrom(d.CanceledAt),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -588,7 +568,6 @@ type PaymentPlansUpdateRequest struct {
 	DefaultGracePeriodSeconds int                     `json:"defaultGracePeriodSeconds"`
 	CompletedAt               time.Time               `json:"completedAt"`
 	CanceledAt                time.Time               `json:"canceledAt"`
-	Metadata                  json.RawMessage         `json:"metadata"`
 }
 
 func (d *PaymentPlansUpdateRequest) Validate() (err error) {
@@ -609,7 +588,6 @@ func (d PaymentPlansUpdateRequest) ToModel() model.PaymentPlans {
 		DefaultGracePeriodSeconds: d.DefaultGracePeriodSeconds,
 		CompletedAt:               null.TimeFrom(d.CompletedAt),
 		CanceledAt:                null.TimeFrom(d.CanceledAt),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -626,7 +604,6 @@ type PaymentPlansBulkUpdateRequest struct {
 	DefaultGracePeriodSeconds int                     `json:"defaultGracePeriodSeconds"`
 	CompletedAt               time.Time               `json:"completedAt"`
 	CanceledAt                time.Time               `json:"canceledAt"`
-	Metadata                  json.RawMessage         `json:"metadata"`
 }
 
 func (d PaymentPlansBulkUpdateRequest) PrimaryID() PaymentPlansPrimaryID {
@@ -662,7 +639,6 @@ func (d PaymentPlansBulkUpdateRequest) ToModel() model.PaymentPlans {
 		DefaultGracePeriodSeconds: d.DefaultGracePeriodSeconds,
 		CompletedAt:               null.TimeFrom(d.CompletedAt),
 		CanceledAt:                null.TimeFrom(d.CanceledAt),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -679,7 +655,6 @@ type PaymentPlansResponse struct {
 	DefaultGracePeriodSeconds int                     `json:"defaultGracePeriodSeconds" example:"1"`
 	CompletedAt               time.Time               `json:"completedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	CanceledAt                time.Time               `json:"canceledAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata                  json.RawMessage         `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentPlansResponse(paymentPlans model.PaymentPlans) PaymentPlansResponse {
@@ -696,7 +671,6 @@ func NewPaymentPlansResponse(paymentPlans model.PaymentPlans) PaymentPlansRespon
 		DefaultGracePeriodSeconds: paymentPlans.DefaultGracePeriodSeconds,
 		CompletedAt:               paymentPlans.CompletedAt.Time,
 		CanceledAt:                paymentPlans.CanceledAt.Time,
-		Metadata:                  paymentPlans.Metadata,
 	}
 }
 

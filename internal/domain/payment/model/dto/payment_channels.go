@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -23,7 +22,6 @@ type paymentChannelsDTOFieldName struct {
 	CountryCode   PaymentChannelsDTOFieldNameType
 	Currency      PaymentChannelsDTOFieldNameType
 	Status        PaymentChannelsDTOFieldNameType
-	Metadata      PaymentChannelsDTOFieldNameType
 	MetaCreatedAt PaymentChannelsDTOFieldNameType
 	MetaCreatedBy PaymentChannelsDTOFieldNameType
 	MetaUpdatedAt PaymentChannelsDTOFieldNameType
@@ -40,7 +38,6 @@ var PaymentChannelsDTOFieldName = paymentChannelsDTOFieldName{
 	CountryCode:   "countryCode",
 	Currency:      "currency",
 	Status:        "status",
-	Metadata:      "metadata",
 	MetaCreatedAt: "metaCreatedAt",
 	MetaCreatedBy: "metaCreatedBy",
 	MetaUpdatedAt: "metaUpdatedAt",
@@ -73,9 +70,6 @@ func transformPaymentChannelsDTOFieldNameFromStr(field string) (dbField string, 
 	case string(PaymentChannelsDTOFieldName.Status):
 		return string(model.PaymentChannelsDBFieldName.Status), true
 
-	case string(PaymentChannelsDTOFieldName.Metadata):
-		return string(model.PaymentChannelsDBFieldName.Metadata), true
-
 	case string(PaymentChannelsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentChannelsDBFieldName.MetaCreatedAt), true
 
@@ -87,12 +81,6 @@ func transformPaymentChannelsDTOFieldNameFromStr(field string) (dbField string, 
 
 	case string(PaymentChannelsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentChannelsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentChannelsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentChannelsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentChannelsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentChannelsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentChannelsFilterFieldSpecFromStr(field); found {
@@ -264,7 +252,6 @@ func NewPaymentChannelsSelectableResponse(paymentChannels model.PaymentChannels,
 			string(model.PaymentChannelsDBFieldName.CountryCode),
 			string(model.PaymentChannelsDBFieldName.Currency),
 			string(model.PaymentChannelsDBFieldName.Status),
-			string(model.PaymentChannelsDBFieldName.Metadata),
 			string(model.PaymentChannelsDBFieldName.MetaCreatedAt),
 			string(model.PaymentChannelsDBFieldName.MetaCreatedBy),
 			string(model.PaymentChannelsDBFieldName.MetaUpdatedAt),
@@ -326,13 +313,6 @@ func NewPaymentChannelsSelectableResponse(paymentChannels model.PaymentChannels,
 				key = outputField
 			}
 			setPaymentChannelsSelectableValue(paymentChannelsSelectableResponse, key, model.PaymentChannelStatus(paymentChannels.Status), explicitAlias)
-
-		case string(model.PaymentChannelsDBFieldName.Metadata):
-			key := string(PaymentChannelsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentChannelsSelectableValue(paymentChannelsSelectableResponse, key, paymentChannels.Metadata, explicitAlias)
 
 		case string(model.PaymentChannelsDBFieldName.MetaCreatedAt):
 			key := string(PaymentChannelsDTOFieldName.MetaCreatedAt)
@@ -453,7 +433,6 @@ type PaymentChannelsCreateRequest struct {
 	CountryCode string                     `json:"countryCode"`
 	Currency    string                     `json:"currency"`
 	Status      model.PaymentChannelStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata    json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentChannelsCreateRequest) Validate() (err error) {
@@ -471,7 +450,6 @@ func (d *PaymentChannelsCreateRequest) ToModel() model.PaymentChannels {
 		CountryCode: d.CountryCode,
 		Currency:    d.Currency,
 		Status:      d.Status,
-		Metadata:    d.Metadata,
 	}
 }
 
@@ -503,7 +481,6 @@ type PaymentChannelsUpdateRequest struct {
 	CountryCode string                     `json:"countryCode"`
 	Currency    string                     `json:"currency"`
 	Status      model.PaymentChannelStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata    json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentChannelsUpdateRequest) Validate() (err error) {
@@ -519,7 +496,6 @@ func (d PaymentChannelsUpdateRequest) ToModel() model.PaymentChannels {
 		CountryCode: d.CountryCode,
 		Currency:    d.Currency,
 		Status:      d.Status,
-		Metadata:    d.Metadata,
 	}
 }
 
@@ -531,7 +507,6 @@ type PaymentChannelsBulkUpdateRequest struct {
 	CountryCode string                     `json:"countryCode"`
 	Currency    string                     `json:"currency"`
 	Status      model.PaymentChannelStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata    json.RawMessage            `json:"metadata"`
 }
 
 func (d PaymentChannelsBulkUpdateRequest) PrimaryID() PaymentChannelsPrimaryID {
@@ -562,7 +537,6 @@ func (d PaymentChannelsBulkUpdateRequest) ToModel() model.PaymentChannels {
 		CountryCode: d.CountryCode,
 		Currency:    d.Currency,
 		Status:      d.Status,
-		Metadata:    d.Metadata,
 	}
 }
 
@@ -574,7 +548,6 @@ type PaymentChannelsResponse struct {
 	CountryCode string                     `json:"countryCode"`
 	Currency    string                     `json:"currency"`
 	Status      model.PaymentChannelStatus `json:"status" validate:"oneof=active inactive deprecated" enums:"active,inactive,deprecated"`
-	Metadata    json.RawMessage            `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentChannelsResponse(paymentChannels model.PaymentChannels) PaymentChannelsResponse {
@@ -586,7 +559,6 @@ func NewPaymentChannelsResponse(paymentChannels model.PaymentChannels) PaymentCh
 		CountryCode: paymentChannels.CountryCode,
 		Currency:    paymentChannels.Currency,
 		Status:      model.PaymentChannelStatus(paymentChannels.Status),
-		Metadata:    paymentChannels.Metadata,
 	}
 }
 

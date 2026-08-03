@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/gofrs/uuid"
 	"github.com/nuriansyah/lokatra-payment/configs"
 )
 
@@ -47,7 +48,7 @@ func ProvideExecutionLocker(cfg *configs.Config, client *redis.Client) Execution
 }
 
 func (l *RedisExecutionLocker) TryLock(ctx context.Context, key string, ttl time.Duration) (func(), bool, error) {
-	token := mustUUID().String()
+	token := uuid.Must(uuid.NewV7()).String()
 	redisKey := l.prefix + ":" + key
 	acquired, err := l.client.SetNX(ctx, redisKey, token, ttl).Result()
 	if err != nil || !acquired {

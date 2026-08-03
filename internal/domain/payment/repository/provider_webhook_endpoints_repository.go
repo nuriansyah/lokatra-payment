@@ -45,8 +45,6 @@ func composeInsertFieldsAndParamsProviderWebhookEndpoints(providerWebhookEndpoin
 				args = append(args, providerWebhookEndpoints.SignatureAlgorithm)
 			case selectField.IsActive():
 				args = append(args, providerWebhookEndpoints.IsActive)
-			case selectField.Metadata():
-				args = append(args, providerWebhookEndpoints.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerWebhookEndpoints.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -147,10 +145,6 @@ func (ss ProviderWebhookEndpointsSelectFields) IsActive() ProviderWebhookEndpoin
 	return ProviderWebhookEndpointsField("is_active")
 }
 
-func (ss ProviderWebhookEndpointsSelectFields) Metadata() ProviderWebhookEndpointsField {
-	return ProviderWebhookEndpointsField("metadata")
-}
-
 func (ss ProviderWebhookEndpointsSelectFields) MetaCreatedAt() ProviderWebhookEndpointsField {
 	return ProviderWebhookEndpointsField("meta_created_at")
 }
@@ -185,7 +179,6 @@ func (ss ProviderWebhookEndpointsSelectFields) All() ProviderWebhookEndpointsFie
 		ss.SecretRef(),
 		ss.SignatureAlgorithm(),
 		ss.IsActive(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -242,7 +235,6 @@ func defaultProviderWebhookEndpointsUpdateFields(providerWebhookEndpoints model.
 		NewProviderWebhookEndpointsUpdateField(selectFields.SecretRef(), providerWebhookEndpoints.SecretRef),
 		NewProviderWebhookEndpointsUpdateField(selectFields.SignatureAlgorithm(), providerWebhookEndpoints.SignatureAlgorithm),
 		NewProviderWebhookEndpointsUpdateField(selectFields.IsActive(), providerWebhookEndpoints.IsActive),
-		NewProviderWebhookEndpointsUpdateField(selectFields.Metadata(), providerWebhookEndpoints.Metadata),
 		NewProviderWebhookEndpointsUpdateField(selectFields.MetaCreatedAt(), providerWebhookEndpoints.MetaCreatedAt),
 		NewProviderWebhookEndpointsUpdateField(selectFields.MetaCreatedBy(), providerWebhookEndpoints.MetaCreatedBy),
 		NewProviderWebhookEndpointsUpdateField(selectFields.MetaUpdatedAt(), providerWebhookEndpoints.MetaUpdatedAt),
@@ -560,9 +552,6 @@ func GetProviderWebhookEndpointsFieldType(providerWebhookEndpointsField Provider
 
 	case selectProviderWebhookEndpointsFields.IsActive():
 		return "bool"
-
-	case selectProviderWebhookEndpointsFields.Metadata():
-		return "jsonb"
 
 	case selectProviderWebhookEndpointsFields.MetaCreatedAt():
 		return "timestamptz"

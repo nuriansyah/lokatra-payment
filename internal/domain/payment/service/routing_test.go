@@ -72,6 +72,9 @@ func (g *routingTestGateway) Capabilities(context.Context, pg.CapabilitiesReques
 func (g *routingTestGateway) CreatePayment(context.Context, pg.CreatePaymentRequest) (pg.CreatePaymentResponse, error) {
 	return g.create()
 }
+func (g *routingTestGateway) GetPaymentStatus(context.Context, pg.GetPaymentStatusRequest) (pg.GetPaymentStatusResponse, error) {
+	return pg.GetPaymentStatusResponse{}, nil
+}
 
 func TestRoutingEngineRetriesPrimaryThenFallsBackAndOpensCircuit(t *testing.T) {
 	xenditCalls, durianCalls := 0, 0
@@ -100,7 +103,7 @@ func TestRoutingEngineRetriesPrimaryThenFallsBackAndOpensCircuit(t *testing.T) {
 	}
 	engine := NewRoutingEngine(registry, map[pg.ProviderCode]uuid.UUID{
 		pg.ProviderXendit: mustUUID(), pg.ProviderDurianpay: mustUUID(),
-	}, NewMemoryCircuitBreaker(3, time.Minute), config)
+	}, NewMemoryCircuitBreaker(3, time.Minute), config, nil, nil)
 	request := RoutingRequest{Method: pg.PaymentMethodQRIS, Channel: "qris", Currency: "IDR", GatewayCall: pg.CreatePaymentRequest{Method: pg.PaymentMethodQRIS}}
 
 	result, err := engine.Execute(context.Background(), request)
@@ -139,7 +142,7 @@ func TestRoutingEngineDoesNotFallbackOnInvalidRequest(t *testing.T) {
 	config := RoutingConfig{DefaultProviders: []pg.ProviderCode{pg.ProviderXendit, pg.ProviderDurianpay}, MaxAttempts: 3, FailureThreshold: 3, Cooldown: time.Minute}
 	engine := NewRoutingEngine(registry, map[pg.ProviderCode]uuid.UUID{
 		pg.ProviderXendit: mustUUID(), pg.ProviderDurianpay: mustUUID(),
-	}, NewMemoryCircuitBreaker(3, time.Minute), config)
+	}, NewMemoryCircuitBreaker(3, time.Minute), config, nil, nil)
 
 	_, err := engine.Execute(context.Background(), RoutingRequest{Method: pg.PaymentMethodVirtualAccount, Channel: "bca_va", Currency: "IDR"})
 	require.Error(t, err)

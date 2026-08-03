@@ -75,8 +75,6 @@ func composeInsertFieldsAndParamsProviderWebhookEvents(providerWebhookEventsList
 				args = append(args, providerWebhookEvents.ErrorCode)
 			case selectField.ErrorMessage():
 				args = append(args, providerWebhookEvents.ErrorMessage)
-			case selectField.Metadata():
-				args = append(args, providerWebhookEvents.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerWebhookEvents.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -237,10 +235,6 @@ func (ss ProviderWebhookEventsSelectFields) ErrorMessage() ProviderWebhookEvents
 	return ProviderWebhookEventsField("error_message")
 }
 
-func (ss ProviderWebhookEventsSelectFields) Metadata() ProviderWebhookEventsField {
-	return ProviderWebhookEventsField("metadata")
-}
-
 func (ss ProviderWebhookEventsSelectFields) MetaCreatedAt() ProviderWebhookEventsField {
 	return ProviderWebhookEventsField("meta_created_at")
 }
@@ -290,7 +284,6 @@ func (ss ProviderWebhookEventsSelectFields) All() ProviderWebhookEventsFieldList
 		ss.ProcessedAt(),
 		ss.ErrorCode(),
 		ss.ErrorMessage(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -362,7 +355,6 @@ func defaultProviderWebhookEventsUpdateFields(providerWebhookEvents model.Provid
 		NewProviderWebhookEventsUpdateField(selectFields.ProcessedAt(), providerWebhookEvents.ProcessedAt),
 		NewProviderWebhookEventsUpdateField(selectFields.ErrorCode(), providerWebhookEvents.ErrorCode),
 		NewProviderWebhookEventsUpdateField(selectFields.ErrorMessage(), providerWebhookEvents.ErrorMessage),
-		NewProviderWebhookEventsUpdateField(selectFields.Metadata(), providerWebhookEvents.Metadata),
 		NewProviderWebhookEventsUpdateField(selectFields.MetaCreatedAt(), providerWebhookEvents.MetaCreatedAt),
 		NewProviderWebhookEventsUpdateField(selectFields.MetaCreatedBy(), providerWebhookEvents.MetaCreatedBy),
 		NewProviderWebhookEventsUpdateField(selectFields.MetaUpdatedAt(), providerWebhookEvents.MetaUpdatedAt),
@@ -725,9 +717,6 @@ func GetProviderWebhookEventsFieldType(providerWebhookEventsField ProviderWebhoo
 
 	case selectProviderWebhookEventsFields.ErrorMessage():
 		return "text"
-
-	case selectProviderWebhookEventsFields.Metadata():
-		return "jsonb"
 
 	case selectProviderWebhookEventsFields.MetaCreatedAt():
 		return "timestamptz"

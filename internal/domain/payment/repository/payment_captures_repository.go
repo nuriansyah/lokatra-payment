@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsPaymentCaptures(paymentCapturesList []model.Pay
 				args = append(args, paymentCaptures.RawRequest)
 			case selectField.RawResponse():
 				args = append(args, paymentCaptures.RawResponse)
-			case selectField.Metadata():
-				args = append(args, paymentCaptures.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentCaptures.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss PaymentCapturesSelectFields) RawResponse() PaymentCapturesField {
 	return PaymentCapturesField("raw_response")
 }
 
-func (ss PaymentCapturesSelectFields) Metadata() PaymentCapturesField {
-	return PaymentCapturesField("metadata")
-}
-
 func (ss PaymentCapturesSelectFields) MetaCreatedAt() PaymentCapturesField {
 	return PaymentCapturesField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss PaymentCapturesSelectFields) All() PaymentCapturesFieldList {
 		ss.FailureMessage(),
 		ss.RawRequest(),
 		ss.RawResponse(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultPaymentCapturesUpdateFields(paymentCaptures model.PaymentCaptures) (
 		NewPaymentCapturesUpdateField(selectFields.FailureMessage(), paymentCaptures.FailureMessage),
 		NewPaymentCapturesUpdateField(selectFields.RawRequest(), paymentCaptures.RawRequest),
 		NewPaymentCapturesUpdateField(selectFields.RawResponse(), paymentCaptures.RawResponse),
-		NewPaymentCapturesUpdateField(selectFields.Metadata(), paymentCaptures.Metadata),
 		NewPaymentCapturesUpdateField(selectFields.MetaCreatedAt(), paymentCaptures.MetaCreatedAt),
 		NewPaymentCapturesUpdateField(selectFields.MetaCreatedBy(), paymentCaptures.MetaCreatedBy),
 		NewPaymentCapturesUpdateField(selectFields.MetaUpdatedAt(), paymentCaptures.MetaUpdatedAt),
@@ -603,9 +595,6 @@ func GetPaymentCapturesFieldType(paymentCapturesField PaymentCapturesField) stri
 		return "jsonb"
 
 	case selectPaymentCapturesFields.RawResponse():
-		return "jsonb"
-
-	case selectPaymentCapturesFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentCapturesFields.MetaCreatedAt():

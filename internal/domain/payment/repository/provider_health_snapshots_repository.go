@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsProviderHealthSnapshots(providerHealthSnapshots
 				args = append(args, providerHealthSnapshots.WindowStartedAt)
 			case selectField.WindowEndedAt():
 				args = append(args, providerHealthSnapshots.WindowEndedAt)
-			case selectField.Metadata():
-				args = append(args, providerHealthSnapshots.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerHealthSnapshots.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss ProviderHealthSnapshotsSelectFields) WindowEndedAt() ProviderHealthSnap
 	return ProviderHealthSnapshotsField("window_ended_at")
 }
 
-func (ss ProviderHealthSnapshotsSelectFields) Metadata() ProviderHealthSnapshotsField {
-	return ProviderHealthSnapshotsField("metadata")
-}
-
 func (ss ProviderHealthSnapshotsSelectFields) MetaCreatedAt() ProviderHealthSnapshotsField {
 	return ProviderHealthSnapshotsField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss ProviderHealthSnapshotsSelectFields) All() ProviderHealthSnapshotsField
 		ss.SampleSize(),
 		ss.WindowStartedAt(),
 		ss.WindowEndedAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultProviderHealthSnapshotsUpdateFields(providerHealthSnapshots model.Pr
 		NewProviderHealthSnapshotsUpdateField(selectFields.SampleSize(), providerHealthSnapshots.SampleSize),
 		NewProviderHealthSnapshotsUpdateField(selectFields.WindowStartedAt(), providerHealthSnapshots.WindowStartedAt),
 		NewProviderHealthSnapshotsUpdateField(selectFields.WindowEndedAt(), providerHealthSnapshots.WindowEndedAt),
-		NewProviderHealthSnapshotsUpdateField(selectFields.Metadata(), providerHealthSnapshots.Metadata),
 		NewProviderHealthSnapshotsUpdateField(selectFields.MetaCreatedAt(), providerHealthSnapshots.MetaCreatedAt),
 		NewProviderHealthSnapshotsUpdateField(selectFields.MetaCreatedBy(), providerHealthSnapshots.MetaCreatedBy),
 		NewProviderHealthSnapshotsUpdateField(selectFields.MetaUpdatedAt(), providerHealthSnapshots.MetaUpdatedAt),
@@ -604,9 +596,6 @@ func GetProviderHealthSnapshotsFieldType(providerHealthSnapshotsField ProviderHe
 
 	case selectProviderHealthSnapshotsFields.WindowEndedAt():
 		return "timestamptz"
-
-	case selectProviderHealthSnapshotsFields.Metadata():
-		return "jsonb"
 
 	case selectProviderHealthSnapshotsFields.MetaCreatedAt():
 		return "timestamptz"

@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -32,7 +31,6 @@ type paymentInstallmentsDTOFieldName struct {
 	Status          PaymentInstallmentsDTOFieldNameType
 	PaidAt          PaymentInstallmentsDTOFieldNameType
 	OverdueAt       PaymentInstallmentsDTOFieldNameType
-	Metadata        PaymentInstallmentsDTOFieldNameType
 	MetaCreatedAt   PaymentInstallmentsDTOFieldNameType
 	MetaCreatedBy   PaymentInstallmentsDTOFieldNameType
 	MetaUpdatedAt   PaymentInstallmentsDTOFieldNameType
@@ -53,13 +51,13 @@ var PaymentInstallmentsDTOFieldName = paymentInstallmentsDTOFieldName{
 	Status:          "status",
 	PaidAt:          "paidAt",
 	OverdueAt:       "overdueAt",
-	Metadata:        "metadata",
-	MetaCreatedAt:   "metaCreatedAt",
-	MetaCreatedBy:   "metaCreatedBy",
-	MetaUpdatedAt:   "metaUpdatedAt",
-	MetaUpdatedBy:   "metaUpdatedBy",
-	MetaDeletedAt:   "metaDeletedAt",
-	MetaDeletedBy:   "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentInstallmentsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -98,9 +96,6 @@ func transformPaymentInstallmentsDTOFieldNameFromStr(field string) (dbField stri
 	case string(PaymentInstallmentsDTOFieldName.OverdueAt):
 		return string(model.PaymentInstallmentsDBFieldName.OverdueAt), true
 
-	case string(PaymentInstallmentsDTOFieldName.Metadata):
-		return string(model.PaymentInstallmentsDBFieldName.Metadata), true
-
 	case string(PaymentInstallmentsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentInstallmentsDBFieldName.MetaCreatedAt), true
 
@@ -112,12 +107,6 @@ func transformPaymentInstallmentsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(PaymentInstallmentsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentInstallmentsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentInstallmentsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentInstallmentsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentInstallmentsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentInstallmentsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentInstallmentsFilterFieldSpecFromStr(field); found {
@@ -293,7 +282,6 @@ func NewPaymentInstallmentsSelectableResponse(paymentInstallments model.PaymentI
 			string(model.PaymentInstallmentsDBFieldName.Status),
 			string(model.PaymentInstallmentsDBFieldName.PaidAt),
 			string(model.PaymentInstallmentsDBFieldName.OverdueAt),
-			string(model.PaymentInstallmentsDBFieldName.Metadata),
 			string(model.PaymentInstallmentsDBFieldName.MetaCreatedAt),
 			string(model.PaymentInstallmentsDBFieldName.MetaCreatedBy),
 			string(model.PaymentInstallmentsDBFieldName.MetaUpdatedAt),
@@ -383,13 +371,6 @@ func NewPaymentInstallmentsSelectableResponse(paymentInstallments model.PaymentI
 				key = outputField
 			}
 			setPaymentInstallmentsSelectableValue(paymentInstallmentsSelectableResponse, key, paymentInstallments.OverdueAt.Time, explicitAlias)
-
-		case string(model.PaymentInstallmentsDBFieldName.Metadata):
-			key := string(PaymentInstallmentsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentInstallmentsSelectableValue(paymentInstallmentsSelectableResponse, key, paymentInstallments.Metadata, explicitAlias)
 
 		case string(model.PaymentInstallmentsDBFieldName.MetaCreatedAt):
 			key := string(PaymentInstallmentsDTOFieldName.MetaCreatedAt)
@@ -514,7 +495,6 @@ type PaymentInstallmentsCreateRequest struct {
 	Status          model.PaymentInstallmentStatus `json:"status" example:"pending" enums:"pending,paid,overdue,canceled"`
 	PaidAt          time.Time                      `json:"paidAt"`
 	OverdueAt       time.Time                      `json:"overdueAt"`
-	Metadata        json.RawMessage                `json:"metadata"`
 }
 
 func (d *PaymentInstallmentsCreateRequest) Validate() (err error) {
@@ -536,7 +516,6 @@ func (d *PaymentInstallmentsCreateRequest) ToModel() model.PaymentInstallments {
 		Status:          d.Status,
 		PaidAt:          null.TimeFrom(d.PaidAt),
 		OverdueAt:       null.TimeFrom(d.OverdueAt),
-		Metadata:        d.Metadata,
 	}
 }
 
@@ -572,7 +551,6 @@ type PaymentInstallmentsUpdateRequest struct {
 	Status          model.PaymentInstallmentStatus `json:"status" example:"pending" enums:"pending,paid,overdue,canceled"`
 	PaidAt          time.Time                      `json:"paidAt"`
 	OverdueAt       time.Time                      `json:"overdueAt"`
-	Metadata        json.RawMessage                `json:"metadata"`
 }
 
 func (d *PaymentInstallmentsUpdateRequest) Validate() (err error) {
@@ -592,7 +570,6 @@ func (d PaymentInstallmentsUpdateRequest) ToModel() model.PaymentInstallments {
 		Status:          d.Status,
 		PaidAt:          null.TimeFrom(d.PaidAt),
 		OverdueAt:       null.TimeFrom(d.OverdueAt),
-		Metadata:        d.Metadata,
 	}
 }
 
@@ -608,7 +585,6 @@ type PaymentInstallmentsBulkUpdateRequest struct {
 	Status          model.PaymentInstallmentStatus `json:"status" example:"pending" enums:"pending,paid,overdue,canceled"`
 	PaidAt          time.Time                      `json:"paidAt"`
 	OverdueAt       time.Time                      `json:"overdueAt"`
-	Metadata        json.RawMessage                `json:"metadata"`
 }
 
 func (d PaymentInstallmentsBulkUpdateRequest) PrimaryID() PaymentInstallmentsPrimaryID {
@@ -643,7 +619,6 @@ func (d PaymentInstallmentsBulkUpdateRequest) ToModel() model.PaymentInstallment
 		Status:          d.Status,
 		PaidAt:          null.TimeFrom(d.PaidAt),
 		OverdueAt:       null.TimeFrom(d.OverdueAt),
-		Metadata:        d.Metadata,
 	}
 }
 
@@ -659,7 +634,6 @@ type PaymentInstallmentsResponse struct {
 	Status          model.PaymentInstallmentStatus `json:"status" validate:"oneof=pending paid overdue canceled" enums:"pending,paid,overdue,canceled"`
 	PaidAt          time.Time                      `json:"paidAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	OverdueAt       time.Time                      `json:"overdueAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata        json.RawMessage                `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentInstallmentsResponse(paymentInstallments model.PaymentInstallments) PaymentInstallmentsResponse {
@@ -675,7 +649,6 @@ func NewPaymentInstallmentsResponse(paymentInstallments model.PaymentInstallment
 		Status:          model.PaymentInstallmentStatus(paymentInstallments.Status),
 		PaidAt:          paymentInstallments.PaidAt.Time,
 		OverdueAt:       paymentInstallments.OverdueAt.Time,
-		Metadata:        paymentInstallments.Metadata,
 	}
 }
 

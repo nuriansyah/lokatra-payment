@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -20,7 +19,6 @@ type providerWebhookEndpointsDBFieldName struct {
 	SecretRef          ProviderWebhookEndpointsDBFieldNameType
 	SignatureAlgorithm ProviderWebhookEndpointsDBFieldNameType
 	IsActive           ProviderWebhookEndpointsDBFieldNameType
-	Metadata           ProviderWebhookEndpointsDBFieldNameType
 	MetaCreatedAt      ProviderWebhookEndpointsDBFieldNameType
 	MetaCreatedBy      ProviderWebhookEndpointsDBFieldNameType
 	MetaUpdatedAt      ProviderWebhookEndpointsDBFieldNameType
@@ -38,7 +36,6 @@ var ProviderWebhookEndpointsDBFieldName = providerWebhookEndpointsDBFieldName{
 	SecretRef:          "secret_ref",
 	SignatureAlgorithm: "signature_algorithm",
 	IsActive:           "is_active",
-	Metadata:           "metadata",
 	MetaCreatedAt:      "meta_created_at",
 	MetaCreatedBy:      "meta_created_by",
 	MetaUpdatedAt:      "meta_updated_at",
@@ -73,9 +70,6 @@ func NewProviderWebhookEndpointsDBFieldNameFromStr(field string) (dbField Provid
 
 	case string(ProviderWebhookEndpointsDBFieldName.IsActive):
 		return ProviderWebhookEndpointsDBFieldName.IsActive, true
-
-	case string(ProviderWebhookEndpointsDBFieldName.Metadata):
-		return ProviderWebhookEndpointsDBFieldName.Metadata, true
 
 	case string(ProviderWebhookEndpointsDBFieldName.MetaCreatedAt):
 		return ProviderWebhookEndpointsDBFieldName.MetaCreatedAt, true
@@ -170,15 +164,6 @@ var ProviderWebhookEndpointsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "isActive",
 		Column:            "is_active",
 		SQLAlias:          "is_active",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -299,15 +284,14 @@ func validateProviderWebhookEndpointsFilterGroupFieldNames(group FilterGroup) (e
 }
 
 type ProviderWebhookEndpoints struct {
-	Id                 uuid.UUID       `db:"id"`
-	ProviderAccountId  uuid.UUID       `db:"provider_account_id"`
-	ProviderCode       string          `db:"provider_code"`
-	EndpointKey        string          `db:"endpoint_key"`
-	Environment        string          `db:"environment"`
-	SecretRef          string          `db:"secret_ref"`
-	SignatureAlgorithm string          `db:"signature_algorithm"`
-	IsActive           bool            `db:"is_active"`
-	Metadata           json.RawMessage `db:"metadata"`
+	Id                 uuid.UUID `db:"id"`
+	ProviderAccountId  uuid.UUID `db:"provider_account_id"`
+	ProviderCode       string    `db:"provider_code"`
+	EndpointKey        string    `db:"endpoint_key"`
+	Environment        string    `db:"environment"`
+	SecretRef          string    `db:"secret_ref"`
+	SignatureAlgorithm string    `db:"signature_algorithm"`
+	IsActive           bool      `db:"is_active"`
 
 	shared.MetaSignature
 }

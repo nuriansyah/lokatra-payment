@@ -29,13 +29,13 @@ type paymentRouteDecisionsDTOFieldName struct {
 	Reason                    PaymentRouteDecisionsDTOFieldNameType
 	EvaluatedContext          PaymentRouteDecisionsDTOFieldNameType
 	Candidates                PaymentRouteDecisionsDTOFieldNameType
-	Metadata                  PaymentRouteDecisionsDTOFieldNameType
-	MetaCreatedAt             PaymentRouteDecisionsDTOFieldNameType
-	MetaCreatedBy             PaymentRouteDecisionsDTOFieldNameType
-	MetaUpdatedAt             PaymentRouteDecisionsDTOFieldNameType
-	MetaUpdatedBy             PaymentRouteDecisionsDTOFieldNameType
-	MetaDeletedAt             PaymentRouteDecisionsDTOFieldNameType
-	MetaDeletedBy             PaymentRouteDecisionsDTOFieldNameType
+
+	MetaCreatedAt PaymentRouteDecisionsDTOFieldNameType
+	MetaCreatedBy PaymentRouteDecisionsDTOFieldNameType
+	MetaUpdatedAt PaymentRouteDecisionsDTOFieldNameType
+	MetaUpdatedBy PaymentRouteDecisionsDTOFieldNameType
+	MetaDeletedAt PaymentRouteDecisionsDTOFieldNameType
+	MetaDeletedBy PaymentRouteDecisionsDTOFieldNameType
 }
 
 var PaymentRouteDecisionsDTOFieldName = paymentRouteDecisionsDTOFieldName{
@@ -48,13 +48,13 @@ var PaymentRouteDecisionsDTOFieldName = paymentRouteDecisionsDTOFieldName{
 	Reason:                    "reason",
 	EvaluatedContext:          "evaluatedContext",
 	Candidates:                "candidates",
-	Metadata:                  "metadata",
-	MetaCreatedAt:             "metaCreatedAt",
-	MetaCreatedBy:             "metaCreatedBy",
-	MetaUpdatedAt:             "metaUpdatedAt",
-	MetaUpdatedBy:             "metaUpdatedBy",
-	MetaDeletedAt:             "metaDeletedAt",
-	MetaDeletedBy:             "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentRouteDecisionsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -87,9 +87,6 @@ func transformPaymentRouteDecisionsDTOFieldNameFromStr(field string) (dbField st
 	case string(PaymentRouteDecisionsDTOFieldName.Candidates):
 		return string(model.PaymentRouteDecisionsDBFieldName.Candidates), true
 
-	case string(PaymentRouteDecisionsDTOFieldName.Metadata):
-		return string(model.PaymentRouteDecisionsDBFieldName.Metadata), true
-
 	case string(PaymentRouteDecisionsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentRouteDecisionsDBFieldName.MetaCreatedAt), true
 
@@ -101,12 +98,6 @@ func transformPaymentRouteDecisionsDTOFieldNameFromStr(field string) (dbField st
 
 	case string(PaymentRouteDecisionsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentRouteDecisionsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentRouteDecisionsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentRouteDecisionsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentRouteDecisionsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentRouteDecisionsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentRouteDecisionsFilterFieldSpecFromStr(field); found {
@@ -280,7 +271,6 @@ func NewPaymentRouteDecisionsSelectableResponse(paymentRouteDecisions model.Paym
 			string(model.PaymentRouteDecisionsDBFieldName.Reason),
 			string(model.PaymentRouteDecisionsDBFieldName.EvaluatedContext),
 			string(model.PaymentRouteDecisionsDBFieldName.Candidates),
-			string(model.PaymentRouteDecisionsDBFieldName.Metadata),
 			string(model.PaymentRouteDecisionsDBFieldName.MetaCreatedAt),
 			string(model.PaymentRouteDecisionsDBFieldName.MetaCreatedBy),
 			string(model.PaymentRouteDecisionsDBFieldName.MetaUpdatedAt),
@@ -356,13 +346,6 @@ func NewPaymentRouteDecisionsSelectableResponse(paymentRouteDecisions model.Paym
 				key = outputField
 			}
 			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.Candidates, explicitAlias)
-
-		case string(model.PaymentRouteDecisionsDBFieldName.Metadata):
-			key := string(PaymentRouteDecisionsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentRouteDecisionsSelectableValue(paymentRouteDecisionsSelectableResponse, key, paymentRouteDecisions.Metadata, explicitAlias)
 
 		case string(model.PaymentRouteDecisionsDBFieldName.MetaCreatedAt):
 			key := string(PaymentRouteDecisionsDTOFieldName.MetaCreatedAt)
@@ -485,7 +468,6 @@ type PaymentRouteDecisionsCreateRequest struct {
 	Reason                    string          `json:"reason"`
 	EvaluatedContext          json.RawMessage `json:"evaluatedContext"`
 	Candidates                json.RawMessage `json:"candidates"`
-	Metadata                  json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentRouteDecisionsCreateRequest) Validate() (err error) {
@@ -505,7 +487,6 @@ func (d *PaymentRouteDecisionsCreateRequest) ToModel() model.PaymentRouteDecisio
 		Reason:                    d.Reason,
 		EvaluatedContext:          d.EvaluatedContext,
 		Candidates:                d.Candidates,
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -539,7 +520,6 @@ type PaymentRouteDecisionsUpdateRequest struct {
 	Reason                    string          `json:"reason"`
 	EvaluatedContext          json.RawMessage `json:"evaluatedContext"`
 	Candidates                json.RawMessage `json:"candidates"`
-	Metadata                  json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentRouteDecisionsUpdateRequest) Validate() (err error) {
@@ -557,7 +537,6 @@ func (d PaymentRouteDecisionsUpdateRequest) ToModel() model.PaymentRouteDecision
 		Reason:                    d.Reason,
 		EvaluatedContext:          d.EvaluatedContext,
 		Candidates:                d.Candidates,
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -571,7 +550,6 @@ type PaymentRouteDecisionsBulkUpdateRequest struct {
 	Reason                    string          `json:"reason"`
 	EvaluatedContext          json.RawMessage `json:"evaluatedContext"`
 	Candidates                json.RawMessage `json:"candidates"`
-	Metadata                  json.RawMessage `json:"metadata"`
 }
 
 func (d PaymentRouteDecisionsBulkUpdateRequest) PrimaryID() PaymentRouteDecisionsPrimaryID {
@@ -604,7 +582,6 @@ func (d PaymentRouteDecisionsBulkUpdateRequest) ToModel() model.PaymentRouteDeci
 		Reason:                    d.Reason,
 		EvaluatedContext:          d.EvaluatedContext,
 		Candidates:                d.Candidates,
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -618,7 +595,6 @@ type PaymentRouteDecisionsResponse struct {
 	Reason                    string          `json:"reason" validate:"required"`
 	EvaluatedContext          json.RawMessage `json:"evaluatedContext" swaggertype:"object"`
 	Candidates                json.RawMessage `json:"candidates" swaggertype:"object"`
-	Metadata                  json.RawMessage `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentRouteDecisionsResponse(paymentRouteDecisions model.PaymentRouteDecisions) PaymentRouteDecisionsResponse {
@@ -632,7 +608,6 @@ func NewPaymentRouteDecisionsResponse(paymentRouteDecisions model.PaymentRouteDe
 		Reason:                    paymentRouteDecisions.Reason,
 		EvaluatedContext:          paymentRouteDecisions.EvaluatedContext,
 		Candidates:                paymentRouteDecisions.Candidates,
-		Metadata:                  paymentRouteDecisions.Metadata,
 	}
 }
 

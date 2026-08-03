@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsPaymentVoids(paymentVoidsList []model.PaymentVo
 				args = append(args, paymentVoids.RawRequest)
 			case selectField.RawResponse():
 				args = append(args, paymentVoids.RawResponse)
-			case selectField.Metadata():
-				args = append(args, paymentVoids.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentVoids.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss PaymentVoidsSelectFields) RawResponse() PaymentVoidsField {
 	return PaymentVoidsField("raw_response")
 }
 
-func (ss PaymentVoidsSelectFields) Metadata() PaymentVoidsField {
-	return PaymentVoidsField("metadata")
-}
-
 func (ss PaymentVoidsSelectFields) MetaCreatedAt() PaymentVoidsField {
 	return PaymentVoidsField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss PaymentVoidsSelectFields) All() PaymentVoidsFieldList {
 		ss.FailureMessage(),
 		ss.RawRequest(),
 		ss.RawResponse(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultPaymentVoidsUpdateFields(paymentVoids model.PaymentVoids) (paymentVo
 		NewPaymentVoidsUpdateField(selectFields.FailureMessage(), paymentVoids.FailureMessage),
 		NewPaymentVoidsUpdateField(selectFields.RawRequest(), paymentVoids.RawRequest),
 		NewPaymentVoidsUpdateField(selectFields.RawResponse(), paymentVoids.RawResponse),
-		NewPaymentVoidsUpdateField(selectFields.Metadata(), paymentVoids.Metadata),
 		NewPaymentVoidsUpdateField(selectFields.MetaCreatedAt(), paymentVoids.MetaCreatedAt),
 		NewPaymentVoidsUpdateField(selectFields.MetaCreatedBy(), paymentVoids.MetaCreatedBy),
 		NewPaymentVoidsUpdateField(selectFields.MetaUpdatedAt(), paymentVoids.MetaUpdatedAt),
@@ -603,9 +595,6 @@ func GetPaymentVoidsFieldType(paymentVoidsField PaymentVoidsField) string {
 		return "jsonb"
 
 	case selectPaymentVoidsFields.RawResponse():
-		return "jsonb"
-
-	case selectPaymentVoidsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentVoidsFields.MetaCreatedAt():

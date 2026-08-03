@@ -47,13 +47,13 @@ type paymentRefundsDTOFieldName struct {
 	FailureMessage    PaymentRefundsDTOFieldNameType
 	RawRequest        PaymentRefundsDTOFieldNameType
 	RawResponse       PaymentRefundsDTOFieldNameType
-	Metadata          PaymentRefundsDTOFieldNameType
-	MetaCreatedAt     PaymentRefundsDTOFieldNameType
-	MetaCreatedBy     PaymentRefundsDTOFieldNameType
-	MetaUpdatedAt     PaymentRefundsDTOFieldNameType
-	MetaUpdatedBy     PaymentRefundsDTOFieldNameType
-	MetaDeletedAt     PaymentRefundsDTOFieldNameType
-	MetaDeletedBy     PaymentRefundsDTOFieldNameType
+
+	MetaCreatedAt PaymentRefundsDTOFieldNameType
+	MetaCreatedBy PaymentRefundsDTOFieldNameType
+	MetaUpdatedAt PaymentRefundsDTOFieldNameType
+	MetaUpdatedBy PaymentRefundsDTOFieldNameType
+	MetaDeletedAt PaymentRefundsDTOFieldNameType
+	MetaDeletedBy PaymentRefundsDTOFieldNameType
 }
 
 var PaymentRefundsDTOFieldName = paymentRefundsDTOFieldName{
@@ -81,13 +81,13 @@ var PaymentRefundsDTOFieldName = paymentRefundsDTOFieldName{
 	FailureMessage:    "failureMessage",
 	RawRequest:        "rawRequest",
 	RawResponse:       "rawResponse",
-	Metadata:          "metadata",
-	MetaCreatedAt:     "metaCreatedAt",
-	MetaCreatedBy:     "metaCreatedBy",
-	MetaUpdatedAt:     "metaUpdatedAt",
-	MetaUpdatedBy:     "metaUpdatedBy",
-	MetaDeletedAt:     "metaDeletedAt",
-	MetaDeletedBy:     "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentRefundsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -165,9 +165,6 @@ func transformPaymentRefundsDTOFieldNameFromStr(field string) (dbField string, f
 	case string(PaymentRefundsDTOFieldName.RawResponse):
 		return string(model.PaymentRefundsDBFieldName.RawResponse), true
 
-	case string(PaymentRefundsDTOFieldName.Metadata):
-		return string(model.PaymentRefundsDBFieldName.Metadata), true
-
 	case string(PaymentRefundsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentRefundsDBFieldName.MetaCreatedAt), true
 
@@ -179,12 +176,6 @@ func transformPaymentRefundsDTOFieldNameFromStr(field string) (dbField string, f
 
 	case string(PaymentRefundsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentRefundsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentRefundsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentRefundsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentRefundsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentRefundsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentRefundsFilterFieldSpecFromStr(field); found {
@@ -373,7 +364,6 @@ func NewPaymentRefundsSelectableResponse(paymentRefunds model.PaymentRefunds, fi
 			string(model.PaymentRefundsDBFieldName.FailureMessage),
 			string(model.PaymentRefundsDBFieldName.RawRequest),
 			string(model.PaymentRefundsDBFieldName.RawResponse),
-			string(model.PaymentRefundsDBFieldName.Metadata),
 			string(model.PaymentRefundsDBFieldName.MetaCreatedAt),
 			string(model.PaymentRefundsDBFieldName.MetaCreatedBy),
 			string(model.PaymentRefundsDBFieldName.MetaUpdatedAt),
@@ -555,13 +545,6 @@ func NewPaymentRefundsSelectableResponse(paymentRefunds model.PaymentRefunds, fi
 			}
 			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.RawResponse, explicitAlias)
 
-		case string(model.PaymentRefundsDBFieldName.Metadata):
-			key := string(PaymentRefundsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentRefundsSelectableValue(paymentRefundsSelectableResponse, key, paymentRefunds.Metadata, explicitAlias)
-
 		case string(model.PaymentRefundsDBFieldName.MetaCreatedAt):
 			key := string(PaymentRefundsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -698,7 +681,6 @@ type PaymentRefundsCreateRequest struct {
 	FailureMessage    string                    `json:"failureMessage"`
 	RawRequest        json.RawMessage           `json:"rawRequest"`
 	RawResponse       json.RawMessage           `json:"rawResponse"`
-	Metadata          json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentRefundsCreateRequest) Validate() (err error) {
@@ -733,7 +715,6 @@ func (d *PaymentRefundsCreateRequest) ToModel() model.PaymentRefunds {
 		FailureMessage:    null.StringFrom(d.FailureMessage),
 		RawRequest:        d.RawRequest,
 		RawResponse:       d.RawResponse,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -782,7 +763,6 @@ type PaymentRefundsUpdateRequest struct {
 	FailureMessage    string                    `json:"failureMessage"`
 	RawRequest        json.RawMessage           `json:"rawRequest"`
 	RawResponse       json.RawMessage           `json:"rawResponse"`
-	Metadata          json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentRefundsUpdateRequest) Validate() (err error) {
@@ -815,7 +795,6 @@ func (d PaymentRefundsUpdateRequest) ToModel() model.PaymentRefunds {
 		FailureMessage:    null.StringFrom(d.FailureMessage),
 		RawRequest:        d.RawRequest,
 		RawResponse:       d.RawResponse,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -844,7 +823,6 @@ type PaymentRefundsBulkUpdateRequest struct {
 	FailureMessage    string                    `json:"failureMessage"`
 	RawRequest        json.RawMessage           `json:"rawRequest"`
 	RawResponse       json.RawMessage           `json:"rawResponse"`
-	Metadata          json.RawMessage           `json:"metadata"`
 }
 
 func (d PaymentRefundsBulkUpdateRequest) PrimaryID() PaymentRefundsPrimaryID {
@@ -892,7 +870,6 @@ func (d PaymentRefundsBulkUpdateRequest) ToModel() model.PaymentRefunds {
 		FailureMessage:    null.StringFrom(d.FailureMessage),
 		RawRequest:        d.RawRequest,
 		RawResponse:       d.RawResponse,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -921,7 +898,6 @@ type PaymentRefundsResponse struct {
 	FailureMessage    string                    `json:"failureMessage"`
 	RawRequest        json.RawMessage           `json:"rawRequest" swaggertype:"object"`
 	RawResponse       json.RawMessage           `json:"rawResponse" swaggertype:"object"`
-	Metadata          json.RawMessage           `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentRefundsResponse(paymentRefunds model.PaymentRefunds) PaymentRefundsResponse {
@@ -950,7 +926,6 @@ func NewPaymentRefundsResponse(paymentRefunds model.PaymentRefunds) PaymentRefun
 		FailureMessage:    paymentRefunds.FailureMessage.String,
 		RawRequest:        paymentRefunds.RawRequest,
 		RawResponse:       paymentRefunds.RawResponse,
-		Metadata:          paymentRefunds.Metadata,
 	}
 }
 

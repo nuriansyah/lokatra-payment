@@ -38,7 +38,6 @@ type providerWebhookEventsDBFieldName struct {
 	ProcessedAt        ProviderWebhookEventsDBFieldNameType
 	ErrorCode          ProviderWebhookEventsDBFieldNameType
 	ErrorMessage       ProviderWebhookEventsDBFieldNameType
-	Metadata           ProviderWebhookEventsDBFieldNameType
 	MetaCreatedAt      ProviderWebhookEventsDBFieldNameType
 	MetaCreatedBy      ProviderWebhookEventsDBFieldNameType
 	MetaUpdatedAt      ProviderWebhookEventsDBFieldNameType
@@ -71,7 +70,6 @@ var ProviderWebhookEventsDBFieldName = providerWebhookEventsDBFieldName{
 	ProcessedAt:        "processed_at",
 	ErrorCode:          "error_code",
 	ErrorMessage:       "error_message",
-	Metadata:           "metadata",
 	MetaCreatedAt:      "meta_created_at",
 	MetaCreatedBy:      "meta_created_by",
 	MetaUpdatedAt:      "meta_updated_at",
@@ -151,9 +149,6 @@ func NewProviderWebhookEventsDBFieldNameFromStr(field string) (dbField ProviderW
 
 	case string(ProviderWebhookEventsDBFieldName.ErrorMessage):
 		return ProviderWebhookEventsDBFieldName.ErrorMessage, true
-
-	case string(ProviderWebhookEventsDBFieldName.Metadata):
-		return ProviderWebhookEventsDBFieldName.Metadata, true
 
 	case string(ProviderWebhookEventsDBFieldName.MetaCreatedAt):
 		return ProviderWebhookEventsDBFieldName.MetaCreatedAt, true
@@ -387,15 +382,6 @@ var ProviderWebhookEventsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -544,7 +530,6 @@ type ProviderWebhookEvents struct {
 	ProcessedAt        null.Time               `db:"processed_at"`
 	ErrorCode          null.String             `db:"error_code"`
 	ErrorMessage       null.String             `db:"error_message"`
-	Metadata           json.RawMessage         `db:"metadata"`
 
 	shared.MetaSignature
 }

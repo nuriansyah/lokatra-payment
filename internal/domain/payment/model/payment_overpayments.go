@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -28,7 +27,6 @@ type paymentOverpaymentsDBFieldName struct {
 	ResolutionNotes   PaymentOverpaymentsDBFieldNameType
 	ResolvedAt        PaymentOverpaymentsDBFieldNameType
 	ResolvedBy        PaymentOverpaymentsDBFieldNameType
-	Metadata          PaymentOverpaymentsDBFieldNameType
 	MetaCreatedAt     PaymentOverpaymentsDBFieldNameType
 	MetaCreatedBy     PaymentOverpaymentsDBFieldNameType
 	MetaUpdatedAt     PaymentOverpaymentsDBFieldNameType
@@ -51,7 +49,6 @@ var PaymentOverpaymentsDBFieldName = paymentOverpaymentsDBFieldName{
 	ResolutionNotes:   "resolution_notes",
 	ResolvedAt:        "resolved_at",
 	ResolvedBy:        "resolved_by",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "meta_created_at",
 	MetaCreatedBy:     "meta_created_by",
 	MetaUpdatedAt:     "meta_updated_at",
@@ -101,9 +98,6 @@ func NewPaymentOverpaymentsDBFieldNameFromStr(field string) (dbField PaymentOver
 
 	case string(PaymentOverpaymentsDBFieldName.ResolvedBy):
 		return PaymentOverpaymentsDBFieldName.ResolvedBy, true
-
-	case string(PaymentOverpaymentsDBFieldName.Metadata):
-		return PaymentOverpaymentsDBFieldName.Metadata, true
 
 	case string(PaymentOverpaymentsDBFieldName.MetaCreatedAt):
 		return PaymentOverpaymentsDBFieldName.MetaCreatedAt, true
@@ -247,15 +241,6 @@ var PaymentOverpaymentsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -385,7 +370,6 @@ type PaymentOverpayments struct {
 	ResolutionNotes   null.String     `db:"resolution_notes"`
 	ResolvedAt        null.Time       `db:"resolved_at"`
 	ResolvedBy        nuuid.NUUID     `db:"resolved_by"`
-	Metadata          json.RawMessage `db:"metadata"`
 
 	shared.MetaSignature
 }

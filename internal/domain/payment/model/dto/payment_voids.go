@@ -33,13 +33,13 @@ type paymentVoidsDTOFieldName struct {
 	FailureMessage         PaymentVoidsDTOFieldNameType
 	RawRequest             PaymentVoidsDTOFieldNameType
 	RawResponse            PaymentVoidsDTOFieldNameType
-	Metadata               PaymentVoidsDTOFieldNameType
-	MetaCreatedAt          PaymentVoidsDTOFieldNameType
-	MetaCreatedBy          PaymentVoidsDTOFieldNameType
-	MetaUpdatedAt          PaymentVoidsDTOFieldNameType
-	MetaUpdatedBy          PaymentVoidsDTOFieldNameType
-	MetaDeletedAt          PaymentVoidsDTOFieldNameType
-	MetaDeletedBy          PaymentVoidsDTOFieldNameType
+
+	MetaCreatedAt PaymentVoidsDTOFieldNameType
+	MetaCreatedBy PaymentVoidsDTOFieldNameType
+	MetaUpdatedAt PaymentVoidsDTOFieldNameType
+	MetaUpdatedBy PaymentVoidsDTOFieldNameType
+	MetaDeletedAt PaymentVoidsDTOFieldNameType
+	MetaDeletedBy PaymentVoidsDTOFieldNameType
 }
 
 var PaymentVoidsDTOFieldName = paymentVoidsDTOFieldName{
@@ -55,13 +55,13 @@ var PaymentVoidsDTOFieldName = paymentVoidsDTOFieldName{
 	FailureMessage:         "failureMessage",
 	RawRequest:             "rawRequest",
 	RawResponse:            "rawResponse",
-	Metadata:               "metadata",
-	MetaCreatedAt:          "metaCreatedAt",
-	MetaCreatedBy:          "metaCreatedBy",
-	MetaUpdatedAt:          "metaUpdatedAt",
-	MetaUpdatedBy:          "metaUpdatedBy",
-	MetaDeletedAt:          "metaDeletedAt",
-	MetaDeletedBy:          "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentVoidsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -103,9 +103,6 @@ func transformPaymentVoidsDTOFieldNameFromStr(field string) (dbField string, fou
 	case string(PaymentVoidsDTOFieldName.RawResponse):
 		return string(model.PaymentVoidsDBFieldName.RawResponse), true
 
-	case string(PaymentVoidsDTOFieldName.Metadata):
-		return string(model.PaymentVoidsDBFieldName.Metadata), true
-
 	case string(PaymentVoidsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentVoidsDBFieldName.MetaCreatedAt), true
 
@@ -117,12 +114,6 @@ func transformPaymentVoidsDTOFieldNameFromStr(field string) (dbField string, fou
 
 	case string(PaymentVoidsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentVoidsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentVoidsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentVoidsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentVoidsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentVoidsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentVoidsFilterFieldSpecFromStr(field); found {
@@ -299,7 +290,6 @@ func NewPaymentVoidsSelectableResponse(paymentVoids model.PaymentVoids, filter m
 			string(model.PaymentVoidsDBFieldName.FailureMessage),
 			string(model.PaymentVoidsDBFieldName.RawRequest),
 			string(model.PaymentVoidsDBFieldName.RawResponse),
-			string(model.PaymentVoidsDBFieldName.Metadata),
 			string(model.PaymentVoidsDBFieldName.MetaCreatedAt),
 			string(model.PaymentVoidsDBFieldName.MetaCreatedBy),
 			string(model.PaymentVoidsDBFieldName.MetaUpdatedAt),
@@ -396,13 +386,6 @@ func NewPaymentVoidsSelectableResponse(paymentVoids model.PaymentVoids, filter m
 				key = outputField
 			}
 			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.RawResponse, explicitAlias)
-
-		case string(model.PaymentVoidsDBFieldName.Metadata):
-			key := string(PaymentVoidsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentVoidsSelectableValue(paymentVoidsSelectableResponse, key, paymentVoids.Metadata, explicitAlias)
 
 		case string(model.PaymentVoidsDBFieldName.MetaCreatedAt):
 			key := string(PaymentVoidsDTOFieldName.MetaCreatedAt)
@@ -528,7 +511,6 @@ type PaymentVoidsCreateRequest struct {
 	FailureMessage         string                  `json:"failureMessage"`
 	RawRequest             json.RawMessage         `json:"rawRequest"`
 	RawResponse            json.RawMessage         `json:"rawResponse"`
-	Metadata               json.RawMessage         `json:"metadata"`
 }
 
 func (d *PaymentVoidsCreateRequest) Validate() (err error) {
@@ -551,7 +533,6 @@ func (d *PaymentVoidsCreateRequest) ToModel() model.PaymentVoids {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -588,7 +569,6 @@ type PaymentVoidsUpdateRequest struct {
 	FailureMessage         string                  `json:"failureMessage"`
 	RawRequest             json.RawMessage         `json:"rawRequest"`
 	RawResponse            json.RawMessage         `json:"rawResponse"`
-	Metadata               json.RawMessage         `json:"metadata"`
 }
 
 func (d *PaymentVoidsUpdateRequest) Validate() (err error) {
@@ -609,7 +589,6 @@ func (d PaymentVoidsUpdateRequest) ToModel() model.PaymentVoids {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -626,7 +605,6 @@ type PaymentVoidsBulkUpdateRequest struct {
 	FailureMessage         string                  `json:"failureMessage"`
 	RawRequest             json.RawMessage         `json:"rawRequest"`
 	RawResponse            json.RawMessage         `json:"rawResponse"`
-	Metadata               json.RawMessage         `json:"metadata"`
 }
 
 func (d PaymentVoidsBulkUpdateRequest) PrimaryID() PaymentVoidsPrimaryID {
@@ -662,7 +640,6 @@ func (d PaymentVoidsBulkUpdateRequest) ToModel() model.PaymentVoids {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -679,7 +656,6 @@ type PaymentVoidsResponse struct {
 	FailureMessage         string                  `json:"failureMessage"`
 	RawRequest             json.RawMessage         `json:"rawRequest" swaggertype:"object"`
 	RawResponse            json.RawMessage         `json:"rawResponse" swaggertype:"object"`
-	Metadata               json.RawMessage         `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentVoidsResponse(paymentVoids model.PaymentVoids) PaymentVoidsResponse {
@@ -696,7 +672,6 @@ func NewPaymentVoidsResponse(paymentVoids model.PaymentVoids) PaymentVoidsRespon
 		FailureMessage:         paymentVoids.FailureMessage.String,
 		RawRequest:             paymentVoids.RawRequest,
 		RawResponse:            paymentVoids.RawResponse,
-		Metadata:               paymentVoids.Metadata,
 	}
 }
 

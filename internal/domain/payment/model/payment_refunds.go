@@ -40,7 +40,6 @@ type paymentRefundsDBFieldName struct {
 	FailureMessage    PaymentRefundsDBFieldNameType
 	RawRequest        PaymentRefundsDBFieldNameType
 	RawResponse       PaymentRefundsDBFieldNameType
-	Metadata          PaymentRefundsDBFieldNameType
 	MetaCreatedAt     PaymentRefundsDBFieldNameType
 	MetaCreatedBy     PaymentRefundsDBFieldNameType
 	MetaUpdatedAt     PaymentRefundsDBFieldNameType
@@ -74,7 +73,6 @@ var PaymentRefundsDBFieldName = paymentRefundsDBFieldName{
 	FailureMessage:    "failure_message",
 	RawRequest:        "raw_request",
 	RawResponse:       "raw_response",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "meta_created_at",
 	MetaCreatedBy:     "meta_created_by",
 	MetaUpdatedAt:     "meta_updated_at",
@@ -157,9 +155,6 @@ func NewPaymentRefundsDBFieldNameFromStr(field string) (dbField PaymentRefundsDB
 
 	case string(PaymentRefundsDBFieldName.RawResponse):
 		return PaymentRefundsDBFieldName.RawResponse, true
-
-	case string(PaymentRefundsDBFieldName.Metadata):
-		return PaymentRefundsDBFieldName.Metadata, true
 
 	case string(PaymentRefundsDBFieldName.MetaCreatedAt):
 		return PaymentRefundsDBFieldName.MetaCreatedAt, true
@@ -402,15 +397,6 @@ var PaymentRefundsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -562,7 +548,6 @@ type PaymentRefunds struct {
 	FailureMessage    null.String         `db:"failure_message"`
 	RawRequest        json.RawMessage     `db:"raw_request"`
 	RawResponse       json.RawMessage     `db:"raw_response"`
-	Metadata          json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

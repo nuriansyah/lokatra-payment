@@ -50,13 +50,13 @@ type paymentAttemptsDTOFieldName struct {
 	LastStatusSyncAt      PaymentAttemptsDTOFieldNameType
 	RawRequest            PaymentAttemptsDTOFieldNameType
 	RawResponse           PaymentAttemptsDTOFieldNameType
-	Metadata              PaymentAttemptsDTOFieldNameType
-	MetaCreatedAt         PaymentAttemptsDTOFieldNameType
-	MetaCreatedBy         PaymentAttemptsDTOFieldNameType
-	MetaUpdatedAt         PaymentAttemptsDTOFieldNameType
-	MetaUpdatedBy         PaymentAttemptsDTOFieldNameType
-	MetaDeletedAt         PaymentAttemptsDTOFieldNameType
-	MetaDeletedBy         PaymentAttemptsDTOFieldNameType
+
+	MetaCreatedAt PaymentAttemptsDTOFieldNameType
+	MetaCreatedBy PaymentAttemptsDTOFieldNameType
+	MetaUpdatedAt PaymentAttemptsDTOFieldNameType
+	MetaUpdatedBy PaymentAttemptsDTOFieldNameType
+	MetaDeletedAt PaymentAttemptsDTOFieldNameType
+	MetaDeletedBy PaymentAttemptsDTOFieldNameType
 }
 
 var PaymentAttemptsDTOFieldName = paymentAttemptsDTOFieldName{
@@ -87,13 +87,13 @@ var PaymentAttemptsDTOFieldName = paymentAttemptsDTOFieldName{
 	LastStatusSyncAt:      "lastStatusSyncAt",
 	RawRequest:            "rawRequest",
 	RawResponse:           "rawResponse",
-	Metadata:              "metadata",
-	MetaCreatedAt:         "metaCreatedAt",
-	MetaCreatedBy:         "metaCreatedBy",
-	MetaUpdatedAt:         "metaUpdatedAt",
-	MetaUpdatedBy:         "metaUpdatedBy",
-	MetaDeletedAt:         "metaDeletedAt",
-	MetaDeletedBy:         "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentAttemptsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -180,9 +180,6 @@ func transformPaymentAttemptsDTOFieldNameFromStr(field string) (dbField string, 
 	case string(PaymentAttemptsDTOFieldName.RawResponse):
 		return string(model.PaymentAttemptsDBFieldName.RawResponse), true
 
-	case string(PaymentAttemptsDTOFieldName.Metadata):
-		return string(model.PaymentAttemptsDBFieldName.Metadata), true
-
 	case string(PaymentAttemptsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentAttemptsDBFieldName.MetaCreatedAt), true
 
@@ -194,12 +191,6 @@ func transformPaymentAttemptsDTOFieldNameFromStr(field string) (dbField string, 
 
 	case string(PaymentAttemptsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentAttemptsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentAttemptsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentAttemptsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentAttemptsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentAttemptsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentAttemptsFilterFieldSpecFromStr(field); found {
@@ -391,7 +382,6 @@ func NewPaymentAttemptsSelectableResponse(paymentAttempts model.PaymentAttempts,
 			string(model.PaymentAttemptsDBFieldName.LastStatusSyncAt),
 			string(model.PaymentAttemptsDBFieldName.RawRequest),
 			string(model.PaymentAttemptsDBFieldName.RawResponse),
-			string(model.PaymentAttemptsDBFieldName.Metadata),
 			string(model.PaymentAttemptsDBFieldName.MetaCreatedAt),
 			string(model.PaymentAttemptsDBFieldName.MetaCreatedBy),
 			string(model.PaymentAttemptsDBFieldName.MetaUpdatedAt),
@@ -594,13 +584,6 @@ func NewPaymentAttemptsSelectableResponse(paymentAttempts model.PaymentAttempts,
 			}
 			setPaymentAttemptsSelectableValue(paymentAttemptsSelectableResponse, key, paymentAttempts.RawResponse, explicitAlias)
 
-		case string(model.PaymentAttemptsDBFieldName.Metadata):
-			key := string(PaymentAttemptsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentAttemptsSelectableValue(paymentAttemptsSelectableResponse, key, paymentAttempts.Metadata, explicitAlias)
-
 		case string(model.PaymentAttemptsDBFieldName.MetaCreatedAt):
 			key := string(PaymentAttemptsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -740,7 +723,6 @@ type PaymentAttemptsCreateRequest struct {
 	LastStatusSyncAt      time.Time                  `json:"lastStatusSyncAt"`
 	RawRequest            json.RawMessage            `json:"rawRequest"`
 	RawResponse           json.RawMessage            `json:"rawResponse"`
-	Metadata              json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentAttemptsCreateRequest) Validate() (err error) {
@@ -778,7 +760,6 @@ func (d *PaymentAttemptsCreateRequest) ToModel() model.PaymentAttempts {
 		LastStatusSyncAt:      null.TimeFrom(d.LastStatusSyncAt),
 		RawRequest:            d.RawRequest,
 		RawResponse:           d.RawResponse,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -830,7 +811,6 @@ type PaymentAttemptsUpdateRequest struct {
 	LastStatusSyncAt      time.Time                  `json:"lastStatusSyncAt"`
 	RawRequest            json.RawMessage            `json:"rawRequest"`
 	RawResponse           json.RawMessage            `json:"rawResponse"`
-	Metadata              json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentAttemptsUpdateRequest) Validate() (err error) {
@@ -866,7 +846,6 @@ func (d PaymentAttemptsUpdateRequest) ToModel() model.PaymentAttempts {
 		LastStatusSyncAt:      null.TimeFrom(d.LastStatusSyncAt),
 		RawRequest:            d.RawRequest,
 		RawResponse:           d.RawResponse,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -898,7 +877,6 @@ type PaymentAttemptsBulkUpdateRequest struct {
 	LastStatusSyncAt      time.Time                  `json:"lastStatusSyncAt"`
 	RawRequest            json.RawMessage            `json:"rawRequest"`
 	RawResponse           json.RawMessage            `json:"rawResponse"`
-	Metadata              json.RawMessage            `json:"metadata"`
 }
 
 func (d PaymentAttemptsBulkUpdateRequest) PrimaryID() PaymentAttemptsPrimaryID {
@@ -949,7 +927,6 @@ func (d PaymentAttemptsBulkUpdateRequest) ToModel() model.PaymentAttempts {
 		LastStatusSyncAt:      null.TimeFrom(d.LastStatusSyncAt),
 		RawRequest:            d.RawRequest,
 		RawResponse:           d.RawResponse,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -981,7 +958,6 @@ type PaymentAttemptsResponse struct {
 	LastStatusSyncAt      time.Time                  `json:"lastStatusSyncAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	RawRequest            json.RawMessage            `json:"rawRequest" swaggertype:"object"`
 	RawResponse           json.RawMessage            `json:"rawResponse" swaggertype:"object"`
-	Metadata              json.RawMessage            `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentAttemptsResponse(paymentAttempts model.PaymentAttempts) PaymentAttemptsResponse {
@@ -1013,7 +989,6 @@ func NewPaymentAttemptsResponse(paymentAttempts model.PaymentAttempts) PaymentAt
 		LastStatusSyncAt:      paymentAttempts.LastStatusSyncAt.Time,
 		RawRequest:            paymentAttempts.RawRequest,
 		RawResponse:           paymentAttempts.RawResponse,
-		Metadata:              paymentAttempts.Metadata,
 	}
 }
 

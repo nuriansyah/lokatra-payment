@@ -42,7 +42,6 @@ type paymentAttemptsDBFieldName struct {
 	LastStatusSyncAt      PaymentAttemptsDBFieldNameType
 	RawRequest            PaymentAttemptsDBFieldNameType
 	RawResponse           PaymentAttemptsDBFieldNameType
-	Metadata              PaymentAttemptsDBFieldNameType
 	MetaCreatedAt         PaymentAttemptsDBFieldNameType
 	MetaCreatedBy         PaymentAttemptsDBFieldNameType
 	MetaUpdatedAt         PaymentAttemptsDBFieldNameType
@@ -79,7 +78,6 @@ var PaymentAttemptsDBFieldName = paymentAttemptsDBFieldName{
 	LastStatusSyncAt:      "last_status_sync_at",
 	RawRequest:            "raw_request",
 	RawResponse:           "raw_response",
-	Metadata:              "metadata",
 	MetaCreatedAt:         "meta_created_at",
 	MetaCreatedBy:         "meta_created_by",
 	MetaUpdatedAt:         "meta_updated_at",
@@ -171,9 +169,6 @@ func NewPaymentAttemptsDBFieldNameFromStr(field string) (dbField PaymentAttempts
 
 	case string(PaymentAttemptsDBFieldName.RawResponse):
 		return PaymentAttemptsDBFieldName.RawResponse, true
-
-	case string(PaymentAttemptsDBFieldName.Metadata):
-		return PaymentAttemptsDBFieldName.Metadata, true
 
 	case string(PaymentAttemptsDBFieldName.MetaCreatedAt):
 		return PaymentAttemptsDBFieldName.MetaCreatedAt, true
@@ -443,15 +438,6 @@ var PaymentAttemptsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -607,7 +593,6 @@ type PaymentAttempts struct {
 	LastStatusSyncAt      null.Time            `db:"last_status_sync_at"`
 	RawRequest            json.RawMessage      `db:"raw_request"`
 	RawResponse           json.RawMessage      `db:"raw_response"`
-	Metadata              json.RawMessage      `db:"metadata"`
 
 	shared.MetaSignature
 }

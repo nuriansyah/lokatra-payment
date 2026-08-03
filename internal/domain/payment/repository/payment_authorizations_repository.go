@@ -59,8 +59,6 @@ func composeInsertFieldsAndParamsPaymentAuthorizations(paymentAuthorizationsList
 				args = append(args, paymentAuthorizations.RawRequest)
 			case selectField.RawResponse():
 				args = append(args, paymentAuthorizations.RawResponse)
-			case selectField.Metadata():
-				args = append(args, paymentAuthorizations.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentAuthorizations.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -189,10 +187,6 @@ func (ss PaymentAuthorizationsSelectFields) RawResponse() PaymentAuthorizationsF
 	return PaymentAuthorizationsField("raw_response")
 }
 
-func (ss PaymentAuthorizationsSelectFields) Metadata() PaymentAuthorizationsField {
-	return PaymentAuthorizationsField("metadata")
-}
-
 func (ss PaymentAuthorizationsSelectFields) MetaCreatedAt() PaymentAuthorizationsField {
 	return PaymentAuthorizationsField("meta_created_at")
 }
@@ -234,7 +228,6 @@ func (ss PaymentAuthorizationsSelectFields) All() PaymentAuthorizationsFieldList
 		ss.FailureMessage(),
 		ss.RawRequest(),
 		ss.RawResponse(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -298,7 +291,6 @@ func defaultPaymentAuthorizationsUpdateFields(paymentAuthorizations model.Paymen
 		NewPaymentAuthorizationsUpdateField(selectFields.FailureMessage(), paymentAuthorizations.FailureMessage),
 		NewPaymentAuthorizationsUpdateField(selectFields.RawRequest(), paymentAuthorizations.RawRequest),
 		NewPaymentAuthorizationsUpdateField(selectFields.RawResponse(), paymentAuthorizations.RawResponse),
-		NewPaymentAuthorizationsUpdateField(selectFields.Metadata(), paymentAuthorizations.Metadata),
 		NewPaymentAuthorizationsUpdateField(selectFields.MetaCreatedAt(), paymentAuthorizations.MetaCreatedAt),
 		NewPaymentAuthorizationsUpdateField(selectFields.MetaCreatedBy(), paymentAuthorizations.MetaCreatedBy),
 		NewPaymentAuthorizationsUpdateField(selectFields.MetaUpdatedAt(), paymentAuthorizations.MetaUpdatedAt),
@@ -636,9 +628,6 @@ func GetPaymentAuthorizationsFieldType(paymentAuthorizationsField PaymentAuthori
 		return "jsonb"
 
 	case selectPaymentAuthorizationsFields.RawResponse():
-		return "jsonb"
-
-	case selectPaymentAuthorizationsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentAuthorizationsFields.MetaCreatedAt():

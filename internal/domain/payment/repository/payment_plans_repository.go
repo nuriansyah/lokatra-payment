@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsPaymentPlans(paymentPlansList []model.PaymentPl
 				args = append(args, paymentPlans.CompletedAt)
 			case selectField.CanceledAt():
 				args = append(args, paymentPlans.CanceledAt)
-			case selectField.Metadata():
-				args = append(args, paymentPlans.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentPlans.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss PaymentPlansSelectFields) CanceledAt() PaymentPlansField {
 	return PaymentPlansField("canceled_at")
 }
 
-func (ss PaymentPlansSelectFields) Metadata() PaymentPlansField {
-	return PaymentPlansField("metadata")
-}
-
 func (ss PaymentPlansSelectFields) MetaCreatedAt() PaymentPlansField {
 	return PaymentPlansField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss PaymentPlansSelectFields) All() PaymentPlansFieldList {
 		ss.DefaultGracePeriodSeconds(),
 		ss.CompletedAt(),
 		ss.CanceledAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultPaymentPlansUpdateFields(paymentPlans model.PaymentPlans) (paymentPl
 		NewPaymentPlansUpdateField(selectFields.DefaultGracePeriodSeconds(), paymentPlans.DefaultGracePeriodSeconds),
 		NewPaymentPlansUpdateField(selectFields.CompletedAt(), paymentPlans.CompletedAt),
 		NewPaymentPlansUpdateField(selectFields.CanceledAt(), paymentPlans.CanceledAt),
-		NewPaymentPlansUpdateField(selectFields.Metadata(), paymentPlans.Metadata),
 		NewPaymentPlansUpdateField(selectFields.MetaCreatedAt(), paymentPlans.MetaCreatedAt),
 		NewPaymentPlansUpdateField(selectFields.MetaCreatedBy(), paymentPlans.MetaCreatedBy),
 		NewPaymentPlansUpdateField(selectFields.MetaUpdatedAt(), paymentPlans.MetaUpdatedAt),
@@ -604,9 +596,6 @@ func GetPaymentPlansFieldType(paymentPlansField PaymentPlansField) string {
 
 	case selectPaymentPlansFields.CanceledAt():
 		return "timestamptz"
-
-	case selectPaymentPlansFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentPlansFields.MetaCreatedAt():
 		return "timestamptz"

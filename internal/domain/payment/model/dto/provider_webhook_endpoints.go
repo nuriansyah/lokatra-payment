@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -24,13 +23,13 @@ type providerWebhookEndpointsDTOFieldName struct {
 	SecretRef          ProviderWebhookEndpointsDTOFieldNameType
 	SignatureAlgorithm ProviderWebhookEndpointsDTOFieldNameType
 	IsActive           ProviderWebhookEndpointsDTOFieldNameType
-	Metadata           ProviderWebhookEndpointsDTOFieldNameType
-	MetaCreatedAt      ProviderWebhookEndpointsDTOFieldNameType
-	MetaCreatedBy      ProviderWebhookEndpointsDTOFieldNameType
-	MetaUpdatedAt      ProviderWebhookEndpointsDTOFieldNameType
-	MetaUpdatedBy      ProviderWebhookEndpointsDTOFieldNameType
-	MetaDeletedAt      ProviderWebhookEndpointsDTOFieldNameType
-	MetaDeletedBy      ProviderWebhookEndpointsDTOFieldNameType
+
+	MetaCreatedAt ProviderWebhookEndpointsDTOFieldNameType
+	MetaCreatedBy ProviderWebhookEndpointsDTOFieldNameType
+	MetaUpdatedAt ProviderWebhookEndpointsDTOFieldNameType
+	MetaUpdatedBy ProviderWebhookEndpointsDTOFieldNameType
+	MetaDeletedAt ProviderWebhookEndpointsDTOFieldNameType
+	MetaDeletedBy ProviderWebhookEndpointsDTOFieldNameType
 }
 
 var ProviderWebhookEndpointsDTOFieldName = providerWebhookEndpointsDTOFieldName{
@@ -42,13 +41,13 @@ var ProviderWebhookEndpointsDTOFieldName = providerWebhookEndpointsDTOFieldName{
 	SecretRef:          "secretRef",
 	SignatureAlgorithm: "signatureAlgorithm",
 	IsActive:           "isActive",
-	Metadata:           "metadata",
-	MetaCreatedAt:      "metaCreatedAt",
-	MetaCreatedBy:      "metaCreatedBy",
-	MetaUpdatedAt:      "metaUpdatedAt",
-	MetaUpdatedBy:      "metaUpdatedBy",
-	MetaDeletedAt:      "metaDeletedAt",
-	MetaDeletedBy:      "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderWebhookEndpointsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -78,9 +77,6 @@ func transformProviderWebhookEndpointsDTOFieldNameFromStr(field string) (dbField
 	case string(ProviderWebhookEndpointsDTOFieldName.IsActive):
 		return string(model.ProviderWebhookEndpointsDBFieldName.IsActive), true
 
-	case string(ProviderWebhookEndpointsDTOFieldName.Metadata):
-		return string(model.ProviderWebhookEndpointsDBFieldName.Metadata), true
-
 	case string(ProviderWebhookEndpointsDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderWebhookEndpointsDBFieldName.MetaCreatedAt), true
 
@@ -92,12 +88,6 @@ func transformProviderWebhookEndpointsDTOFieldNameFromStr(field string) (dbField
 
 	case string(ProviderWebhookEndpointsDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderWebhookEndpointsDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderWebhookEndpointsDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderWebhookEndpointsDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderWebhookEndpointsDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderWebhookEndpointsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderWebhookEndpointsFilterFieldSpecFromStr(field); found {
@@ -270,7 +260,6 @@ func NewProviderWebhookEndpointsSelectableResponse(providerWebhookEndpoints mode
 			string(model.ProviderWebhookEndpointsDBFieldName.SecretRef),
 			string(model.ProviderWebhookEndpointsDBFieldName.SignatureAlgorithm),
 			string(model.ProviderWebhookEndpointsDBFieldName.IsActive),
-			string(model.ProviderWebhookEndpointsDBFieldName.Metadata),
 			string(model.ProviderWebhookEndpointsDBFieldName.MetaCreatedAt),
 			string(model.ProviderWebhookEndpointsDBFieldName.MetaCreatedBy),
 			string(model.ProviderWebhookEndpointsDBFieldName.MetaUpdatedAt),
@@ -339,13 +328,6 @@ func NewProviderWebhookEndpointsSelectableResponse(providerWebhookEndpoints mode
 				key = outputField
 			}
 			setProviderWebhookEndpointsSelectableValue(providerWebhookEndpointsSelectableResponse, key, providerWebhookEndpoints.IsActive, explicitAlias)
-
-		case string(model.ProviderWebhookEndpointsDBFieldName.Metadata):
-			key := string(ProviderWebhookEndpointsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderWebhookEndpointsSelectableValue(providerWebhookEndpointsSelectableResponse, key, providerWebhookEndpoints.Metadata, explicitAlias)
 
 		case string(model.ProviderWebhookEndpointsDBFieldName.MetaCreatedAt):
 			key := string(ProviderWebhookEndpointsDTOFieldName.MetaCreatedAt)
@@ -460,14 +442,13 @@ func NewProviderWebhookEndpointsFilterResponse(result []model.ProviderWebhookEnd
 }
 
 type ProviderWebhookEndpointsCreateRequest struct {
-	ProviderAccountId  uuid.UUID       `json:"providerAccountId"`
-	ProviderCode       string          `json:"providerCode"`
-	EndpointKey        string          `json:"endpointKey"`
-	Environment        string          `json:"environment"`
-	SecretRef          string          `json:"secretRef"`
-	SignatureAlgorithm string          `json:"signatureAlgorithm"`
-	IsActive           bool            `json:"isActive"`
-	Metadata           json.RawMessage `json:"metadata"`
+	ProviderAccountId  uuid.UUID `json:"providerAccountId"`
+	ProviderCode       string    `json:"providerCode"`
+	EndpointKey        string    `json:"endpointKey"`
+	Environment        string    `json:"environment"`
+	SecretRef          string    `json:"secretRef"`
+	SignatureAlgorithm string    `json:"signatureAlgorithm"`
+	IsActive           bool      `json:"isActive"`
 }
 
 func (d *ProviderWebhookEndpointsCreateRequest) Validate() (err error) {
@@ -486,7 +467,6 @@ func (d *ProviderWebhookEndpointsCreateRequest) ToModel() model.ProviderWebhookE
 		SecretRef:          d.SecretRef,
 		SignatureAlgorithm: d.SignatureAlgorithm,
 		IsActive:           d.IsActive,
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -512,14 +492,13 @@ func (d ProviderWebhookEndpointsListCreateRequest) ToModelList() []model.Provide
 }
 
 type ProviderWebhookEndpointsUpdateRequest struct {
-	ProviderAccountId  uuid.UUID       `json:"providerAccountId"`
-	ProviderCode       string          `json:"providerCode"`
-	EndpointKey        string          `json:"endpointKey"`
-	Environment        string          `json:"environment"`
-	SecretRef          string          `json:"secretRef"`
-	SignatureAlgorithm string          `json:"signatureAlgorithm"`
-	IsActive           bool            `json:"isActive"`
-	Metadata           json.RawMessage `json:"metadata"`
+	ProviderAccountId  uuid.UUID `json:"providerAccountId"`
+	ProviderCode       string    `json:"providerCode"`
+	EndpointKey        string    `json:"endpointKey"`
+	Environment        string    `json:"environment"`
+	SecretRef          string    `json:"secretRef"`
+	SignatureAlgorithm string    `json:"signatureAlgorithm"`
+	IsActive           bool      `json:"isActive"`
 }
 
 func (d *ProviderWebhookEndpointsUpdateRequest) Validate() (err error) {
@@ -536,20 +515,18 @@ func (d ProviderWebhookEndpointsUpdateRequest) ToModel() model.ProviderWebhookEn
 		SecretRef:          d.SecretRef,
 		SignatureAlgorithm: d.SignatureAlgorithm,
 		IsActive:           d.IsActive,
-		Metadata:           d.Metadata,
 	}
 }
 
 type ProviderWebhookEndpointsBulkUpdateRequest struct {
-	Id                 uuid.UUID       `json:"id"`
-	ProviderAccountId  uuid.UUID       `json:"providerAccountId"`
-	ProviderCode       string          `json:"providerCode"`
-	EndpointKey        string          `json:"endpointKey"`
-	Environment        string          `json:"environment"`
-	SecretRef          string          `json:"secretRef"`
-	SignatureAlgorithm string          `json:"signatureAlgorithm"`
-	IsActive           bool            `json:"isActive"`
-	Metadata           json.RawMessage `json:"metadata"`
+	Id                 uuid.UUID `json:"id"`
+	ProviderAccountId  uuid.UUID `json:"providerAccountId"`
+	ProviderCode       string    `json:"providerCode"`
+	EndpointKey        string    `json:"endpointKey"`
+	Environment        string    `json:"environment"`
+	SecretRef          string    `json:"secretRef"`
+	SignatureAlgorithm string    `json:"signatureAlgorithm"`
+	IsActive           bool      `json:"isActive"`
 }
 
 func (d ProviderWebhookEndpointsBulkUpdateRequest) PrimaryID() ProviderWebhookEndpointsPrimaryID {
@@ -581,20 +558,18 @@ func (d ProviderWebhookEndpointsBulkUpdateRequest) ToModel() model.ProviderWebho
 		SecretRef:          d.SecretRef,
 		SignatureAlgorithm: d.SignatureAlgorithm,
 		IsActive:           d.IsActive,
-		Metadata:           d.Metadata,
 	}
 }
 
 type ProviderWebhookEndpointsResponse struct {
-	Id                 uuid.UUID       `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ProviderAccountId  uuid.UUID       `json:"providerAccountId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ProviderCode       string          `json:"providerCode" validate:"required"`
-	EndpointKey        string          `json:"endpointKey" validate:"required"`
-	Environment        string          `json:"environment"`
-	SecretRef          string          `json:"secretRef" validate:"required"`
-	SignatureAlgorithm string          `json:"signatureAlgorithm" validate:"required"`
-	IsActive           bool            `json:"isActive" example:"true"`
-	Metadata           json.RawMessage `json:"metadata" swaggertype:"object"`
+	Id                 uuid.UUID `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ProviderAccountId  uuid.UUID `json:"providerAccountId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ProviderCode       string    `json:"providerCode" validate:"required"`
+	EndpointKey        string    `json:"endpointKey" validate:"required"`
+	Environment        string    `json:"environment"`
+	SecretRef          string    `json:"secretRef" validate:"required"`
+	SignatureAlgorithm string    `json:"signatureAlgorithm" validate:"required"`
+	IsActive           bool      `json:"isActive" example:"true"`
 }
 
 func NewProviderWebhookEndpointsResponse(providerWebhookEndpoints model.ProviderWebhookEndpoints) ProviderWebhookEndpointsResponse {
@@ -607,7 +582,6 @@ func NewProviderWebhookEndpointsResponse(providerWebhookEndpoints model.Provider
 		SecretRef:          providerWebhookEndpoints.SecretRef,
 		SignatureAlgorithm: providerWebhookEndpoints.SignatureAlgorithm,
 		IsActive:           providerWebhookEndpoints.IsActive,
-		Metadata:           providerWebhookEndpoints.Metadata,
 	}
 }
 

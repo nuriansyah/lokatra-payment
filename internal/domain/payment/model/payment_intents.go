@@ -34,7 +34,6 @@ type paymentIntentsDBFieldName struct {
 	CancellationReason  PaymentIntentsDBFieldNameType
 	IdempotencyKey      PaymentIntentsDBFieldNameType
 	SourceSnapshot      PaymentIntentsDBFieldNameType
-	Metadata            PaymentIntentsDBFieldNameType
 	MetaCreatedAt       PaymentIntentsDBFieldNameType
 	MetaCreatedBy       PaymentIntentsDBFieldNameType
 	MetaUpdatedAt       PaymentIntentsDBFieldNameType
@@ -63,7 +62,6 @@ var PaymentIntentsDBFieldName = paymentIntentsDBFieldName{
 	CancellationReason:  "cancellation_reason",
 	IdempotencyKey:      "idempotency_key",
 	SourceSnapshot:      "source_snapshot",
-	Metadata:            "metadata",
 	MetaCreatedAt:       "meta_created_at",
 	MetaCreatedBy:       "meta_created_by",
 	MetaUpdatedAt:       "meta_updated_at",
@@ -131,9 +129,6 @@ func NewPaymentIntentsDBFieldNameFromStr(field string) (dbField PaymentIntentsDB
 
 	case string(PaymentIntentsDBFieldName.SourceSnapshot):
 		return PaymentIntentsDBFieldName.SourceSnapshot, true
-
-	case string(PaymentIntentsDBFieldName.Metadata):
-		return PaymentIntentsDBFieldName.Metadata, true
 
 	case string(PaymentIntentsDBFieldName.MetaCreatedAt):
 		return PaymentIntentsDBFieldName.MetaCreatedAt, true
@@ -331,15 +326,6 @@ var PaymentIntentsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -486,7 +472,6 @@ type PaymentIntents struct {
 	CancellationReason  null.String         `db:"cancellation_reason"`
 	IdempotencyKey      string              `db:"idempotency_key"`
 	SourceSnapshot      json.RawMessage     `db:"source_snapshot"`
-	Metadata            json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

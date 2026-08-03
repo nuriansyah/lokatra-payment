@@ -10,6 +10,7 @@ import (
 	midtrans "github.com/nuriansyah/lokatra-payment/external/paymentgateway/midtrans/service"
 	xendit "github.com/nuriansyah/lokatra-payment/external/paymentgateway/xendit/service"
 	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/repository"
+	"github.com/rs/zerolog"
 )
 
 type ServiceImpl struct {
@@ -19,6 +20,11 @@ type ServiceImpl struct {
 	webhookConfigured  map[pg.ProviderCode]bool
 	routingEngine      *RoutingEngine
 	executionLocker    ExecutionLocker
+	logger             zerolog.Logger
+}
+
+func (s *ServiceImpl) RoutingEngine() *RoutingEngine {
+	return s.routingEngine
 }
 
 func ProvidePaymentService(paymentRepo repository.Repository, cfg *configs.Config, breaker CircuitBreaker, locker ExecutionLocker) *ServiceImpl {
@@ -40,7 +46,7 @@ func ProvidePaymentService(paymentRepo repository.Repository, cfg *configs.Confi
 		providerConfig := pg.ProviderConfig{
 			Code:            pg.ProviderXendit,
 			BaseURL:         cfg.Externals.Providers.Xendit.BaseURL,
-			APIKey:          cfg.Externals.Providers.Xendit.SecretKey,
+			APIKey:          cfg.Externals.Providers.Xendit.APIKey,
 			WebhookToken:    cfg.Externals.Providers.Xendit.WebhookToken,
 			WebhookSecret:   cfg.Externals.Providers.Xendit.WebhookSecret,
 			DefaultCurrency: "IDR",
@@ -73,9 +79,14 @@ func ProvidePaymentService(paymentRepo repository.Repository, cfg *configs.Confi
 		gatewayRegistry:    registry,
 		providerAccountIDs: accountIDs,
 		webhookConfigured:  webhookConfigured,
-		routingEngine:      NewRoutingEngine(registry, accountIDs, breaker, routingConfig),
+		routingEngine:      NewRoutingEngine(registry, accountIDs, breaker, routingConfig, paymentRepo, nil),
 		executionLocker:    locker,
+		logger:             zerolog.Nop(),
 	}
+}
+
+func ProvideRoutingEngine(paymentService *ServiceImpl) *RoutingEngine {
+	return paymentService.routingEngine
 }
 
 func parseAccountID(value string) uuid.UUID {

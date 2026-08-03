@@ -79,6 +79,7 @@ type Config struct {
 				Enabled        bool   `mapstructure:"ENABLED"`
 				BaseURL        string `mapstructure:"BASE_URL"`
 				ChargePath     string `mapstructure:"CHARGE_PATH"`
+				APIKey         string `mapstructure:"API_KEY"`
 				SecretKey      string `mapstructure:"SECRET_KEY"`
 				WebhookToken   string `mapstructure:"WEBHOOK_TOKEN"`
 				WebhookSecret  string `mapstructure:"WEBHOOK_SECRET"`
@@ -164,6 +165,7 @@ func bindPaymentEnvironment() {
 		"externals.providers.xendit.enabled":            "EXTERNALS_PROVIDERS_XENDIT_ENABLED",
 		"externals.providers.xendit.account_id":         "EXTERNALS_PROVIDERS_XENDIT_ACCOUNT_ID",
 		"externals.providers.xendit.base_url":           "EXTERNALS_PROVIDERS_XENDIT_BASE_URL",
+		"externals.providers.xendit.api_key":            "EXTERNALS_PROVIDERS_XENDIT_API_KEY",
 		"externals.providers.xendit.secret_key":         "EXTERNALS_PROVIDERS_XENDIT_SECRET_KEY",
 		"externals.providers.xendit.webhook_token":      "EXTERNALS_PROVIDERS_XENDIT_WEBHOOK_TOKEN",
 		"externals.providers.xendit.webhook_secret":     "EXTERNALS_PROVIDERS_XENDIT_WEBHOOK_SECRET",

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -19,7 +18,6 @@ type paymentChannelsDBFieldName struct {
 	CountryCode   PaymentChannelsDBFieldNameType
 	Currency      PaymentChannelsDBFieldNameType
 	Status        PaymentChannelsDBFieldNameType
-	Metadata      PaymentChannelsDBFieldNameType
 	MetaCreatedAt PaymentChannelsDBFieldNameType
 	MetaCreatedBy PaymentChannelsDBFieldNameType
 	MetaUpdatedAt PaymentChannelsDBFieldNameType
@@ -36,7 +34,6 @@ var PaymentChannelsDBFieldName = paymentChannelsDBFieldName{
 	CountryCode:   "country_code",
 	Currency:      "currency",
 	Status:        "status",
-	Metadata:      "metadata",
 	MetaCreatedAt: "meta_created_at",
 	MetaCreatedBy: "meta_created_by",
 	MetaUpdatedAt: "meta_updated_at",
@@ -68,9 +65,6 @@ func NewPaymentChannelsDBFieldNameFromStr(field string) (dbField PaymentChannels
 
 	case string(PaymentChannelsDBFieldName.Status):
 		return PaymentChannelsDBFieldName.Status, true
-
-	case string(PaymentChannelsDBFieldName.Metadata):
-		return PaymentChannelsDBFieldName.Metadata, true
 
 	case string(PaymentChannelsDBFieldName.MetaCreatedAt):
 		return PaymentChannelsDBFieldName.MetaCreatedAt, true
@@ -156,15 +150,6 @@ var PaymentChannelsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "status",
 		Column:            "status",
 		SQLAlias:          "status",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -300,7 +285,6 @@ type PaymentChannels struct {
 	CountryCode string               `db:"country_code"`
 	Currency    string               `db:"currency"`
 	Status      PaymentChannelStatus `db:"status"`
-	Metadata    json.RawMessage      `db:"metadata"`
 
 	shared.MetaSignature
 }

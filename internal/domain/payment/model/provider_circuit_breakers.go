@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -26,7 +25,6 @@ type providerCircuitBreakersDBFieldName struct {
 	OpenUntil         ProviderCircuitBreakersDBFieldNameType
 	HalfOpenAt        ProviderCircuitBreakersDBFieldNameType
 	Reason            ProviderCircuitBreakersDBFieldNameType
-	Metadata          ProviderCircuitBreakersDBFieldNameType
 	MetaCreatedAt     ProviderCircuitBreakersDBFieldNameType
 	MetaCreatedBy     ProviderCircuitBreakersDBFieldNameType
 	MetaUpdatedAt     ProviderCircuitBreakersDBFieldNameType
@@ -49,7 +47,6 @@ var ProviderCircuitBreakersDBFieldName = providerCircuitBreakersDBFieldName{
 	OpenUntil:         "open_until",
 	HalfOpenAt:        "half_open_at",
 	Reason:            "reason",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "meta_created_at",
 	MetaCreatedBy:     "meta_created_by",
 	MetaUpdatedAt:     "meta_updated_at",
@@ -99,9 +96,6 @@ func NewProviderCircuitBreakersDBFieldNameFromStr(field string) (dbField Provide
 
 	case string(ProviderCircuitBreakersDBFieldName.Reason):
 		return ProviderCircuitBreakersDBFieldName.Reason, true
-
-	case string(ProviderCircuitBreakersDBFieldName.Metadata):
-		return ProviderCircuitBreakersDBFieldName.Metadata, true
 
 	case string(ProviderCircuitBreakersDBFieldName.MetaCreatedAt):
 		return ProviderCircuitBreakersDBFieldName.MetaCreatedAt, true
@@ -245,15 +239,6 @@ var ProviderCircuitBreakersFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -378,20 +363,19 @@ const (
 )
 
 type ProviderCircuitBreakers struct {
-	Id                uuid.UUID       `db:"id"`
-	ProviderAccountId uuid.UUID       `db:"provider_account_id"`
-	MethodCode        null.String     `db:"method_code"`
-	ChannelCode       null.String     `db:"channel_code"`
-	Status            CircuitStatus   `db:"status"`
-	FailureCount      int             `db:"failure_count"`
-	SuccessCount      int             `db:"success_count"`
-	LastFailureAt     null.Time       `db:"last_failure_at"`
-	LastSuccessAt     null.Time       `db:"last_success_at"`
-	OpenedAt          null.Time       `db:"opened_at"`
-	OpenUntil         null.Time       `db:"open_until"`
-	HalfOpenAt        null.Time       `db:"half_open_at"`
-	Reason            null.String     `db:"reason"`
-	Metadata          json.RawMessage `db:"metadata"`
+	Id                uuid.UUID     `db:"id"`
+	ProviderAccountId uuid.UUID     `db:"provider_account_id"`
+	MethodCode        null.String   `db:"method_code"`
+	ChannelCode       null.String   `db:"channel_code"`
+	Status            CircuitStatus `db:"status"`
+	FailureCount      int           `db:"failure_count"`
+	SuccessCount      int           `db:"success_count"`
+	LastFailureAt     null.Time     `db:"last_failure_at"`
+	LastSuccessAt     null.Time     `db:"last_success_at"`
+	OpenedAt          null.Time     `db:"opened_at"`
+	OpenUntil         null.Time     `db:"open_until"`
+	HalfOpenAt        null.Time     `db:"half_open_at"`
+	Reason            null.String   `db:"reason"`
 
 	shared.MetaSignature
 }

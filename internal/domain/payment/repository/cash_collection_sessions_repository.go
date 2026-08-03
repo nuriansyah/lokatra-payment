@@ -57,8 +57,6 @@ func composeInsertFieldsAndParamsCashCollectionSessions(cashCollectionSessionsLi
 				args = append(args, cashCollectionSessions.Currency)
 			case selectField.Notes():
 				args = append(args, cashCollectionSessions.Notes)
-			case selectField.Metadata():
-				args = append(args, cashCollectionSessions.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, cashCollectionSessions.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -183,10 +181,6 @@ func (ss CashCollectionSessionsSelectFields) Notes() CashCollectionSessionsField
 	return CashCollectionSessionsField("notes")
 }
 
-func (ss CashCollectionSessionsSelectFields) Metadata() CashCollectionSessionsField {
-	return CashCollectionSessionsField("metadata")
-}
-
 func (ss CashCollectionSessionsSelectFields) MetaCreatedAt() CashCollectionSessionsField {
 	return CashCollectionSessionsField("meta_created_at")
 }
@@ -227,7 +221,6 @@ func (ss CashCollectionSessionsSelectFields) All() CashCollectionSessionsFieldLi
 		ss.VarianceAmount(),
 		ss.Currency(),
 		ss.Notes(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -290,7 +283,6 @@ func defaultCashCollectionSessionsUpdateFields(cashCollectionSessions model.Cash
 		NewCashCollectionSessionsUpdateField(selectFields.VarianceAmount(), cashCollectionSessions.VarianceAmount),
 		NewCashCollectionSessionsUpdateField(selectFields.Currency(), cashCollectionSessions.Currency),
 		NewCashCollectionSessionsUpdateField(selectFields.Notes(), cashCollectionSessions.Notes),
-		NewCashCollectionSessionsUpdateField(selectFields.Metadata(), cashCollectionSessions.Metadata),
 		NewCashCollectionSessionsUpdateField(selectFields.MetaCreatedAt(), cashCollectionSessions.MetaCreatedAt),
 		NewCashCollectionSessionsUpdateField(selectFields.MetaCreatedBy(), cashCollectionSessions.MetaCreatedBy),
 		NewCashCollectionSessionsUpdateField(selectFields.MetaUpdatedAt(), cashCollectionSessions.MetaUpdatedAt),
@@ -626,9 +618,6 @@ func GetCashCollectionSessionsFieldType(cashCollectionSessionsField CashCollecti
 
 	case selectCashCollectionSessionsFields.Notes():
 		return "text"
-
-	case selectCashCollectionSessionsFields.Metadata():
-		return "jsonb"
 
 	case selectCashCollectionSessionsFields.MetaCreatedAt():
 		return "timestamptz"

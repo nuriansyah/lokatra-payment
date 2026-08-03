@@ -163,6 +163,16 @@ func Conflict(operationName string, domainName string, message string) error {
 	}
 }
 
+// WithCode returns a new Failure with a specific error code (e.g. ERR-PAY-01).
+func WithCode(errorCode string, message string) error {
+	status := shared.ProblemStatusForCode(errorCode)
+	return &Failure{
+		Code:      status,
+		ErrorCode: errorCode,
+		Message:   message,
+	}
+}
+
 // GetCode returns the error code of an error interface.
 func GetCode(err error) int {
 	if f, ok := err.(*Failure); ok {

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -30,7 +29,6 @@ type cashCollectionSessionsDBFieldName struct {
 	VarianceAmount     CashCollectionSessionsDBFieldNameType
 	Currency           CashCollectionSessionsDBFieldNameType
 	Notes              CashCollectionSessionsDBFieldNameType
-	Metadata           CashCollectionSessionsDBFieldNameType
 	MetaCreatedAt      CashCollectionSessionsDBFieldNameType
 	MetaCreatedBy      CashCollectionSessionsDBFieldNameType
 	MetaUpdatedAt      CashCollectionSessionsDBFieldNameType
@@ -54,7 +52,6 @@ var CashCollectionSessionsDBFieldName = cashCollectionSessionsDBFieldName{
 	VarianceAmount:     "variance_amount",
 	Currency:           "currency",
 	Notes:              "notes",
-	Metadata:           "metadata",
 	MetaCreatedAt:      "meta_created_at",
 	MetaCreatedBy:      "meta_created_by",
 	MetaUpdatedAt:      "meta_updated_at",
@@ -107,9 +104,6 @@ func NewCashCollectionSessionsDBFieldNameFromStr(field string) (dbField CashColl
 
 	case string(CashCollectionSessionsDBFieldName.Notes):
 		return CashCollectionSessionsDBFieldName.Notes, true
-
-	case string(CashCollectionSessionsDBFieldName.Metadata):
-		return CashCollectionSessionsDBFieldName.Metadata, true
 
 	case string(CashCollectionSessionsDBFieldName.MetaCreatedAt):
 		return CashCollectionSessionsDBFieldName.MetaCreatedAt, true
@@ -262,15 +256,6 @@ var CashCollectionSessionsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -409,7 +394,6 @@ type CashCollectionSessions struct {
 	VarianceAmount     decimal.Decimal   `db:"variance_amount"`
 	Currency           string            `db:"currency"`
 	Notes              null.String       `db:"notes"`
-	Metadata           json.RawMessage   `db:"metadata"`
 
 	shared.MetaSignature
 }

@@ -67,8 +67,6 @@ func composeInsertFieldsAndParamsPaymentIntents(paymentIntentsList []model.Payme
 				args = append(args, paymentIntents.IdempotencyKey)
 			case selectField.SourceSnapshot():
 				args = append(args, paymentIntents.SourceSnapshot)
-			case selectField.Metadata():
-				args = append(args, paymentIntents.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentIntents.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -213,10 +211,6 @@ func (ss PaymentIntentsSelectFields) SourceSnapshot() PaymentIntentsField {
 	return PaymentIntentsField("source_snapshot")
 }
 
-func (ss PaymentIntentsSelectFields) Metadata() PaymentIntentsField {
-	return PaymentIntentsField("metadata")
-}
-
 func (ss PaymentIntentsSelectFields) MetaCreatedAt() PaymentIntentsField {
 	return PaymentIntentsField("meta_created_at")
 }
@@ -262,7 +256,6 @@ func (ss PaymentIntentsSelectFields) All() PaymentIntentsFieldList {
 		ss.CancellationReason(),
 		ss.IdempotencyKey(),
 		ss.SourceSnapshot(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -330,7 +323,6 @@ func defaultPaymentIntentsUpdateFields(paymentIntents model.PaymentIntents) (pay
 		NewPaymentIntentsUpdateField(selectFields.CancellationReason(), paymentIntents.CancellationReason),
 		NewPaymentIntentsUpdateField(selectFields.IdempotencyKey(), paymentIntents.IdempotencyKey),
 		NewPaymentIntentsUpdateField(selectFields.SourceSnapshot(), paymentIntents.SourceSnapshot),
-		NewPaymentIntentsUpdateField(selectFields.Metadata(), paymentIntents.Metadata),
 		NewPaymentIntentsUpdateField(selectFields.MetaCreatedAt(), paymentIntents.MetaCreatedAt),
 		NewPaymentIntentsUpdateField(selectFields.MetaCreatedBy(), paymentIntents.MetaCreatedBy),
 		NewPaymentIntentsUpdateField(selectFields.MetaUpdatedAt(), paymentIntents.MetaUpdatedAt),
@@ -680,9 +672,6 @@ func GetPaymentIntentsFieldType(paymentIntentsField PaymentIntentsField) string 
 		return "text"
 
 	case selectPaymentIntentsFields.SourceSnapshot():
-		return "jsonb"
-
-	case selectPaymentIntentsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentIntentsFields.MetaCreatedAt():

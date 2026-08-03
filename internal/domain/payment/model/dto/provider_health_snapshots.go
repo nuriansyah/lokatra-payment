@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -33,13 +32,13 @@ type providerHealthSnapshotsDTOFieldName struct {
 	SampleSize        ProviderHealthSnapshotsDTOFieldNameType
 	WindowStartedAt   ProviderHealthSnapshotsDTOFieldNameType
 	WindowEndedAt     ProviderHealthSnapshotsDTOFieldNameType
-	Metadata          ProviderHealthSnapshotsDTOFieldNameType
-	MetaCreatedAt     ProviderHealthSnapshotsDTOFieldNameType
-	MetaCreatedBy     ProviderHealthSnapshotsDTOFieldNameType
-	MetaUpdatedAt     ProviderHealthSnapshotsDTOFieldNameType
-	MetaUpdatedBy     ProviderHealthSnapshotsDTOFieldNameType
-	MetaDeletedAt     ProviderHealthSnapshotsDTOFieldNameType
-	MetaDeletedBy     ProviderHealthSnapshotsDTOFieldNameType
+
+	MetaCreatedAt ProviderHealthSnapshotsDTOFieldNameType
+	MetaCreatedBy ProviderHealthSnapshotsDTOFieldNameType
+	MetaUpdatedAt ProviderHealthSnapshotsDTOFieldNameType
+	MetaUpdatedBy ProviderHealthSnapshotsDTOFieldNameType
+	MetaDeletedAt ProviderHealthSnapshotsDTOFieldNameType
+	MetaDeletedBy ProviderHealthSnapshotsDTOFieldNameType
 }
 
 var ProviderHealthSnapshotsDTOFieldName = providerHealthSnapshotsDTOFieldName{
@@ -55,13 +54,13 @@ var ProviderHealthSnapshotsDTOFieldName = providerHealthSnapshotsDTOFieldName{
 	SampleSize:        "sampleSize",
 	WindowStartedAt:   "windowStartedAt",
 	WindowEndedAt:     "windowEndedAt",
-	Metadata:          "metadata",
-	MetaCreatedAt:     "metaCreatedAt",
-	MetaCreatedBy:     "metaCreatedBy",
-	MetaUpdatedAt:     "metaUpdatedAt",
-	MetaUpdatedBy:     "metaUpdatedBy",
-	MetaDeletedAt:     "metaDeletedAt",
-	MetaDeletedBy:     "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderHealthSnapshotsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -103,9 +102,6 @@ func transformProviderHealthSnapshotsDTOFieldNameFromStr(field string) (dbField 
 	case string(ProviderHealthSnapshotsDTOFieldName.WindowEndedAt):
 		return string(model.ProviderHealthSnapshotsDBFieldName.WindowEndedAt), true
 
-	case string(ProviderHealthSnapshotsDTOFieldName.Metadata):
-		return string(model.ProviderHealthSnapshotsDBFieldName.Metadata), true
-
 	case string(ProviderHealthSnapshotsDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderHealthSnapshotsDBFieldName.MetaCreatedAt), true
 
@@ -117,12 +113,6 @@ func transformProviderHealthSnapshotsDTOFieldNameFromStr(field string) (dbField 
 
 	case string(ProviderHealthSnapshotsDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderHealthSnapshotsDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderHealthSnapshotsDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderHealthSnapshotsDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderHealthSnapshotsDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderHealthSnapshotsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderHealthSnapshotsFilterFieldSpecFromStr(field); found {
@@ -299,7 +289,6 @@ func NewProviderHealthSnapshotsSelectableResponse(providerHealthSnapshots model.
 			string(model.ProviderHealthSnapshotsDBFieldName.SampleSize),
 			string(model.ProviderHealthSnapshotsDBFieldName.WindowStartedAt),
 			string(model.ProviderHealthSnapshotsDBFieldName.WindowEndedAt),
-			string(model.ProviderHealthSnapshotsDBFieldName.Metadata),
 			string(model.ProviderHealthSnapshotsDBFieldName.MetaCreatedAt),
 			string(model.ProviderHealthSnapshotsDBFieldName.MetaCreatedBy),
 			string(model.ProviderHealthSnapshotsDBFieldName.MetaUpdatedAt),
@@ -396,13 +385,6 @@ func NewProviderHealthSnapshotsSelectableResponse(providerHealthSnapshots model.
 				key = outputField
 			}
 			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.WindowEndedAt, explicitAlias)
-
-		case string(model.ProviderHealthSnapshotsDBFieldName.Metadata):
-			key := string(ProviderHealthSnapshotsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderHealthSnapshotsSelectableValue(providerHealthSnapshotsSelectableResponse, key, providerHealthSnapshots.Metadata, explicitAlias)
 
 		case string(model.ProviderHealthSnapshotsDBFieldName.MetaCreatedAt):
 			key := string(ProviderHealthSnapshotsDTOFieldName.MetaCreatedAt)
@@ -528,7 +510,6 @@ type ProviderHealthSnapshotsCreateRequest struct {
 	SampleSize        int             `json:"sampleSize"`
 	WindowStartedAt   time.Time       `json:"windowStartedAt"`
 	WindowEndedAt     time.Time       `json:"windowEndedAt"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *ProviderHealthSnapshotsCreateRequest) Validate() (err error) {
@@ -551,7 +532,6 @@ func (d *ProviderHealthSnapshotsCreateRequest) ToModel() model.ProviderHealthSna
 		SampleSize:        d.SampleSize,
 		WindowStartedAt:   d.WindowStartedAt,
 		WindowEndedAt:     d.WindowEndedAt,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -588,7 +568,6 @@ type ProviderHealthSnapshotsUpdateRequest struct {
 	SampleSize        int             `json:"sampleSize"`
 	WindowStartedAt   time.Time       `json:"windowStartedAt"`
 	WindowEndedAt     time.Time       `json:"windowEndedAt"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *ProviderHealthSnapshotsUpdateRequest) Validate() (err error) {
@@ -609,7 +588,6 @@ func (d ProviderHealthSnapshotsUpdateRequest) ToModel() model.ProviderHealthSnap
 		SampleSize:        d.SampleSize,
 		WindowStartedAt:   d.WindowStartedAt,
 		WindowEndedAt:     d.WindowEndedAt,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -626,7 +604,6 @@ type ProviderHealthSnapshotsBulkUpdateRequest struct {
 	SampleSize        int             `json:"sampleSize"`
 	WindowStartedAt   time.Time       `json:"windowStartedAt"`
 	WindowEndedAt     time.Time       `json:"windowEndedAt"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d ProviderHealthSnapshotsBulkUpdateRequest) PrimaryID() ProviderHealthSnapshotsPrimaryID {
@@ -662,7 +639,6 @@ func (d ProviderHealthSnapshotsBulkUpdateRequest) ToModel() model.ProviderHealth
 		SampleSize:        d.SampleSize,
 		WindowStartedAt:   d.WindowStartedAt,
 		WindowEndedAt:     d.WindowEndedAt,
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -679,7 +655,6 @@ type ProviderHealthSnapshotsResponse struct {
 	SampleSize        int             `json:"sampleSize" example:"1"`
 	WindowStartedAt   time.Time       `json:"windowStartedAt" validate:"required" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	WindowEndedAt     time.Time       `json:"windowEndedAt" validate:"required" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata          json.RawMessage `json:"metadata" swaggertype:"object"`
 }
 
 func NewProviderHealthSnapshotsResponse(providerHealthSnapshots model.ProviderHealthSnapshots) ProviderHealthSnapshotsResponse {
@@ -696,7 +671,6 @@ func NewProviderHealthSnapshotsResponse(providerHealthSnapshots model.ProviderHe
 		SampleSize:        providerHealthSnapshots.SampleSize,
 		WindowStartedAt:   providerHealthSnapshots.WindowStartedAt,
 		WindowEndedAt:     providerHealthSnapshots.WindowEndedAt,
-		Metadata:          providerHealthSnapshots.Metadata,
 	}
 }
 

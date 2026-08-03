@@ -55,8 +55,6 @@ func composeInsertFieldsAndParamsPaymentOverpayments(paymentOverpaymentsList []m
 				args = append(args, paymentOverpayments.ResolvedAt)
 			case selectField.ResolvedBy():
 				args = append(args, paymentOverpayments.ResolvedBy)
-			case selectField.Metadata():
-				args = append(args, paymentOverpayments.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentOverpayments.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -177,10 +175,6 @@ func (ss PaymentOverpaymentsSelectFields) ResolvedBy() PaymentOverpaymentsField 
 	return PaymentOverpaymentsField("resolved_by")
 }
 
-func (ss PaymentOverpaymentsSelectFields) Metadata() PaymentOverpaymentsField {
-	return PaymentOverpaymentsField("metadata")
-}
-
 func (ss PaymentOverpaymentsSelectFields) MetaCreatedAt() PaymentOverpaymentsField {
 	return PaymentOverpaymentsField("meta_created_at")
 }
@@ -220,7 +214,6 @@ func (ss PaymentOverpaymentsSelectFields) All() PaymentOverpaymentsFieldList {
 		ss.ResolutionNotes(),
 		ss.ResolvedAt(),
 		ss.ResolvedBy(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -282,7 +275,6 @@ func defaultPaymentOverpaymentsUpdateFields(paymentOverpayments model.PaymentOve
 		NewPaymentOverpaymentsUpdateField(selectFields.ResolutionNotes(), paymentOverpayments.ResolutionNotes),
 		NewPaymentOverpaymentsUpdateField(selectFields.ResolvedAt(), paymentOverpayments.ResolvedAt),
 		NewPaymentOverpaymentsUpdateField(selectFields.ResolvedBy(), paymentOverpayments.ResolvedBy),
-		NewPaymentOverpaymentsUpdateField(selectFields.Metadata(), paymentOverpayments.Metadata),
 		NewPaymentOverpaymentsUpdateField(selectFields.MetaCreatedAt(), paymentOverpayments.MetaCreatedAt),
 		NewPaymentOverpaymentsUpdateField(selectFields.MetaCreatedBy(), paymentOverpayments.MetaCreatedBy),
 		NewPaymentOverpaymentsUpdateField(selectFields.MetaUpdatedAt(), paymentOverpayments.MetaUpdatedAt),
@@ -615,9 +607,6 @@ func GetPaymentOverpaymentsFieldType(paymentOverpaymentsField PaymentOverpayment
 
 	case selectPaymentOverpaymentsFields.ResolvedBy():
 		return "uuid"
-
-	case selectPaymentOverpaymentsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentOverpaymentsFields.MetaCreatedAt():
 		return "timestamptz"

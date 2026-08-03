@@ -26,7 +26,6 @@ type paymentCapturesDBFieldName struct {
 	FailureMessage         PaymentCapturesDBFieldNameType
 	RawRequest             PaymentCapturesDBFieldNameType
 	RawResponse            PaymentCapturesDBFieldNameType
-	Metadata               PaymentCapturesDBFieldNameType
 	MetaCreatedAt          PaymentCapturesDBFieldNameType
 	MetaCreatedBy          PaymentCapturesDBFieldNameType
 	MetaUpdatedAt          PaymentCapturesDBFieldNameType
@@ -48,7 +47,6 @@ var PaymentCapturesDBFieldName = paymentCapturesDBFieldName{
 	FailureMessage:         "failure_message",
 	RawRequest:             "raw_request",
 	RawResponse:            "raw_response",
-	Metadata:               "metadata",
 	MetaCreatedAt:          "meta_created_at",
 	MetaCreatedBy:          "meta_created_by",
 	MetaUpdatedAt:          "meta_updated_at",
@@ -95,9 +93,6 @@ func NewPaymentCapturesDBFieldNameFromStr(field string) (dbField PaymentCaptures
 
 	case string(PaymentCapturesDBFieldName.RawResponse):
 		return PaymentCapturesDBFieldName.RawResponse, true
-
-	case string(PaymentCapturesDBFieldName.Metadata):
-		return PaymentCapturesDBFieldName.Metadata, true
 
 	case string(PaymentCapturesDBFieldName.MetaCreatedAt):
 		return PaymentCapturesDBFieldName.MetaCreatedAt, true
@@ -228,15 +223,6 @@ var PaymentCapturesFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "rawResponse",
 		Column:            "raw_response",
 		SQLAlias:          "raw_response",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -377,7 +363,6 @@ type PaymentCaptures struct {
 	FailureMessage         null.String          `db:"failure_message"`
 	RawRequest             json.RawMessage      `db:"raw_request"`
 	RawResponse            json.RawMessage      `db:"raw_response"`
-	Metadata               json.RawMessage      `db:"metadata"`
 
 	shared.MetaSignature
 }

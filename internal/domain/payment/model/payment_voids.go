@@ -26,7 +26,6 @@ type paymentVoidsDBFieldName struct {
 	FailureMessage         PaymentVoidsDBFieldNameType
 	RawRequest             PaymentVoidsDBFieldNameType
 	RawResponse            PaymentVoidsDBFieldNameType
-	Metadata               PaymentVoidsDBFieldNameType
 	MetaCreatedAt          PaymentVoidsDBFieldNameType
 	MetaCreatedBy          PaymentVoidsDBFieldNameType
 	MetaUpdatedAt          PaymentVoidsDBFieldNameType
@@ -48,7 +47,6 @@ var PaymentVoidsDBFieldName = paymentVoidsDBFieldName{
 	FailureMessage:         "failure_message",
 	RawRequest:             "raw_request",
 	RawResponse:            "raw_response",
-	Metadata:               "metadata",
 	MetaCreatedAt:          "meta_created_at",
 	MetaCreatedBy:          "meta_created_by",
 	MetaUpdatedAt:          "meta_updated_at",
@@ -95,9 +93,6 @@ func NewPaymentVoidsDBFieldNameFromStr(field string) (dbField PaymentVoidsDBFiel
 
 	case string(PaymentVoidsDBFieldName.RawResponse):
 		return PaymentVoidsDBFieldName.RawResponse, true
-
-	case string(PaymentVoidsDBFieldName.Metadata):
-		return PaymentVoidsDBFieldName.Metadata, true
 
 	case string(PaymentVoidsDBFieldName.MetaCreatedAt):
 		return PaymentVoidsDBFieldName.MetaCreatedAt, true
@@ -228,15 +223,6 @@ var PaymentVoidsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "rawResponse",
 		Column:            "raw_response",
 		SQLAlias:          "raw_response",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -377,7 +363,6 @@ type PaymentVoids struct {
 	FailureMessage         null.String       `db:"failure_message"`
 	RawRequest             json.RawMessage   `db:"raw_request"`
 	RawResponse            json.RawMessage   `db:"raw_response"`
-	Metadata               json.RawMessage   `db:"metadata"`
 
 	shared.MetaSignature
 }

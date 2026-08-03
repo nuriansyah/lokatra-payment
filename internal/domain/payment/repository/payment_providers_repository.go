@@ -51,8 +51,6 @@ func composeInsertFieldsAndParamsPaymentProviders(paymentProvidersList []model.P
 				args = append(args, paymentProviders.SupportsVoid)
 			case selectField.SupportsWebhook():
 				args = append(args, paymentProviders.SupportsWebhook)
-			case selectField.Metadata():
-				args = append(args, paymentProviders.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentProviders.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -165,10 +163,6 @@ func (ss PaymentProvidersSelectFields) SupportsWebhook() PaymentProvidersField {
 	return PaymentProvidersField("supports_webhook")
 }
 
-func (ss PaymentProvidersSelectFields) Metadata() PaymentProvidersField {
-	return PaymentProvidersField("metadata")
-}
-
 func (ss PaymentProvidersSelectFields) MetaCreatedAt() PaymentProvidersField {
 	return PaymentProvidersField("meta_created_at")
 }
@@ -206,7 +200,6 @@ func (ss PaymentProvidersSelectFields) All() PaymentProvidersFieldList {
 		ss.SupportsCapture(),
 		ss.SupportsVoid(),
 		ss.SupportsWebhook(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -266,7 +259,6 @@ func defaultPaymentProvidersUpdateFields(paymentProviders model.PaymentProviders
 		NewPaymentProvidersUpdateField(selectFields.SupportsCapture(), paymentProviders.SupportsCapture),
 		NewPaymentProvidersUpdateField(selectFields.SupportsVoid(), paymentProviders.SupportsVoid),
 		NewPaymentProvidersUpdateField(selectFields.SupportsWebhook(), paymentProviders.SupportsWebhook),
-		NewPaymentProvidersUpdateField(selectFields.Metadata(), paymentProviders.Metadata),
 		NewPaymentProvidersUpdateField(selectFields.MetaCreatedAt(), paymentProviders.MetaCreatedAt),
 		NewPaymentProvidersUpdateField(selectFields.MetaCreatedBy(), paymentProviders.MetaCreatedBy),
 		NewPaymentProvidersUpdateField(selectFields.MetaUpdatedAt(), paymentProviders.MetaUpdatedAt),
@@ -593,9 +585,6 @@ func GetPaymentProvidersFieldType(paymentProvidersField PaymentProvidersField) s
 
 	case selectPaymentProvidersFields.SupportsWebhook():
 		return "bool"
-
-	case selectPaymentProvidersFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentProvidersFields.MetaCreatedAt():
 		return "timestamptz"

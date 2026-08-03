@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -36,7 +35,6 @@ type paymentOverpaymentsDTOFieldName struct {
 	ResolutionNotes   PaymentOverpaymentsDTOFieldNameType
 	ResolvedAt        PaymentOverpaymentsDTOFieldNameType
 	ResolvedBy        PaymentOverpaymentsDTOFieldNameType
-	Metadata          PaymentOverpaymentsDTOFieldNameType
 	MetaCreatedAt     PaymentOverpaymentsDTOFieldNameType
 	MetaCreatedBy     PaymentOverpaymentsDTOFieldNameType
 	MetaUpdatedAt     PaymentOverpaymentsDTOFieldNameType
@@ -59,7 +57,6 @@ var PaymentOverpaymentsDTOFieldName = paymentOverpaymentsDTOFieldName{
 	ResolutionNotes:   "resolutionNotes",
 	ResolvedAt:        "resolvedAt",
 	ResolvedBy:        "resolvedBy",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "metaCreatedAt",
 	MetaCreatedBy:     "metaCreatedBy",
 	MetaUpdatedAt:     "metaUpdatedAt",
@@ -110,9 +107,6 @@ func transformPaymentOverpaymentsDTOFieldNameFromStr(field string) (dbField stri
 	case string(PaymentOverpaymentsDTOFieldName.ResolvedBy):
 		return string(model.PaymentOverpaymentsDBFieldName.ResolvedBy), true
 
-	case string(PaymentOverpaymentsDTOFieldName.Metadata):
-		return string(model.PaymentOverpaymentsDBFieldName.Metadata), true
-
 	case string(PaymentOverpaymentsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentOverpaymentsDBFieldName.MetaCreatedAt), true
 
@@ -124,12 +118,6 @@ func transformPaymentOverpaymentsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(PaymentOverpaymentsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentOverpaymentsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentOverpaymentsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentOverpaymentsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentOverpaymentsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentOverpaymentsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentOverpaymentsFilterFieldSpecFromStr(field); found {
@@ -307,7 +295,6 @@ func NewPaymentOverpaymentsSelectableResponse(paymentOverpayments model.PaymentO
 			string(model.PaymentOverpaymentsDBFieldName.ResolutionNotes),
 			string(model.PaymentOverpaymentsDBFieldName.ResolvedAt),
 			string(model.PaymentOverpaymentsDBFieldName.ResolvedBy),
-			string(model.PaymentOverpaymentsDBFieldName.Metadata),
 			string(model.PaymentOverpaymentsDBFieldName.MetaCreatedAt),
 			string(model.PaymentOverpaymentsDBFieldName.MetaCreatedBy),
 			string(model.PaymentOverpaymentsDBFieldName.MetaUpdatedAt),
@@ -411,13 +398,6 @@ func NewPaymentOverpaymentsSelectableResponse(paymentOverpayments model.PaymentO
 				key = outputField
 			}
 			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.ResolvedBy.UUID, explicitAlias)
-
-		case string(model.PaymentOverpaymentsDBFieldName.Metadata):
-			key := string(PaymentOverpaymentsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentOverpaymentsSelectableValue(paymentOverpaymentsSelectableResponse, key, paymentOverpayments.Metadata, explicitAlias)
 
 		case string(model.PaymentOverpaymentsDBFieldName.MetaCreatedAt):
 			key := string(PaymentOverpaymentsDTOFieldName.MetaCreatedAt)
@@ -544,7 +524,6 @@ type PaymentOverpaymentsCreateRequest struct {
 	ResolutionNotes   string          `json:"resolutionNotes"`
 	ResolvedAt        time.Time       `json:"resolvedAt"`
 	ResolvedBy        uuid.UUID       `json:"resolvedBy"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentOverpaymentsCreateRequest) Validate() (err error) {
@@ -568,7 +547,6 @@ func (d *PaymentOverpaymentsCreateRequest) ToModel() model.PaymentOverpayments {
 		ResolutionNotes:   null.StringFrom(d.ResolutionNotes),
 		ResolvedAt:        null.TimeFrom(d.ResolvedAt),
 		ResolvedBy:        nuuid.From(d.ResolvedBy),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -606,7 +584,6 @@ type PaymentOverpaymentsUpdateRequest struct {
 	ResolutionNotes   string          `json:"resolutionNotes"`
 	ResolvedAt        time.Time       `json:"resolvedAt"`
 	ResolvedBy        uuid.UUID       `json:"resolvedBy"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentOverpaymentsUpdateRequest) Validate() (err error) {
@@ -628,7 +605,6 @@ func (d PaymentOverpaymentsUpdateRequest) ToModel() model.PaymentOverpayments {
 		ResolutionNotes:   null.StringFrom(d.ResolutionNotes),
 		ResolvedAt:        null.TimeFrom(d.ResolvedAt),
 		ResolvedBy:        nuuid.From(d.ResolvedBy),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -646,7 +622,6 @@ type PaymentOverpaymentsBulkUpdateRequest struct {
 	ResolutionNotes   string          `json:"resolutionNotes"`
 	ResolvedAt        time.Time       `json:"resolvedAt"`
 	ResolvedBy        uuid.UUID       `json:"resolvedBy"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d PaymentOverpaymentsBulkUpdateRequest) PrimaryID() PaymentOverpaymentsPrimaryID {
@@ -683,7 +658,6 @@ func (d PaymentOverpaymentsBulkUpdateRequest) ToModel() model.PaymentOverpayment
 		ResolutionNotes:   null.StringFrom(d.ResolutionNotes),
 		ResolvedAt:        null.TimeFrom(d.ResolvedAt),
 		ResolvedBy:        nuuid.From(d.ResolvedBy),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -701,7 +675,6 @@ type PaymentOverpaymentsResponse struct {
 	ResolutionNotes   string          `json:"resolutionNotes"`
 	ResolvedAt        time.Time       `json:"resolvedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	ResolvedBy        uuid.UUID       `json:"resolvedBy" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Metadata          json.RawMessage `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentOverpaymentsResponse(paymentOverpayments model.PaymentOverpayments) PaymentOverpaymentsResponse {
@@ -719,7 +692,6 @@ func NewPaymentOverpaymentsResponse(paymentOverpayments model.PaymentOverpayment
 		ResolutionNotes:   paymentOverpayments.ResolutionNotes.String,
 		ResolvedAt:        paymentOverpayments.ResolvedAt.Time,
 		ResolvedBy:        paymentOverpayments.ResolvedBy.UUID,
-		Metadata:          paymentOverpayments.Metadata,
 	}
 }
 

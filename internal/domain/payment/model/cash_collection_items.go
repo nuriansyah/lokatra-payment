@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -28,7 +27,6 @@ type cashCollectionItemsDBFieldName struct {
 	VoidedAt                CashCollectionItemsDBFieldNameType
 	VoidReason              CashCollectionItemsDBFieldNameType
 	Notes                   CashCollectionItemsDBFieldNameType
-	Metadata                CashCollectionItemsDBFieldNameType
 	MetaCreatedAt           CashCollectionItemsDBFieldNameType
 	MetaCreatedBy           CashCollectionItemsDBFieldNameType
 	MetaUpdatedAt           CashCollectionItemsDBFieldNameType
@@ -50,7 +48,6 @@ var CashCollectionItemsDBFieldName = cashCollectionItemsDBFieldName{
 	VoidedAt:                "voided_at",
 	VoidReason:              "void_reason",
 	Notes:                   "notes",
-	Metadata:                "metadata",
 	MetaCreatedAt:           "meta_created_at",
 	MetaCreatedBy:           "meta_created_by",
 	MetaUpdatedAt:           "meta_updated_at",
@@ -97,9 +94,6 @@ func NewCashCollectionItemsDBFieldNameFromStr(field string) (dbField CashCollect
 
 	case string(CashCollectionItemsDBFieldName.Notes):
 		return CashCollectionItemsDBFieldName.Notes, true
-
-	case string(CashCollectionItemsDBFieldName.Metadata):
-		return CashCollectionItemsDBFieldName.Metadata, true
 
 	case string(CashCollectionItemsDBFieldName.MetaCreatedAt):
 		return CashCollectionItemsDBFieldName.MetaCreatedAt, true
@@ -230,15 +224,6 @@ var CashCollectionItemsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "notes",
 		Column:            "notes",
 		SQLAlias:          "notes",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -378,7 +363,6 @@ type CashCollectionItems struct {
 	VoidedAt                null.Time       `db:"voided_at"`
 	VoidReason              null.String     `db:"void_reason"`
 	Notes                   null.String     `db:"notes"`
-	Metadata                json.RawMessage `db:"metadata"`
 
 	shared.MetaSignature
 }

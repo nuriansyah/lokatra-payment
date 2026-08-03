@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -27,13 +26,13 @@ type paymentProvidersDTOFieldName struct {
 	SupportsCapture       PaymentProvidersDTOFieldNameType
 	SupportsVoid          PaymentProvidersDTOFieldNameType
 	SupportsWebhook       PaymentProvidersDTOFieldNameType
-	Metadata              PaymentProvidersDTOFieldNameType
-	MetaCreatedAt         PaymentProvidersDTOFieldNameType
-	MetaCreatedBy         PaymentProvidersDTOFieldNameType
-	MetaUpdatedAt         PaymentProvidersDTOFieldNameType
-	MetaUpdatedBy         PaymentProvidersDTOFieldNameType
-	MetaDeletedAt         PaymentProvidersDTOFieldNameType
-	MetaDeletedBy         PaymentProvidersDTOFieldNameType
+
+	MetaCreatedAt PaymentProvidersDTOFieldNameType
+	MetaCreatedBy PaymentProvidersDTOFieldNameType
+	MetaUpdatedAt PaymentProvidersDTOFieldNameType
+	MetaUpdatedBy PaymentProvidersDTOFieldNameType
+	MetaDeletedAt PaymentProvidersDTOFieldNameType
+	MetaDeletedBy PaymentProvidersDTOFieldNameType
 }
 
 var PaymentProvidersDTOFieldName = paymentProvidersDTOFieldName{
@@ -48,13 +47,13 @@ var PaymentProvidersDTOFieldName = paymentProvidersDTOFieldName{
 	SupportsCapture:       "supportsCapture",
 	SupportsVoid:          "supportsVoid",
 	SupportsWebhook:       "supportsWebhook",
-	Metadata:              "metadata",
-	MetaCreatedAt:         "metaCreatedAt",
-	MetaCreatedBy:         "metaCreatedBy",
-	MetaUpdatedAt:         "metaUpdatedAt",
-	MetaUpdatedBy:         "metaUpdatedBy",
-	MetaDeletedAt:         "metaDeletedAt",
-	MetaDeletedBy:         "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentProvidersDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -93,9 +92,6 @@ func transformPaymentProvidersDTOFieldNameFromStr(field string) (dbField string,
 	case string(PaymentProvidersDTOFieldName.SupportsWebhook):
 		return string(model.PaymentProvidersDBFieldName.SupportsWebhook), true
 
-	case string(PaymentProvidersDTOFieldName.Metadata):
-		return string(model.PaymentProvidersDBFieldName.Metadata), true
-
 	case string(PaymentProvidersDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentProvidersDBFieldName.MetaCreatedAt), true
 
@@ -107,12 +103,6 @@ func transformPaymentProvidersDTOFieldNameFromStr(field string) (dbField string,
 
 	case string(PaymentProvidersDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentProvidersDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentProvidersDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentProvidersDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentProvidersDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentProvidersDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentProvidersFilterFieldSpecFromStr(field); found {
@@ -288,7 +278,6 @@ func NewPaymentProvidersSelectableResponse(paymentProviders model.PaymentProvide
 			string(model.PaymentProvidersDBFieldName.SupportsCapture),
 			string(model.PaymentProvidersDBFieldName.SupportsVoid),
 			string(model.PaymentProvidersDBFieldName.SupportsWebhook),
-			string(model.PaymentProvidersDBFieldName.Metadata),
 			string(model.PaymentProvidersDBFieldName.MetaCreatedAt),
 			string(model.PaymentProvidersDBFieldName.MetaCreatedBy),
 			string(model.PaymentProvidersDBFieldName.MetaUpdatedAt),
@@ -378,13 +367,6 @@ func NewPaymentProvidersSelectableResponse(paymentProviders model.PaymentProvide
 				key = outputField
 			}
 			setPaymentProvidersSelectableValue(paymentProvidersSelectableResponse, key, paymentProviders.SupportsWebhook, explicitAlias)
-
-		case string(model.PaymentProvidersDBFieldName.Metadata):
-			key := string(PaymentProvidersDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentProvidersSelectableValue(paymentProvidersSelectableResponse, key, paymentProviders.Metadata, explicitAlias)
 
 		case string(model.PaymentProvidersDBFieldName.MetaCreatedAt):
 			key := string(PaymentProvidersDTOFieldName.MetaCreatedAt)
@@ -509,7 +491,6 @@ type PaymentProvidersCreateRequest struct {
 	SupportsCapture       bool                 `json:"supportsCapture"`
 	SupportsVoid          bool                 `json:"supportsVoid"`
 	SupportsWebhook       bool                 `json:"supportsWebhook"`
-	Metadata              json.RawMessage      `json:"metadata"`
 }
 
 func (d *PaymentProvidersCreateRequest) Validate() (err error) {
@@ -531,7 +512,6 @@ func (d *PaymentProvidersCreateRequest) ToModel() model.PaymentProviders {
 		SupportsCapture:       d.SupportsCapture,
 		SupportsVoid:          d.SupportsVoid,
 		SupportsWebhook:       d.SupportsWebhook,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -567,7 +547,6 @@ type PaymentProvidersUpdateRequest struct {
 	SupportsCapture       bool                 `json:"supportsCapture"`
 	SupportsVoid          bool                 `json:"supportsVoid"`
 	SupportsWebhook       bool                 `json:"supportsWebhook"`
-	Metadata              json.RawMessage      `json:"metadata"`
 }
 
 func (d *PaymentProvidersUpdateRequest) Validate() (err error) {
@@ -587,7 +566,6 @@ func (d PaymentProvidersUpdateRequest) ToModel() model.PaymentProviders {
 		SupportsCapture:       d.SupportsCapture,
 		SupportsVoid:          d.SupportsVoid,
 		SupportsWebhook:       d.SupportsWebhook,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -603,7 +581,6 @@ type PaymentProvidersBulkUpdateRequest struct {
 	SupportsCapture       bool                 `json:"supportsCapture"`
 	SupportsVoid          bool                 `json:"supportsVoid"`
 	SupportsWebhook       bool                 `json:"supportsWebhook"`
-	Metadata              json.RawMessage      `json:"metadata"`
 }
 
 func (d PaymentProvidersBulkUpdateRequest) PrimaryID() PaymentProvidersPrimaryID {
@@ -638,7 +615,6 @@ func (d PaymentProvidersBulkUpdateRequest) ToModel() model.PaymentProviders {
 		SupportsCapture:       d.SupportsCapture,
 		SupportsVoid:          d.SupportsVoid,
 		SupportsWebhook:       d.SupportsWebhook,
-		Metadata:              d.Metadata,
 	}
 }
 
@@ -654,7 +630,6 @@ type PaymentProvidersResponse struct {
 	SupportsCapture       bool                 `json:"supportsCapture" example:"true"`
 	SupportsVoid          bool                 `json:"supportsVoid" example:"true"`
 	SupportsWebhook       bool                 `json:"supportsWebhook" example:"true"`
-	Metadata              json.RawMessage      `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentProvidersResponse(paymentProviders model.PaymentProviders) PaymentProvidersResponse {
@@ -670,7 +645,6 @@ func NewPaymentProvidersResponse(paymentProviders model.PaymentProviders) Paymen
 		SupportsCapture:       paymentProviders.SupportsCapture,
 		SupportsVoid:          paymentProviders.SupportsVoid,
 		SupportsWebhook:       paymentProviders.SupportsWebhook,
-		Metadata:              paymentProviders.Metadata,
 	}
 }
 

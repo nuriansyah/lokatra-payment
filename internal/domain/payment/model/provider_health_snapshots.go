@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -27,7 +26,6 @@ type providerHealthSnapshotsDBFieldName struct {
 	SampleSize        ProviderHealthSnapshotsDBFieldNameType
 	WindowStartedAt   ProviderHealthSnapshotsDBFieldNameType
 	WindowEndedAt     ProviderHealthSnapshotsDBFieldNameType
-	Metadata          ProviderHealthSnapshotsDBFieldNameType
 	MetaCreatedAt     ProviderHealthSnapshotsDBFieldNameType
 	MetaCreatedBy     ProviderHealthSnapshotsDBFieldNameType
 	MetaUpdatedAt     ProviderHealthSnapshotsDBFieldNameType
@@ -49,7 +47,6 @@ var ProviderHealthSnapshotsDBFieldName = providerHealthSnapshotsDBFieldName{
 	SampleSize:        "sample_size",
 	WindowStartedAt:   "window_started_at",
 	WindowEndedAt:     "window_ended_at",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "meta_created_at",
 	MetaCreatedBy:     "meta_created_by",
 	MetaUpdatedAt:     "meta_updated_at",
@@ -96,9 +93,6 @@ func NewProviderHealthSnapshotsDBFieldNameFromStr(field string) (dbField Provide
 
 	case string(ProviderHealthSnapshotsDBFieldName.WindowEndedAt):
 		return ProviderHealthSnapshotsDBFieldName.WindowEndedAt, true
-
-	case string(ProviderHealthSnapshotsDBFieldName.Metadata):
-		return ProviderHealthSnapshotsDBFieldName.Metadata, true
 
 	case string(ProviderHealthSnapshotsDBFieldName.MetaCreatedAt):
 		return ProviderHealthSnapshotsDBFieldName.MetaCreatedAt, true
@@ -233,15 +227,6 @@ var ProviderHealthSnapshotsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -370,7 +355,6 @@ type ProviderHealthSnapshots struct {
 	SampleSize        int                 `db:"sample_size"`
 	WindowStartedAt   time.Time           `db:"window_started_at"`
 	WindowEndedAt     time.Time           `db:"window_ended_at"`
-	Metadata          json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

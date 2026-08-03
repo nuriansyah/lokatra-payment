@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/nuriansyah/lokatra-payment/configs"
 	"github.com/nuriansyah/lokatra-payment/docs"
 	"github.com/nuriansyah/lokatra-payment/infras"
+paymentservice "github.com/nuriansyah/lokatra-payment/internal/domain/payment/service"
 	"github.com/nuriansyah/lokatra-payment/shared/logger"
 	"github.com/nuriansyah/lokatra-payment/transport/http/response"
 	"github.com/nuriansyah/lokatra-payment/transport/http/router"
@@ -37,19 +39,22 @@ const (
 
 // HTTP is the HTTP server.
 type HTTP struct {
-	Config *configs.Config
-	DB     *infras.PostgresConn
-	Router router.Router
-	State  ServerState
-	mux    *chi.Mux
+	Config        *configs.Config
+	DB            *infras.PostgresConn
+	Router        router.Router
+	HealthMonitor *paymentservice.HealthMonitor
+	State         ServerState
+	mux           *chi.Mux
+	cancelMonitor context.CancelFunc
 }
 
 // ProvideHTTP is the provider for HTTP.
-func ProvideHTTP(db *infras.PostgresConn, config *configs.Config, router router.Router) *HTTP {
+func ProvideHTTP(db *infras.PostgresConn, config *configs.Config, router router.Router, healthMonitor *paymentservice.HealthMonitor) *HTTP {
 	return &HTTP{
-		DB:     db,
-		Config: config,
-		Router: router,
+		DB:            db,
+		Config:        config,
+		Router:        router,
+		HealthMonitor: healthMonitor,
 	}
 }
 
@@ -61,6 +66,8 @@ func (h *HTTP) SetupAndServe() {
 	h.setupRoutes()
 	h.State = ServerStateReady
 
+	h.startHealthMonitor()
+
 	h.logServerInfo()
 
 	log.Info().Str("port", h.Config.Server.Port).Msg("Starting up HTTP server.")
@@ -69,6 +76,15 @@ func (h *HTTP) SetupAndServe() {
 	if err != nil {
 		logger.ErrorWithStack(err)
 	}
+}
+
+func (h *HTTP) startHealthMonitor() {
+	if h.HealthMonitor == nil {
+		return
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	h.cancelMonitor = cancel
+	go h.HealthMonitor.Start(ctx)
 }
 
 func (h *HTTP) setupSwaggerDocs() {
@@ -103,6 +119,13 @@ func (h *HTTP) GracefulShutdown() {
 	log.Info().Msg("Received SIGTERM.")
 	log.Info().Int64("seconds", shutdownConfig.GracePeriodSeconds).Msg("Entering grace period.")
 	h.State = ServerStateInGracePeriod
+
+	// Stop health monitor before grace period
+	if h.cancelMonitor != nil {
+		h.cancelMonitor()
+		log.Info().Msg("Health monitor stopped.")
+	}
+
 	time.Sleep(time.Duration(shutdownConfig.GracePeriodSeconds) * time.Second)
 
 	log.Info().Int64("seconds", shutdownConfig.CleanupPeriodSeconds).Msg("Entering cleanup period.")

@@ -55,8 +55,6 @@ func composeInsertFieldsAndParamsPaymentStatusEvents(paymentStatusEventsList []m
 				args = append(args, paymentStatusEvents.Reason)
 			case selectField.OccurredAt():
 				args = append(args, paymentStatusEvents.OccurredAt)
-			case selectField.Metadata():
-				args = append(args, paymentStatusEvents.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentStatusEvents.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -177,10 +175,6 @@ func (ss PaymentStatusEventsSelectFields) OccurredAt() PaymentStatusEventsField 
 	return PaymentStatusEventsField("occurred_at")
 }
 
-func (ss PaymentStatusEventsSelectFields) Metadata() PaymentStatusEventsField {
-	return PaymentStatusEventsField("metadata")
-}
-
 func (ss PaymentStatusEventsSelectFields) MetaCreatedAt() PaymentStatusEventsField {
 	return PaymentStatusEventsField("meta_created_at")
 }
@@ -220,7 +214,6 @@ func (ss PaymentStatusEventsSelectFields) All() PaymentStatusEventsFieldList {
 		ss.ProviderStatus(),
 		ss.Reason(),
 		ss.OccurredAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -282,7 +275,6 @@ func defaultPaymentStatusEventsUpdateFields(paymentStatusEvents model.PaymentSta
 		NewPaymentStatusEventsUpdateField(selectFields.ProviderStatus(), paymentStatusEvents.ProviderStatus),
 		NewPaymentStatusEventsUpdateField(selectFields.Reason(), paymentStatusEvents.Reason),
 		NewPaymentStatusEventsUpdateField(selectFields.OccurredAt(), paymentStatusEvents.OccurredAt),
-		NewPaymentStatusEventsUpdateField(selectFields.Metadata(), paymentStatusEvents.Metadata),
 		NewPaymentStatusEventsUpdateField(selectFields.MetaCreatedAt(), paymentStatusEvents.MetaCreatedAt),
 		NewPaymentStatusEventsUpdateField(selectFields.MetaCreatedBy(), paymentStatusEvents.MetaCreatedBy),
 		NewPaymentStatusEventsUpdateField(selectFields.MetaUpdatedAt(), paymentStatusEvents.MetaUpdatedAt),
@@ -615,9 +607,6 @@ func GetPaymentStatusEventsFieldType(paymentStatusEventsField PaymentStatusEvent
 
 	case selectPaymentStatusEventsFields.OccurredAt():
 		return "timestamptz"
-
-	case selectPaymentStatusEventsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentStatusEventsFields.MetaCreatedAt():
 		return "timestamptz"

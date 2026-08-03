@@ -33,7 +33,6 @@ type paymentCapturesDTOFieldName struct {
 	FailureMessage         PaymentCapturesDTOFieldNameType
 	RawRequest             PaymentCapturesDTOFieldNameType
 	RawResponse            PaymentCapturesDTOFieldNameType
-	Metadata               PaymentCapturesDTOFieldNameType
 	MetaCreatedAt          PaymentCapturesDTOFieldNameType
 	MetaCreatedBy          PaymentCapturesDTOFieldNameType
 	MetaUpdatedAt          PaymentCapturesDTOFieldNameType
@@ -55,7 +54,6 @@ var PaymentCapturesDTOFieldName = paymentCapturesDTOFieldName{
 	FailureMessage:         "failureMessage",
 	RawRequest:             "rawRequest",
 	RawResponse:            "rawResponse",
-	Metadata:               "metadata",
 	MetaCreatedAt:          "metaCreatedAt",
 	MetaCreatedBy:          "metaCreatedBy",
 	MetaUpdatedAt:          "metaUpdatedAt",
@@ -103,9 +101,6 @@ func transformPaymentCapturesDTOFieldNameFromStr(field string) (dbField string, 
 	case string(PaymentCapturesDTOFieldName.RawResponse):
 		return string(model.PaymentCapturesDBFieldName.RawResponse), true
 
-	case string(PaymentCapturesDTOFieldName.Metadata):
-		return string(model.PaymentCapturesDBFieldName.Metadata), true
-
 	case string(PaymentCapturesDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentCapturesDBFieldName.MetaCreatedAt), true
 
@@ -117,12 +112,6 @@ func transformPaymentCapturesDTOFieldNameFromStr(field string) (dbField string, 
 
 	case string(PaymentCapturesDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentCapturesDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentCapturesDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentCapturesDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentCapturesDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentCapturesDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentCapturesFilterFieldSpecFromStr(field); found {
@@ -299,7 +288,6 @@ func NewPaymentCapturesSelectableResponse(paymentCaptures model.PaymentCaptures,
 			string(model.PaymentCapturesDBFieldName.FailureMessage),
 			string(model.PaymentCapturesDBFieldName.RawRequest),
 			string(model.PaymentCapturesDBFieldName.RawResponse),
-			string(model.PaymentCapturesDBFieldName.Metadata),
 			string(model.PaymentCapturesDBFieldName.MetaCreatedAt),
 			string(model.PaymentCapturesDBFieldName.MetaCreatedBy),
 			string(model.PaymentCapturesDBFieldName.MetaUpdatedAt),
@@ -396,13 +384,6 @@ func NewPaymentCapturesSelectableResponse(paymentCaptures model.PaymentCaptures,
 				key = outputField
 			}
 			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.RawResponse, explicitAlias)
-
-		case string(model.PaymentCapturesDBFieldName.Metadata):
-			key := string(PaymentCapturesDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentCapturesSelectableValue(paymentCapturesSelectableResponse, key, paymentCaptures.Metadata, explicitAlias)
 
 		case string(model.PaymentCapturesDBFieldName.MetaCreatedAt):
 			key := string(PaymentCapturesDTOFieldName.MetaCreatedAt)
@@ -528,7 +509,6 @@ type PaymentCapturesCreateRequest struct {
 	FailureMessage         string                     `json:"failureMessage"`
 	RawRequest             json.RawMessage            `json:"rawRequest"`
 	RawResponse            json.RawMessage            `json:"rawResponse"`
-	Metadata               json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentCapturesCreateRequest) Validate() (err error) {
@@ -551,7 +531,6 @@ func (d *PaymentCapturesCreateRequest) ToModel() model.PaymentCaptures {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -588,7 +567,6 @@ type PaymentCapturesUpdateRequest struct {
 	FailureMessage         string                     `json:"failureMessage"`
 	RawRequest             json.RawMessage            `json:"rawRequest"`
 	RawResponse            json.RawMessage            `json:"rawResponse"`
-	Metadata               json.RawMessage            `json:"metadata"`
 }
 
 func (d *PaymentCapturesUpdateRequest) Validate() (err error) {
@@ -609,7 +587,6 @@ func (d PaymentCapturesUpdateRequest) ToModel() model.PaymentCaptures {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -626,7 +603,6 @@ type PaymentCapturesBulkUpdateRequest struct {
 	FailureMessage         string                     `json:"failureMessage"`
 	RawRequest             json.RawMessage            `json:"rawRequest"`
 	RawResponse            json.RawMessage            `json:"rawResponse"`
-	Metadata               json.RawMessage            `json:"metadata"`
 }
 
 func (d PaymentCapturesBulkUpdateRequest) PrimaryID() PaymentCapturesPrimaryID {
@@ -662,7 +638,6 @@ func (d PaymentCapturesBulkUpdateRequest) ToModel() model.PaymentCaptures {
 		FailureMessage:         null.StringFrom(d.FailureMessage),
 		RawRequest:             d.RawRequest,
 		RawResponse:            d.RawResponse,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -679,7 +654,6 @@ type PaymentCapturesResponse struct {
 	FailureMessage         string                     `json:"failureMessage"`
 	RawRequest             json.RawMessage            `json:"rawRequest" swaggertype:"object"`
 	RawResponse            json.RawMessage            `json:"rawResponse" swaggertype:"object"`
-	Metadata               json.RawMessage            `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentCapturesResponse(paymentCaptures model.PaymentCaptures) PaymentCapturesResponse {
@@ -696,7 +670,6 @@ func NewPaymentCapturesResponse(paymentCaptures model.PaymentCaptures) PaymentCa
 		FailureMessage:         paymentCaptures.FailureMessage.String,
 		RawRequest:             paymentCaptures.RawRequest,
 		RawResponse:            paymentCaptures.RawResponse,
-		Metadata:               paymentCaptures.Metadata,
 	}
 }
 

@@ -42,7 +42,6 @@ type paymentIntentsDTOFieldName struct {
 	CancellationReason  PaymentIntentsDTOFieldNameType
 	IdempotencyKey      PaymentIntentsDTOFieldNameType
 	SourceSnapshot      PaymentIntentsDTOFieldNameType
-	Metadata            PaymentIntentsDTOFieldNameType
 	MetaCreatedAt       PaymentIntentsDTOFieldNameType
 	MetaCreatedBy       PaymentIntentsDTOFieldNameType
 	MetaUpdatedAt       PaymentIntentsDTOFieldNameType
@@ -71,7 +70,6 @@ var PaymentIntentsDTOFieldName = paymentIntentsDTOFieldName{
 	CancellationReason:  "cancellationReason",
 	IdempotencyKey:      "idempotencyKey",
 	SourceSnapshot:      "sourceSnapshot",
-	Metadata:            "metadata",
 	MetaCreatedAt:       "metaCreatedAt",
 	MetaCreatedBy:       "metaCreatedBy",
 	MetaUpdatedAt:       "metaUpdatedAt",
@@ -140,9 +138,6 @@ func transformPaymentIntentsDTOFieldNameFromStr(field string) (dbField string, f
 	case string(PaymentIntentsDTOFieldName.SourceSnapshot):
 		return string(model.PaymentIntentsDBFieldName.SourceSnapshot), true
 
-	case string(PaymentIntentsDTOFieldName.Metadata):
-		return string(model.PaymentIntentsDBFieldName.Metadata), true
-
 	case string(PaymentIntentsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentIntentsDBFieldName.MetaCreatedAt), true
 
@@ -154,12 +149,6 @@ func transformPaymentIntentsDTOFieldNameFromStr(field string) (dbField string, f
 
 	case string(PaymentIntentsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentIntentsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentIntentsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentIntentsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentIntentsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentIntentsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentIntentsFilterFieldSpecFromStr(field); found {
@@ -343,7 +332,6 @@ func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, fi
 			string(model.PaymentIntentsDBFieldName.CancellationReason),
 			string(model.PaymentIntentsDBFieldName.IdempotencyKey),
 			string(model.PaymentIntentsDBFieldName.SourceSnapshot),
-			string(model.PaymentIntentsDBFieldName.Metadata),
 			string(model.PaymentIntentsDBFieldName.MetaCreatedAt),
 			string(model.PaymentIntentsDBFieldName.MetaCreatedBy),
 			string(model.PaymentIntentsDBFieldName.MetaUpdatedAt),
@@ -490,13 +478,6 @@ func NewPaymentIntentsSelectableResponse(paymentIntents model.PaymentIntents, fi
 			}
 			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.SourceSnapshot, explicitAlias)
 
-		case string(model.PaymentIntentsDBFieldName.Metadata):
-			key := string(PaymentIntentsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentIntentsSelectableValue(paymentIntentsSelectableResponse, key, paymentIntents.Metadata, explicitAlias)
-
 		case string(model.PaymentIntentsDBFieldName.MetaCreatedAt):
 			key := string(PaymentIntentsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -628,7 +609,6 @@ type PaymentIntentsCreateRequest struct {
 	CancellationReason  string                    `json:"cancellationReason"`
 	IdempotencyKey      string                    `json:"idempotencyKey"`
 	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
-	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentIntentsCreateRequest) Validate() (err error) {
@@ -658,7 +638,6 @@ func (d *PaymentIntentsCreateRequest) ToModel() model.PaymentIntents {
 		CancellationReason:  null.StringFrom(d.CancellationReason),
 		IdempotencyKey:      d.IdempotencyKey,
 		SourceSnapshot:      d.SourceSnapshot,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -702,7 +681,6 @@ type PaymentIntentsUpdateRequest struct {
 	CancellationReason  string                    `json:"cancellationReason"`
 	IdempotencyKey      string                    `json:"idempotencyKey"`
 	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
-	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentIntentsUpdateRequest) Validate() (err error) {
@@ -730,7 +708,6 @@ func (d PaymentIntentsUpdateRequest) ToModel() model.PaymentIntents {
 		CancellationReason:  null.StringFrom(d.CancellationReason),
 		IdempotencyKey:      d.IdempotencyKey,
 		SourceSnapshot:      d.SourceSnapshot,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -754,7 +731,6 @@ type PaymentIntentsBulkUpdateRequest struct {
 	CancellationReason  string                    `json:"cancellationReason"`
 	IdempotencyKey      string                    `json:"idempotencyKey"`
 	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot"`
-	Metadata            json.RawMessage           `json:"metadata"`
 }
 
 func (d PaymentIntentsBulkUpdateRequest) PrimaryID() PaymentIntentsPrimaryID {
@@ -797,7 +773,6 @@ func (d PaymentIntentsBulkUpdateRequest) ToModel() model.PaymentIntents {
 		CancellationReason:  null.StringFrom(d.CancellationReason),
 		IdempotencyKey:      d.IdempotencyKey,
 		SourceSnapshot:      d.SourceSnapshot,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -821,7 +796,6 @@ type PaymentIntentsResponse struct {
 	CancellationReason  string                    `json:"cancellationReason"`
 	IdempotencyKey      string                    `json:"idempotencyKey" validate:"required"`
 	SourceSnapshot      json.RawMessage           `json:"sourceSnapshot" swaggertype:"object"`
-	Metadata            json.RawMessage           `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentIntentsResponse(paymentIntents model.PaymentIntents) PaymentIntentsResponse {
@@ -845,7 +819,6 @@ func NewPaymentIntentsResponse(paymentIntents model.PaymentIntents) PaymentInten
 		CancellationReason:  paymentIntents.CancellationReason.String,
 		IdempotencyKey:      paymentIntents.IdempotencyKey,
 		SourceSnapshot:      paymentIntents.SourceSnapshot,
-		Metadata:            paymentIntents.Metadata,
 	}
 }
 

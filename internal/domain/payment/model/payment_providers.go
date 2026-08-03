@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -23,7 +22,6 @@ type paymentProvidersDBFieldName struct {
 	SupportsCapture       PaymentProvidersDBFieldNameType
 	SupportsVoid          PaymentProvidersDBFieldNameType
 	SupportsWebhook       PaymentProvidersDBFieldNameType
-	Metadata              PaymentProvidersDBFieldNameType
 	MetaCreatedAt         PaymentProvidersDBFieldNameType
 	MetaCreatedBy         PaymentProvidersDBFieldNameType
 	MetaUpdatedAt         PaymentProvidersDBFieldNameType
@@ -44,7 +42,6 @@ var PaymentProvidersDBFieldName = paymentProvidersDBFieldName{
 	SupportsCapture:       "supports_capture",
 	SupportsVoid:          "supports_void",
 	SupportsWebhook:       "supports_webhook",
-	Metadata:              "metadata",
 	MetaCreatedAt:         "meta_created_at",
 	MetaCreatedBy:         "meta_created_by",
 	MetaUpdatedAt:         "meta_updated_at",
@@ -88,9 +85,6 @@ func NewPaymentProvidersDBFieldNameFromStr(field string) (dbField PaymentProvide
 
 	case string(PaymentProvidersDBFieldName.SupportsWebhook):
 		return PaymentProvidersDBFieldName.SupportsWebhook, true
-
-	case string(PaymentProvidersDBFieldName.Metadata):
-		return PaymentProvidersDBFieldName.Metadata, true
 
 	case string(PaymentProvidersDBFieldName.MetaCreatedAt):
 		return PaymentProvidersDBFieldName.MetaCreatedAt, true
@@ -212,15 +206,6 @@ var PaymentProvidersFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "supportsWebhook",
 		Column:            "supports_webhook",
 		SQLAlias:          "supports_webhook",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -359,18 +344,17 @@ const (
 )
 
 type PaymentProviders struct {
-	Id                    uuid.UUID       `db:"id"`
-	Code                  string          `db:"code"`
-	Name                  string          `db:"name"`
-	ProviderType          ProviderType    `db:"provider_type"`
-	Status                ProviderStatus  `db:"status"`
-	SupportsRefund        bool            `db:"supports_refund"`
-	SupportsPartialRefund bool            `db:"supports_partial_refund"`
-	SupportsAuthorization bool            `db:"supports_authorization"`
-	SupportsCapture       bool            `db:"supports_capture"`
-	SupportsVoid          bool            `db:"supports_void"`
-	SupportsWebhook       bool            `db:"supports_webhook"`
-	Metadata              json.RawMessage `db:"metadata"`
+	Id                    uuid.UUID      `db:"id"`
+	Code                  string         `db:"code"`
+	Name                  string         `db:"name"`
+	ProviderType          ProviderType   `db:"provider_type"`
+	Status                ProviderStatus `db:"status"`
+	SupportsRefund        bool           `db:"supports_refund"`
+	SupportsPartialRefund bool           `db:"supports_partial_refund"`
+	SupportsAuthorization bool           `db:"supports_authorization"`
+	SupportsCapture       bool           `db:"supports_capture"`
+	SupportsVoid          bool           `db:"supports_void"`
+	SupportsWebhook       bool           `db:"supports_webhook"`
 
 	shared.MetaSignature
 }

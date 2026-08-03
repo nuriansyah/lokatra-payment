@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -30,7 +29,6 @@ type paymentInstructionsDBFieldName struct {
 	DeeplinkUrl         PaymentInstructionsDBFieldNameType
 	RetailOutletCode    PaymentInstructionsDBFieldNameType
 	ExpiresAt           PaymentInstructionsDBFieldNameType
-	Metadata            PaymentInstructionsDBFieldNameType
 	MetaCreatedAt       PaymentInstructionsDBFieldNameType
 	MetaCreatedBy       PaymentInstructionsDBFieldNameType
 	MetaUpdatedAt       PaymentInstructionsDBFieldNameType
@@ -57,7 +55,6 @@ var PaymentInstructionsDBFieldName = paymentInstructionsDBFieldName{
 	DeeplinkUrl:         "deeplink_url",
 	RetailOutletCode:    "retail_outlet_code",
 	ExpiresAt:           "expires_at",
-	Metadata:            "metadata",
 	MetaCreatedAt:       "meta_created_at",
 	MetaCreatedBy:       "meta_created_by",
 	MetaUpdatedAt:       "meta_updated_at",
@@ -119,9 +116,6 @@ func NewPaymentInstructionsDBFieldNameFromStr(field string) (dbField PaymentInst
 
 	case string(PaymentInstructionsDBFieldName.ExpiresAt):
 		return PaymentInstructionsDBFieldName.ExpiresAt, true
-
-	case string(PaymentInstructionsDBFieldName.Metadata):
-		return PaymentInstructionsDBFieldName.Metadata, true
 
 	case string(PaymentInstructionsDBFieldName.MetaCreatedAt):
 		return PaymentInstructionsDBFieldName.MetaCreatedAt, true
@@ -301,15 +295,6 @@ var PaymentInstructionsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -426,24 +411,23 @@ func validatePaymentInstructionsFilterGroupFieldNames(group FilterGroup) (err er
 }
 
 type PaymentInstructions struct {
-	Id                  uuid.UUID       `db:"id"`
-	PaymentAttemptId    uuid.UUID       `db:"payment_attempt_id"`
-	InstructionType     string          `db:"instruction_type"`
-	IsActive            bool            `db:"is_active"`
-	DisplayName         null.String     `db:"display_name"`
-	AccountNumber       null.String     `db:"account_number"`
-	AccountNumberMasked null.String     `db:"account_number_masked"`
-	AccountHolderName   null.String     `db:"account_holder_name"`
-	BankCode            null.String     `db:"bank_code"`
-	BillerCode          null.String     `db:"biller_code"`
-	PaymentCode         null.String     `db:"payment_code"`
-	QrString            null.String     `db:"qr_string"`
-	QrImageUrl          null.String     `db:"qr_image_url"`
-	CheckoutUrl         null.String     `db:"checkout_url"`
-	DeeplinkUrl         null.String     `db:"deeplink_url"`
-	RetailOutletCode    null.String     `db:"retail_outlet_code"`
-	ExpiresAt           null.Time       `db:"expires_at"`
-	Metadata            json.RawMessage `db:"metadata"`
+	Id                  uuid.UUID   `db:"id"`
+	PaymentAttemptId    uuid.UUID   `db:"payment_attempt_id"`
+	InstructionType     string      `db:"instruction_type"`
+	IsActive            bool        `db:"is_active"`
+	DisplayName         null.String `db:"display_name"`
+	AccountNumber       null.String `db:"account_number"`
+	AccountNumberMasked null.String `db:"account_number_masked"`
+	AccountHolderName   null.String `db:"account_holder_name"`
+	BankCode            null.String `db:"bank_code"`
+	BillerCode          null.String `db:"biller_code"`
+	PaymentCode         null.String `db:"payment_code"`
+	QrString            null.String `db:"qr_string"`
+	QrImageUrl          null.String `db:"qr_image_url"`
+	CheckoutUrl         null.String `db:"checkout_url"`
+	DeeplinkUrl         null.String `db:"deeplink_url"`
+	RetailOutletCode    null.String `db:"retail_outlet_code"`
+	ExpiresAt           null.Time   `db:"expires_at"`
 
 	shared.MetaSignature
 }

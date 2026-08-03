@@ -39,8 +39,6 @@ func composeInsertFieldsAndParamsPaymentMethods(paymentMethodsList []model.Payme
 				args = append(args, paymentMethods.Name)
 			case selectField.Status():
 				args = append(args, paymentMethods.Status)
-			case selectField.Metadata():
-				args = append(args, paymentMethods.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentMethods.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -129,10 +127,6 @@ func (ss PaymentMethodsSelectFields) Status() PaymentMethodsField {
 	return PaymentMethodsField("status")
 }
 
-func (ss PaymentMethodsSelectFields) Metadata() PaymentMethodsField {
-	return PaymentMethodsField("metadata")
-}
-
 func (ss PaymentMethodsSelectFields) MetaCreatedAt() PaymentMethodsField {
 	return PaymentMethodsField("meta_created_at")
 }
@@ -164,7 +158,6 @@ func (ss PaymentMethodsSelectFields) All() PaymentMethodsFieldList {
 		ss.MethodType(),
 		ss.Name(),
 		ss.Status(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -218,7 +211,6 @@ func defaultPaymentMethodsUpdateFields(paymentMethods model.PaymentMethods) (pay
 		NewPaymentMethodsUpdateField(selectFields.MethodType(), paymentMethods.MethodType),
 		NewPaymentMethodsUpdateField(selectFields.Name(), paymentMethods.Name),
 		NewPaymentMethodsUpdateField(selectFields.Status(), paymentMethods.Status),
-		NewPaymentMethodsUpdateField(selectFields.Metadata(), paymentMethods.Metadata),
 		NewPaymentMethodsUpdateField(selectFields.MetaCreatedAt(), paymentMethods.MetaCreatedAt),
 		NewPaymentMethodsUpdateField(selectFields.MetaCreatedBy(), paymentMethods.MetaCreatedBy),
 		NewPaymentMethodsUpdateField(selectFields.MetaUpdatedAt(), paymentMethods.MetaUpdatedAt),
@@ -527,9 +519,6 @@ func GetPaymentMethodsFieldType(paymentMethodsField PaymentMethodsField) string 
 
 	case selectPaymentMethodsFields.Status():
 		return "payment_method_status_enum"
-
-	case selectPaymentMethodsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentMethodsFields.MetaCreatedAt():
 		return "timestamptz"

@@ -34,6 +34,13 @@ var paymentServiceSet = wire.NewSet(
 	paymentservice.ProvideCircuitBreaker,
 	paymentservice.ProvideExecutionLocker,
 	paymentservice.ProvidePaymentService,
+	paymentservice.ProvideRoutingEngine,
+	paymentservice.ProvideHealthMonitor,
+	paymentservice.ProvideAnalyticsPublisher,
+)
+
+var payRouteAdminSet = wire.NewSet(
+	handlers.ProvidePayRouteAdminHandler,
 )
 
 // Wiring for HTTP routing.
@@ -54,6 +61,8 @@ func InitializeServiceService() *http.HTTP {
 		repositoriesService,
 		// payment service
 		paymentServiceSet,
+		// payroute admin
+		payRouteAdminSet,
 		// routing
 		routingService,
 		// selected transport layer

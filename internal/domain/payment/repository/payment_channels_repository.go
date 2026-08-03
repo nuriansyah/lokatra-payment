@@ -43,8 +43,6 @@ func composeInsertFieldsAndParamsPaymentChannels(paymentChannelsList []model.Pay
 				args = append(args, paymentChannels.Currency)
 			case selectField.Status():
 				args = append(args, paymentChannels.Status)
-			case selectField.Metadata():
-				args = append(args, paymentChannels.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentChannels.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -141,10 +139,6 @@ func (ss PaymentChannelsSelectFields) Status() PaymentChannelsField {
 	return PaymentChannelsField("status")
 }
 
-func (ss PaymentChannelsSelectFields) Metadata() PaymentChannelsField {
-	return PaymentChannelsField("metadata")
-}
-
 func (ss PaymentChannelsSelectFields) MetaCreatedAt() PaymentChannelsField {
 	return PaymentChannelsField("meta_created_at")
 }
@@ -178,7 +172,6 @@ func (ss PaymentChannelsSelectFields) All() PaymentChannelsFieldList {
 		ss.CountryCode(),
 		ss.Currency(),
 		ss.Status(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -234,7 +227,6 @@ func defaultPaymentChannelsUpdateFields(paymentChannels model.PaymentChannels) (
 		NewPaymentChannelsUpdateField(selectFields.CountryCode(), paymentChannels.CountryCode),
 		NewPaymentChannelsUpdateField(selectFields.Currency(), paymentChannels.Currency),
 		NewPaymentChannelsUpdateField(selectFields.Status(), paymentChannels.Status),
-		NewPaymentChannelsUpdateField(selectFields.Metadata(), paymentChannels.Metadata),
 		NewPaymentChannelsUpdateField(selectFields.MetaCreatedAt(), paymentChannels.MetaCreatedAt),
 		NewPaymentChannelsUpdateField(selectFields.MetaCreatedBy(), paymentChannels.MetaCreatedBy),
 		NewPaymentChannelsUpdateField(selectFields.MetaUpdatedAt(), paymentChannels.MetaUpdatedAt),
@@ -549,9 +541,6 @@ func GetPaymentChannelsFieldType(paymentChannelsField PaymentChannelsField) stri
 
 	case selectPaymentChannelsFields.Status():
 		return "payment_channel_status_enum"
-
-	case selectPaymentChannelsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentChannelsFields.MetaCreatedAt():
 		return "timestamptz"

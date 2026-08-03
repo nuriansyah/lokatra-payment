@@ -67,8 +67,6 @@ func composeInsertFieldsAndParamsPaymentRouteCandidatesRuntime(paymentRouteCandi
 				args = append(args, paymentRouteCandidatesRuntime.IsEnabled)
 			case selectField.ConditionExpr():
 				args = append(args, paymentRouteCandidatesRuntime.ConditionExpr)
-			case selectField.Metadata():
-				args = append(args, paymentRouteCandidatesRuntime.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentRouteCandidatesRuntime.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -213,10 +211,6 @@ func (ss PaymentRouteCandidatesRuntimeSelectFields) ConditionExpr() PaymentRoute
 	return PaymentRouteCandidatesRuntimeField("condition_expr")
 }
 
-func (ss PaymentRouteCandidatesRuntimeSelectFields) Metadata() PaymentRouteCandidatesRuntimeField {
-	return PaymentRouteCandidatesRuntimeField("metadata")
-}
-
 func (ss PaymentRouteCandidatesRuntimeSelectFields) MetaCreatedAt() PaymentRouteCandidatesRuntimeField {
 	return PaymentRouteCandidatesRuntimeField("meta_created_at")
 }
@@ -262,7 +256,6 @@ func (ss PaymentRouteCandidatesRuntimeSelectFields) All() PaymentRouteCandidates
 		ss.MaxAttempts(),
 		ss.IsEnabled(),
 		ss.ConditionExpr(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -330,7 +323,6 @@ func defaultPaymentRouteCandidatesRuntimeUpdateFields(paymentRouteCandidatesRunt
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.MaxAttempts(), paymentRouteCandidatesRuntime.MaxAttempts),
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.IsEnabled(), paymentRouteCandidatesRuntime.IsEnabled),
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.ConditionExpr(), paymentRouteCandidatesRuntime.ConditionExpr),
-		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.Metadata(), paymentRouteCandidatesRuntime.Metadata),
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.MetaCreatedAt(), paymentRouteCandidatesRuntime.MetaCreatedAt),
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.MetaCreatedBy(), paymentRouteCandidatesRuntime.MetaCreatedBy),
 		NewPaymentRouteCandidatesRuntimeUpdateField(selectFields.MetaUpdatedAt(), paymentRouteCandidatesRuntime.MetaUpdatedAt),
@@ -680,9 +672,6 @@ func GetPaymentRouteCandidatesRuntimeFieldType(paymentRouteCandidatesRuntimeFiel
 		return "bool"
 
 	case selectPaymentRouteCandidatesRuntimeFields.ConditionExpr():
-		return "jsonb"
-
-	case selectPaymentRouteCandidatesRuntimeFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentRouteCandidatesRuntimeFields.MetaCreatedAt():

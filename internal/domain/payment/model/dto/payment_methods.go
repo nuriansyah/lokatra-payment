@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -21,7 +20,6 @@ type paymentMethodsDTOFieldName struct {
 	MethodType    PaymentMethodsDTOFieldNameType
 	Name          PaymentMethodsDTOFieldNameType
 	Status        PaymentMethodsDTOFieldNameType
-	Metadata      PaymentMethodsDTOFieldNameType
 	MetaCreatedAt PaymentMethodsDTOFieldNameType
 	MetaCreatedBy PaymentMethodsDTOFieldNameType
 	MetaUpdatedAt PaymentMethodsDTOFieldNameType
@@ -36,7 +34,6 @@ var PaymentMethodsDTOFieldName = paymentMethodsDTOFieldName{
 	MethodType:    "methodType",
 	Name:          "name",
 	Status:        "status",
-	Metadata:      "metadata",
 	MetaCreatedAt: "metaCreatedAt",
 	MetaCreatedBy: "metaCreatedBy",
 	MetaUpdatedAt: "metaUpdatedAt",
@@ -63,9 +60,6 @@ func transformPaymentMethodsDTOFieldNameFromStr(field string) (dbField string, f
 	case string(PaymentMethodsDTOFieldName.Status):
 		return string(model.PaymentMethodsDBFieldName.Status), true
 
-	case string(PaymentMethodsDTOFieldName.Metadata):
-		return string(model.PaymentMethodsDBFieldName.Metadata), true
-
 	case string(PaymentMethodsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentMethodsDBFieldName.MetaCreatedAt), true
 
@@ -77,12 +71,6 @@ func transformPaymentMethodsDTOFieldNameFromStr(field string) (dbField string, f
 
 	case string(PaymentMethodsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentMethodsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentMethodsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentMethodsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentMethodsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentMethodsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentMethodsFilterFieldSpecFromStr(field); found {
@@ -252,7 +240,6 @@ func NewPaymentMethodsSelectableResponse(paymentMethods model.PaymentMethods, fi
 			string(model.PaymentMethodsDBFieldName.MethodType),
 			string(model.PaymentMethodsDBFieldName.Name),
 			string(model.PaymentMethodsDBFieldName.Status),
-			string(model.PaymentMethodsDBFieldName.Metadata),
 			string(model.PaymentMethodsDBFieldName.MetaCreatedAt),
 			string(model.PaymentMethodsDBFieldName.MetaCreatedBy),
 			string(model.PaymentMethodsDBFieldName.MetaUpdatedAt),
@@ -300,13 +287,6 @@ func NewPaymentMethodsSelectableResponse(paymentMethods model.PaymentMethods, fi
 				key = outputField
 			}
 			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, model.PaymentMethodStatus(paymentMethods.Status), explicitAlias)
-
-		case string(model.PaymentMethodsDBFieldName.Metadata):
-			key := string(PaymentMethodsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentMethodsSelectableValue(paymentMethodsSelectableResponse, key, paymentMethods.Metadata, explicitAlias)
 
 		case string(model.PaymentMethodsDBFieldName.MetaCreatedAt):
 			key := string(PaymentMethodsDTOFieldName.MetaCreatedAt)
@@ -425,7 +405,6 @@ type PaymentMethodsCreateRequest struct {
 	MethodType model.PaymentMethodType   `json:"methodType" example:"card" enums:"card,bank_transfer,ewallet,cash,cod"`
 	Name       string                    `json:"name"`
 	Status     model.PaymentMethodStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata   json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentMethodsCreateRequest) Validate() (err error) {
@@ -441,7 +420,6 @@ func (d *PaymentMethodsCreateRequest) ToModel() model.PaymentMethods {
 		MethodType: d.MethodType,
 		Name:       d.Name,
 		Status:     d.Status,
-		Metadata:   d.Metadata,
 	}
 }
 
@@ -471,7 +449,6 @@ type PaymentMethodsUpdateRequest struct {
 	MethodType model.PaymentMethodType   `json:"methodType" example:"card" enums:"card,bank_transfer,ewallet,cash,cod"`
 	Name       string                    `json:"name"`
 	Status     model.PaymentMethodStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata   json.RawMessage           `json:"metadata"`
 }
 
 func (d *PaymentMethodsUpdateRequest) Validate() (err error) {
@@ -485,7 +462,6 @@ func (d PaymentMethodsUpdateRequest) ToModel() model.PaymentMethods {
 		MethodType: d.MethodType,
 		Name:       d.Name,
 		Status:     d.Status,
-		Metadata:   d.Metadata,
 	}
 }
 
@@ -495,7 +471,6 @@ type PaymentMethodsBulkUpdateRequest struct {
 	MethodType model.PaymentMethodType   `json:"methodType" example:"card" enums:"card,bank_transfer,ewallet,cash,cod"`
 	Name       string                    `json:"name"`
 	Status     model.PaymentMethodStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
-	Metadata   json.RawMessage           `json:"metadata"`
 }
 
 func (d PaymentMethodsBulkUpdateRequest) PrimaryID() PaymentMethodsPrimaryID {
@@ -524,7 +499,6 @@ func (d PaymentMethodsBulkUpdateRequest) ToModel() model.PaymentMethods {
 		MethodType: d.MethodType,
 		Name:       d.Name,
 		Status:     d.Status,
-		Metadata:   d.Metadata,
 	}
 }
 
@@ -534,7 +508,6 @@ type PaymentMethodsResponse struct {
 	MethodType model.PaymentMethodType   `json:"methodType" validate:"required,oneof=card bank_transfer ewallet cash cod" enums:"card,bank_transfer,ewallet,cash,cod"`
 	Name       string                    `json:"name" validate:"required"`
 	Status     model.PaymentMethodStatus `json:"status" validate:"oneof=active inactive deprecated" enums:"active,inactive,deprecated"`
-	Metadata   json.RawMessage           `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentMethodsResponse(paymentMethods model.PaymentMethods) PaymentMethodsResponse {
@@ -544,7 +517,6 @@ func NewPaymentMethodsResponse(paymentMethods model.PaymentMethods) PaymentMetho
 		MethodType: model.PaymentMethodType(paymentMethods.MethodType),
 		Name:       paymentMethods.Name,
 		Status:     model.PaymentMethodStatus(paymentMethods.Status),
-		Metadata:   paymentMethods.Metadata,
 	}
 }
 

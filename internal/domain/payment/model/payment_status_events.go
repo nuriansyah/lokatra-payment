@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -28,7 +27,6 @@ type paymentStatusEventsDBFieldName struct {
 	ProviderStatus         PaymentStatusEventsDBFieldNameType
 	Reason                 PaymentStatusEventsDBFieldNameType
 	OccurredAt             PaymentStatusEventsDBFieldNameType
-	Metadata               PaymentStatusEventsDBFieldNameType
 	MetaCreatedAt          PaymentStatusEventsDBFieldNameType
 	MetaCreatedBy          PaymentStatusEventsDBFieldNameType
 	MetaUpdatedAt          PaymentStatusEventsDBFieldNameType
@@ -51,7 +49,6 @@ var PaymentStatusEventsDBFieldName = paymentStatusEventsDBFieldName{
 	ProviderStatus:         "provider_status",
 	Reason:                 "reason",
 	OccurredAt:             "occurred_at",
-	Metadata:               "metadata",
 	MetaCreatedAt:          "meta_created_at",
 	MetaCreatedBy:          "meta_created_by",
 	MetaUpdatedAt:          "meta_updated_at",
@@ -101,9 +98,6 @@ func NewPaymentStatusEventsDBFieldNameFromStr(field string) (dbField PaymentStat
 
 	case string(PaymentStatusEventsDBFieldName.OccurredAt):
 		return PaymentStatusEventsDBFieldName.OccurredAt, true
-
-	case string(PaymentStatusEventsDBFieldName.Metadata):
-		return PaymentStatusEventsDBFieldName.Metadata, true
 
 	case string(PaymentStatusEventsDBFieldName.MetaCreatedAt):
 		return PaymentStatusEventsDBFieldName.MetaCreatedAt, true
@@ -247,15 +241,6 @@ var PaymentStatusEventsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -372,20 +357,19 @@ func validatePaymentStatusEventsFilterGroupFieldNames(group FilterGroup) (err er
 }
 
 type PaymentStatusEvents struct {
-	Id                     uuid.UUID       `db:"id"`
-	PaymentIntentId        nuuid.NUUID     `db:"payment_intent_id"`
-	PaymentAttemptId       nuuid.NUUID     `db:"payment_attempt_id"`
-	ProviderWebhookEventId nuuid.NUUID     `db:"provider_webhook_event_id"`
-	SourceType             string          `db:"source_type"`
-	EventType              string          `db:"event_type"`
-	OldIntentStatus        null.String     `db:"old_intent_status"`
-	NewIntentStatus        null.String     `db:"new_intent_status"`
-	OldAttemptStatus       null.String     `db:"old_attempt_status"`
-	NewAttemptStatus       null.String     `db:"new_attempt_status"`
-	ProviderStatus         null.String     `db:"provider_status"`
-	Reason                 null.String     `db:"reason"`
-	OccurredAt             time.Time       `db:"occurred_at"`
-	Metadata               json.RawMessage `db:"metadata"`
+	Id                     uuid.UUID   `db:"id"`
+	PaymentIntentId        nuuid.NUUID `db:"payment_intent_id"`
+	PaymentAttemptId       nuuid.NUUID `db:"payment_attempt_id"`
+	ProviderWebhookEventId nuuid.NUUID `db:"provider_webhook_event_id"`
+	SourceType             string      `db:"source_type"`
+	EventType              string      `db:"event_type"`
+	OldIntentStatus        null.String `db:"old_intent_status"`
+	NewIntentStatus        null.String `db:"new_intent_status"`
+	OldAttemptStatus       null.String `db:"old_attempt_status"`
+	NewAttemptStatus       null.String `db:"new_attempt_status"`
+	ProviderStatus         null.String `db:"provider_status"`
+	Reason                 null.String `db:"reason"`
+	OccurredAt             time.Time   `db:"occurred_at"`
 
 	shared.MetaSignature
 }

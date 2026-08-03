@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsCashCollectionItems(cashCollectionItemsList []m
 				args = append(args, cashCollectionItems.VoidReason)
 			case selectField.Notes():
 				args = append(args, cashCollectionItems.Notes)
-			case selectField.Metadata():
-				args = append(args, cashCollectionItems.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, cashCollectionItems.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss CashCollectionItemsSelectFields) Notes() CashCollectionItemsField {
 	return CashCollectionItemsField("notes")
 }
 
-func (ss CashCollectionItemsSelectFields) Metadata() CashCollectionItemsField {
-	return CashCollectionItemsField("metadata")
-}
-
 func (ss CashCollectionItemsSelectFields) MetaCreatedAt() CashCollectionItemsField {
 	return CashCollectionItemsField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss CashCollectionItemsSelectFields) All() CashCollectionItemsFieldList {
 		ss.VoidedAt(),
 		ss.VoidReason(),
 		ss.Notes(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultCashCollectionItemsUpdateFields(cashCollectionItems model.CashCollec
 		NewCashCollectionItemsUpdateField(selectFields.VoidedAt(), cashCollectionItems.VoidedAt),
 		NewCashCollectionItemsUpdateField(selectFields.VoidReason(), cashCollectionItems.VoidReason),
 		NewCashCollectionItemsUpdateField(selectFields.Notes(), cashCollectionItems.Notes),
-		NewCashCollectionItemsUpdateField(selectFields.Metadata(), cashCollectionItems.Metadata),
 		NewCashCollectionItemsUpdateField(selectFields.MetaCreatedAt(), cashCollectionItems.MetaCreatedAt),
 		NewCashCollectionItemsUpdateField(selectFields.MetaCreatedBy(), cashCollectionItems.MetaCreatedBy),
 		NewCashCollectionItemsUpdateField(selectFields.MetaUpdatedAt(), cashCollectionItems.MetaUpdatedAt),
@@ -604,9 +596,6 @@ func GetCashCollectionItemsFieldType(cashCollectionItemsField CashCollectionItem
 
 	case selectCashCollectionItemsFields.Notes():
 		return "text"
-
-	case selectCashCollectionItemsFields.Metadata():
-		return "jsonb"
 
 	case selectCashCollectionItemsFields.MetaCreatedAt():
 		return "timestamptz"

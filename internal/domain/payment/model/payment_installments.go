@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -26,7 +25,6 @@ type paymentInstallmentsDBFieldName struct {
 	Status          PaymentInstallmentsDBFieldNameType
 	PaidAt          PaymentInstallmentsDBFieldNameType
 	OverdueAt       PaymentInstallmentsDBFieldNameType
-	Metadata        PaymentInstallmentsDBFieldNameType
 	MetaCreatedAt   PaymentInstallmentsDBFieldNameType
 	MetaCreatedBy   PaymentInstallmentsDBFieldNameType
 	MetaUpdatedAt   PaymentInstallmentsDBFieldNameType
@@ -47,7 +45,6 @@ var PaymentInstallmentsDBFieldName = paymentInstallmentsDBFieldName{
 	Status:          "status",
 	PaidAt:          "paid_at",
 	OverdueAt:       "overdue_at",
-	Metadata:        "metadata",
 	MetaCreatedAt:   "meta_created_at",
 	MetaCreatedBy:   "meta_created_by",
 	MetaUpdatedAt:   "meta_updated_at",
@@ -91,9 +88,6 @@ func NewPaymentInstallmentsDBFieldNameFromStr(field string) (dbField PaymentInst
 
 	case string(PaymentInstallmentsDBFieldName.OverdueAt):
 		return PaymentInstallmentsDBFieldName.OverdueAt, true
-
-	case string(PaymentInstallmentsDBFieldName.Metadata):
-		return PaymentInstallmentsDBFieldName.Metadata, true
 
 	case string(PaymentInstallmentsDBFieldName.MetaCreatedAt):
 		return PaymentInstallmentsDBFieldName.MetaCreatedAt, true
@@ -215,15 +209,6 @@ var PaymentInstallmentsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "overdueAt",
 		Column:            "overdue_at",
 		SQLAlias:          "overdue_at",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -364,7 +349,6 @@ type PaymentInstallments struct {
 	Status          PaymentInstallmentStatus `db:"status"`
 	PaidAt          null.Time                `db:"paid_at"`
 	OverdueAt       null.Time                `db:"overdue_at"`
-	Metadata        json.RawMessage          `db:"metadata"`
 
 	shared.MetaSignature
 }

@@ -41,13 +41,13 @@ type paymentRouteCandidatesRuntimeDTOFieldName struct {
 	MaxAttempts         PaymentRouteCandidatesRuntimeDTOFieldNameType
 	IsEnabled           PaymentRouteCandidatesRuntimeDTOFieldNameType
 	ConditionExpr       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	Metadata            PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaCreatedAt       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaCreatedBy       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaUpdatedAt       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaUpdatedBy       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaDeletedAt       PaymentRouteCandidatesRuntimeDTOFieldNameType
-	MetaDeletedBy       PaymentRouteCandidatesRuntimeDTOFieldNameType
+
+	MetaCreatedAt PaymentRouteCandidatesRuntimeDTOFieldNameType
+	MetaCreatedBy PaymentRouteCandidatesRuntimeDTOFieldNameType
+	MetaUpdatedAt PaymentRouteCandidatesRuntimeDTOFieldNameType
+	MetaUpdatedBy PaymentRouteCandidatesRuntimeDTOFieldNameType
+	MetaDeletedAt PaymentRouteCandidatesRuntimeDTOFieldNameType
+	MetaDeletedBy PaymentRouteCandidatesRuntimeDTOFieldNameType
 }
 
 var PaymentRouteCandidatesRuntimeDTOFieldName = paymentRouteCandidatesRuntimeDTOFieldName{
@@ -70,13 +70,13 @@ var PaymentRouteCandidatesRuntimeDTOFieldName = paymentRouteCandidatesRuntimeDTO
 	MaxAttempts:         "maxAttempts",
 	IsEnabled:           "isEnabled",
 	ConditionExpr:       "conditionExpr",
-	Metadata:            "metadata",
-	MetaCreatedAt:       "metaCreatedAt",
-	MetaCreatedBy:       "metaCreatedBy",
-	MetaUpdatedAt:       "metaUpdatedAt",
-	MetaUpdatedBy:       "metaUpdatedBy",
-	MetaDeletedAt:       "metaDeletedAt",
-	MetaDeletedBy:       "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentRouteCandidatesRuntimeDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -139,9 +139,6 @@ func transformPaymentRouteCandidatesRuntimeDTOFieldNameFromStr(field string) (db
 	case string(PaymentRouteCandidatesRuntimeDTOFieldName.ConditionExpr):
 		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.ConditionExpr), true
 
-	case string(PaymentRouteCandidatesRuntimeDTOFieldName.Metadata):
-		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.Metadata), true
-
 	case string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedAt), true
 
@@ -153,12 +150,6 @@ func transformPaymentRouteCandidatesRuntimeDTOFieldNameFromStr(field string) (db
 
 	case string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentRouteCandidatesRuntimeFilterFieldSpecFromStr(field); found {
@@ -342,7 +333,6 @@ func NewPaymentRouteCandidatesRuntimeSelectableResponse(paymentRouteCandidatesRu
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.MaxAttempts),
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.IsEnabled),
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.ConditionExpr),
-			string(model.PaymentRouteCandidatesRuntimeDBFieldName.Metadata),
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedAt),
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedBy),
 			string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaUpdatedAt),
@@ -489,13 +479,6 @@ func NewPaymentRouteCandidatesRuntimeSelectableResponse(paymentRouteCandidatesRu
 			}
 			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.ConditionExpr, explicitAlias)
 
-		case string(model.PaymentRouteCandidatesRuntimeDBFieldName.Metadata):
-			key := string(PaymentRouteCandidatesRuntimeDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentRouteCandidatesRuntimeSelectableValue(paymentRouteCandidatesRuntimeSelectableResponse, key, paymentRouteCandidatesRuntime.Metadata, explicitAlias)
-
 		case string(model.PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedAt):
 			key := string(PaymentRouteCandidatesRuntimeDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -627,7 +610,6 @@ type PaymentRouteCandidatesRuntimeCreateRequest struct {
 	MaxAttempts         int             `json:"maxAttempts"`
 	IsEnabled           bool            `json:"isEnabled"`
 	ConditionExpr       json.RawMessage `json:"conditionExpr"`
-	Metadata            json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentRouteCandidatesRuntimeCreateRequest) Validate() (err error) {
@@ -657,7 +639,6 @@ func (d *PaymentRouteCandidatesRuntimeCreateRequest) ToModel() model.PaymentRout
 		MaxAttempts:         d.MaxAttempts,
 		IsEnabled:           d.IsEnabled,
 		ConditionExpr:       d.ConditionExpr,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -701,7 +682,6 @@ type PaymentRouteCandidatesRuntimeUpdateRequest struct {
 	MaxAttempts         int             `json:"maxAttempts"`
 	IsEnabled           bool            `json:"isEnabled"`
 	ConditionExpr       json.RawMessage `json:"conditionExpr"`
-	Metadata            json.RawMessage `json:"metadata"`
 }
 
 func (d *PaymentRouteCandidatesRuntimeUpdateRequest) Validate() (err error) {
@@ -729,7 +709,6 @@ func (d PaymentRouteCandidatesRuntimeUpdateRequest) ToModel() model.PaymentRoute
 		MaxAttempts:         d.MaxAttempts,
 		IsEnabled:           d.IsEnabled,
 		ConditionExpr:       d.ConditionExpr,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -753,7 +732,6 @@ type PaymentRouteCandidatesRuntimeBulkUpdateRequest struct {
 	MaxAttempts         int             `json:"maxAttempts"`
 	IsEnabled           bool            `json:"isEnabled"`
 	ConditionExpr       json.RawMessage `json:"conditionExpr"`
-	Metadata            json.RawMessage `json:"metadata"`
 }
 
 func (d PaymentRouteCandidatesRuntimeBulkUpdateRequest) PrimaryID() PaymentRouteCandidatesRuntimePrimaryID {
@@ -796,7 +774,6 @@ func (d PaymentRouteCandidatesRuntimeBulkUpdateRequest) ToModel() model.PaymentR
 		MaxAttempts:         d.MaxAttempts,
 		IsEnabled:           d.IsEnabled,
 		ConditionExpr:       d.ConditionExpr,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -820,7 +797,6 @@ type PaymentRouteCandidatesRuntimeResponse struct {
 	MaxAttempts         int             `json:"maxAttempts" example:"1"`
 	IsEnabled           bool            `json:"isEnabled" example:"true"`
 	ConditionExpr       json.RawMessage `json:"conditionExpr" swaggertype:"object"`
-	Metadata            json.RawMessage `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentRouteCandidatesRuntimeResponse(paymentRouteCandidatesRuntime model.PaymentRouteCandidatesRuntime) PaymentRouteCandidatesRuntimeResponse {
@@ -844,7 +820,6 @@ func NewPaymentRouteCandidatesRuntimeResponse(paymentRouteCandidatesRuntime mode
 		MaxAttempts:         paymentRouteCandidatesRuntime.MaxAttempts,
 		IsEnabled:           paymentRouteCandidatesRuntime.IsEnabled,
 		ConditionExpr:       paymentRouteCandidatesRuntime.ConditionExpr,
-		Metadata:            paymentRouteCandidatesRuntime.Metadata,
 	}
 }
 

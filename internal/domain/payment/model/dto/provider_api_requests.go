@@ -37,13 +37,13 @@ type providerApiRequestsDTOFieldName struct {
 	Success           ProviderApiRequestsDTOFieldNameType
 	ErrorCode         ProviderApiRequestsDTOFieldNameType
 	ErrorMessage      ProviderApiRequestsDTOFieldNameType
-	Metadata          ProviderApiRequestsDTOFieldNameType
-	MetaCreatedAt     ProviderApiRequestsDTOFieldNameType
-	MetaCreatedBy     ProviderApiRequestsDTOFieldNameType
-	MetaUpdatedAt     ProviderApiRequestsDTOFieldNameType
-	MetaUpdatedBy     ProviderApiRequestsDTOFieldNameType
-	MetaDeletedAt     ProviderApiRequestsDTOFieldNameType
-	MetaDeletedBy     ProviderApiRequestsDTOFieldNameType
+
+	MetaCreatedAt ProviderApiRequestsDTOFieldNameType
+	MetaCreatedBy ProviderApiRequestsDTOFieldNameType
+	MetaUpdatedAt ProviderApiRequestsDTOFieldNameType
+	MetaUpdatedBy ProviderApiRequestsDTOFieldNameType
+	MetaDeletedAt ProviderApiRequestsDTOFieldNameType
+	MetaDeletedBy ProviderApiRequestsDTOFieldNameType
 }
 
 var ProviderApiRequestsDTOFieldName = providerApiRequestsDTOFieldName{
@@ -64,13 +64,13 @@ var ProviderApiRequestsDTOFieldName = providerApiRequestsDTOFieldName{
 	Success:           "success",
 	ErrorCode:         "errorCode",
 	ErrorMessage:      "errorMessage",
-	Metadata:          "metadata",
-	MetaCreatedAt:     "metaCreatedAt",
-	MetaCreatedBy:     "metaCreatedBy",
-	MetaUpdatedAt:     "metaUpdatedAt",
-	MetaUpdatedBy:     "metaUpdatedBy",
-	MetaDeletedAt:     "metaDeletedAt",
-	MetaDeletedBy:     "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderApiRequestsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -127,9 +127,6 @@ func transformProviderApiRequestsDTOFieldNameFromStr(field string) (dbField stri
 	case string(ProviderApiRequestsDTOFieldName.ErrorMessage):
 		return string(model.ProviderApiRequestsDBFieldName.ErrorMessage), true
 
-	case string(ProviderApiRequestsDTOFieldName.Metadata):
-		return string(model.ProviderApiRequestsDBFieldName.Metadata), true
-
 	case string(ProviderApiRequestsDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderApiRequestsDBFieldName.MetaCreatedAt), true
 
@@ -141,12 +138,6 @@ func transformProviderApiRequestsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(ProviderApiRequestsDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderApiRequestsDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderApiRequestsDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderApiRequestsDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderApiRequestsDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderApiRequestsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderApiRequestsFilterFieldSpecFromStr(field); found {
@@ -328,7 +319,6 @@ func NewProviderApiRequestsSelectableResponse(providerApiRequests model.Provider
 			string(model.ProviderApiRequestsDBFieldName.Success),
 			string(model.ProviderApiRequestsDBFieldName.ErrorCode),
 			string(model.ProviderApiRequestsDBFieldName.ErrorMessage),
-			string(model.ProviderApiRequestsDBFieldName.Metadata),
 			string(model.ProviderApiRequestsDBFieldName.MetaCreatedAt),
 			string(model.ProviderApiRequestsDBFieldName.MetaCreatedBy),
 			string(model.ProviderApiRequestsDBFieldName.MetaUpdatedAt),
@@ -461,13 +451,6 @@ func NewProviderApiRequestsSelectableResponse(providerApiRequests model.Provider
 			}
 			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.ErrorMessage.String, explicitAlias)
 
-		case string(model.ProviderApiRequestsDBFieldName.Metadata):
-			key := string(ProviderApiRequestsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderApiRequestsSelectableValue(providerApiRequestsSelectableResponse, key, providerApiRequests.Metadata, explicitAlias)
-
 		case string(model.ProviderApiRequestsDBFieldName.MetaCreatedAt):
 			key := string(ProviderApiRequestsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -597,7 +580,6 @@ type ProviderApiRequestsCreateRequest struct {
 	Success           bool            `json:"success"`
 	ErrorCode         string          `json:"errorCode"`
 	ErrorMessage      string          `json:"errorMessage"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *ProviderApiRequestsCreateRequest) Validate() (err error) {
@@ -625,7 +607,6 @@ func (d *ProviderApiRequestsCreateRequest) ToModel() model.ProviderApiRequests {
 		Success:           null.BoolFrom(d.Success),
 		ErrorCode:         null.StringFrom(d.ErrorCode),
 		ErrorMessage:      null.StringFrom(d.ErrorMessage),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -667,7 +648,6 @@ type ProviderApiRequestsUpdateRequest struct {
 	Success           bool            `json:"success"`
 	ErrorCode         string          `json:"errorCode"`
 	ErrorMessage      string          `json:"errorMessage"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d *ProviderApiRequestsUpdateRequest) Validate() (err error) {
@@ -693,7 +673,6 @@ func (d ProviderApiRequestsUpdateRequest) ToModel() model.ProviderApiRequests {
 		Success:           null.BoolFrom(d.Success),
 		ErrorCode:         null.StringFrom(d.ErrorCode),
 		ErrorMessage:      null.StringFrom(d.ErrorMessage),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -715,7 +694,6 @@ type ProviderApiRequestsBulkUpdateRequest struct {
 	Success           bool            `json:"success"`
 	ErrorCode         string          `json:"errorCode"`
 	ErrorMessage      string          `json:"errorMessage"`
-	Metadata          json.RawMessage `json:"metadata"`
 }
 
 func (d ProviderApiRequestsBulkUpdateRequest) PrimaryID() ProviderApiRequestsPrimaryID {
@@ -756,7 +734,6 @@ func (d ProviderApiRequestsBulkUpdateRequest) ToModel() model.ProviderApiRequest
 		Success:           null.BoolFrom(d.Success),
 		ErrorCode:         null.StringFrom(d.ErrorCode),
 		ErrorMessage:      null.StringFrom(d.ErrorMessage),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -778,7 +755,6 @@ type ProviderApiRequestsResponse struct {
 	Success           bool            `json:"success" example:"true"`
 	ErrorCode         string          `json:"errorCode"`
 	ErrorMessage      string          `json:"errorMessage"`
-	Metadata          json.RawMessage `json:"metadata" swaggertype:"object"`
 }
 
 func NewProviderApiRequestsResponse(providerApiRequests model.ProviderApiRequests) ProviderApiRequestsResponse {
@@ -800,7 +776,6 @@ func NewProviderApiRequestsResponse(providerApiRequests model.ProviderApiRequest
 		Success:           providerApiRequests.Success.Bool,
 		ErrorCode:         providerApiRequests.ErrorCode.String,
 		ErrorMessage:      providerApiRequests.ErrorMessage.String,
-		Metadata:          providerApiRequests.Metadata,
 	}
 }
 

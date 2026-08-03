@@ -63,8 +63,6 @@ func composeInsertFieldsAndParamsProviderApiRequests(providerApiRequestsList []m
 				args = append(args, providerApiRequests.ErrorCode)
 			case selectField.ErrorMessage():
 				args = append(args, providerApiRequests.ErrorMessage)
-			case selectField.Metadata():
-				args = append(args, providerApiRequests.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerApiRequests.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -201,10 +199,6 @@ func (ss ProviderApiRequestsSelectFields) ErrorMessage() ProviderApiRequestsFiel
 	return ProviderApiRequestsField("error_message")
 }
 
-func (ss ProviderApiRequestsSelectFields) Metadata() ProviderApiRequestsField {
-	return ProviderApiRequestsField("metadata")
-}
-
 func (ss ProviderApiRequestsSelectFields) MetaCreatedAt() ProviderApiRequestsField {
 	return ProviderApiRequestsField("meta_created_at")
 }
@@ -248,7 +242,6 @@ func (ss ProviderApiRequestsSelectFields) All() ProviderApiRequestsFieldList {
 		ss.Success(),
 		ss.ErrorCode(),
 		ss.ErrorMessage(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -314,7 +307,6 @@ func defaultProviderApiRequestsUpdateFields(providerApiRequests model.ProviderAp
 		NewProviderApiRequestsUpdateField(selectFields.Success(), providerApiRequests.Success),
 		NewProviderApiRequestsUpdateField(selectFields.ErrorCode(), providerApiRequests.ErrorCode),
 		NewProviderApiRequestsUpdateField(selectFields.ErrorMessage(), providerApiRequests.ErrorMessage),
-		NewProviderApiRequestsUpdateField(selectFields.Metadata(), providerApiRequests.Metadata),
 		NewProviderApiRequestsUpdateField(selectFields.MetaCreatedAt(), providerApiRequests.MetaCreatedAt),
 		NewProviderApiRequestsUpdateField(selectFields.MetaCreatedBy(), providerApiRequests.MetaCreatedBy),
 		NewProviderApiRequestsUpdateField(selectFields.MetaUpdatedAt(), providerApiRequests.MetaUpdatedAt),
@@ -659,9 +651,6 @@ func GetProviderApiRequestsFieldType(providerApiRequestsField ProviderApiRequest
 
 	case selectProviderApiRequestsFields.ErrorMessage():
 		return "text"
-
-	case selectProviderApiRequestsFields.Metadata():
-		return "jsonb"
 
 	case selectProviderApiRequestsFields.MetaCreatedAt():
 		return "timestamptz"

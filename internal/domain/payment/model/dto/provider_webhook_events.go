@@ -44,13 +44,13 @@ type providerWebhookEventsDTOFieldName struct {
 	ProcessedAt        ProviderWebhookEventsDTOFieldNameType
 	ErrorCode          ProviderWebhookEventsDTOFieldNameType
 	ErrorMessage       ProviderWebhookEventsDTOFieldNameType
-	Metadata           ProviderWebhookEventsDTOFieldNameType
-	MetaCreatedAt      ProviderWebhookEventsDTOFieldNameType
-	MetaCreatedBy      ProviderWebhookEventsDTOFieldNameType
-	MetaUpdatedAt      ProviderWebhookEventsDTOFieldNameType
-	MetaUpdatedBy      ProviderWebhookEventsDTOFieldNameType
-	MetaDeletedAt      ProviderWebhookEventsDTOFieldNameType
-	MetaDeletedBy      ProviderWebhookEventsDTOFieldNameType
+
+	MetaCreatedAt ProviderWebhookEventsDTOFieldNameType
+	MetaCreatedBy ProviderWebhookEventsDTOFieldNameType
+	MetaUpdatedAt ProviderWebhookEventsDTOFieldNameType
+	MetaUpdatedBy ProviderWebhookEventsDTOFieldNameType
+	MetaDeletedAt ProviderWebhookEventsDTOFieldNameType
+	MetaDeletedBy ProviderWebhookEventsDTOFieldNameType
 }
 
 var ProviderWebhookEventsDTOFieldName = providerWebhookEventsDTOFieldName{
@@ -77,13 +77,13 @@ var ProviderWebhookEventsDTOFieldName = providerWebhookEventsDTOFieldName{
 	ProcessedAt:        "processedAt",
 	ErrorCode:          "errorCode",
 	ErrorMessage:       "errorMessage",
-	Metadata:           "metadata",
-	MetaCreatedAt:      "metaCreatedAt",
-	MetaCreatedBy:      "metaCreatedBy",
-	MetaUpdatedAt:      "metaUpdatedAt",
-	MetaUpdatedBy:      "metaUpdatedBy",
-	MetaDeletedAt:      "metaDeletedAt",
-	MetaDeletedBy:      "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderWebhookEventsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -158,9 +158,6 @@ func transformProviderWebhookEventsDTOFieldNameFromStr(field string) (dbField st
 	case string(ProviderWebhookEventsDTOFieldName.ErrorMessage):
 		return string(model.ProviderWebhookEventsDBFieldName.ErrorMessage), true
 
-	case string(ProviderWebhookEventsDTOFieldName.Metadata):
-		return string(model.ProviderWebhookEventsDBFieldName.Metadata), true
-
 	case string(ProviderWebhookEventsDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderWebhookEventsDBFieldName.MetaCreatedAt), true
 
@@ -172,12 +169,6 @@ func transformProviderWebhookEventsDTOFieldNameFromStr(field string) (dbField st
 
 	case string(ProviderWebhookEventsDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderWebhookEventsDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderWebhookEventsDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderWebhookEventsDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderWebhookEventsDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderWebhookEventsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderWebhookEventsFilterFieldSpecFromStr(field); found {
@@ -365,7 +356,6 @@ func NewProviderWebhookEventsSelectableResponse(providerWebhookEvents model.Prov
 			string(model.ProviderWebhookEventsDBFieldName.ProcessedAt),
 			string(model.ProviderWebhookEventsDBFieldName.ErrorCode),
 			string(model.ProviderWebhookEventsDBFieldName.ErrorMessage),
-			string(model.ProviderWebhookEventsDBFieldName.Metadata),
 			string(model.ProviderWebhookEventsDBFieldName.MetaCreatedAt),
 			string(model.ProviderWebhookEventsDBFieldName.MetaCreatedBy),
 			string(model.ProviderWebhookEventsDBFieldName.MetaUpdatedAt),
@@ -540,13 +530,6 @@ func NewProviderWebhookEventsSelectableResponse(providerWebhookEvents model.Prov
 			}
 			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.ErrorMessage.String, explicitAlias)
 
-		case string(model.ProviderWebhookEventsDBFieldName.Metadata):
-			key := string(ProviderWebhookEventsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderWebhookEventsSelectableValue(providerWebhookEventsSelectableResponse, key, providerWebhookEvents.Metadata, explicitAlias)
-
 		case string(model.ProviderWebhookEventsDBFieldName.MetaCreatedAt):
 			key := string(ProviderWebhookEventsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -682,7 +665,6 @@ type ProviderWebhookEventsCreateRequest struct {
 	ProcessedAt        time.Time                     `json:"processedAt"`
 	ErrorCode          string                        `json:"errorCode"`
 	ErrorMessage       string                        `json:"errorMessage"`
-	Metadata           json.RawMessage               `json:"metadata"`
 }
 
 func (d *ProviderWebhookEventsCreateRequest) Validate() (err error) {
@@ -716,7 +698,6 @@ func (d *ProviderWebhookEventsCreateRequest) ToModel() model.ProviderWebhookEven
 		ProcessedAt:        null.TimeFrom(d.ProcessedAt),
 		ErrorCode:          null.StringFrom(d.ErrorCode),
 		ErrorMessage:       null.StringFrom(d.ErrorMessage),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -764,7 +745,6 @@ type ProviderWebhookEventsUpdateRequest struct {
 	ProcessedAt        time.Time                     `json:"processedAt"`
 	ErrorCode          string                        `json:"errorCode"`
 	ErrorMessage       string                        `json:"errorMessage"`
-	Metadata           json.RawMessage               `json:"metadata"`
 }
 
 func (d *ProviderWebhookEventsUpdateRequest) Validate() (err error) {
@@ -796,7 +776,6 @@ func (d ProviderWebhookEventsUpdateRequest) ToModel() model.ProviderWebhookEvent
 		ProcessedAt:        null.TimeFrom(d.ProcessedAt),
 		ErrorCode:          null.StringFrom(d.ErrorCode),
 		ErrorMessage:       null.StringFrom(d.ErrorMessage),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -824,7 +803,6 @@ type ProviderWebhookEventsBulkUpdateRequest struct {
 	ProcessedAt        time.Time                     `json:"processedAt"`
 	ErrorCode          string                        `json:"errorCode"`
 	ErrorMessage       string                        `json:"errorMessage"`
-	Metadata           json.RawMessage               `json:"metadata"`
 }
 
 func (d ProviderWebhookEventsBulkUpdateRequest) PrimaryID() ProviderWebhookEventsPrimaryID {
@@ -871,7 +849,6 @@ func (d ProviderWebhookEventsBulkUpdateRequest) ToModel() model.ProviderWebhookE
 		ProcessedAt:        null.TimeFrom(d.ProcessedAt),
 		ErrorCode:          null.StringFrom(d.ErrorCode),
 		ErrorMessage:       null.StringFrom(d.ErrorMessage),
-		Metadata:           d.Metadata,
 	}
 }
 
@@ -899,7 +876,6 @@ type ProviderWebhookEventsResponse struct {
 	ProcessedAt        time.Time                     `json:"processedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	ErrorCode          string                        `json:"errorCode"`
 	ErrorMessage       string                        `json:"errorMessage"`
-	Metadata           json.RawMessage               `json:"metadata" swaggertype:"object"`
 }
 
 func NewProviderWebhookEventsResponse(providerWebhookEvents model.ProviderWebhookEvents) ProviderWebhookEventsResponse {
@@ -927,7 +903,6 @@ func NewProviderWebhookEventsResponse(providerWebhookEvents model.ProviderWebhoo
 		ProcessedAt:        providerWebhookEvents.ProcessedAt.Time,
 		ErrorCode:          providerWebhookEvents.ErrorCode.String,
 		ErrorMessage:       providerWebhookEvents.ErrorMessage.String,
-		Metadata:           providerWebhookEvents.Metadata,
 	}
 }
 

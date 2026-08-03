@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -34,7 +33,6 @@ type paymentStatusEventsDTOFieldName struct {
 	ProviderStatus         PaymentStatusEventsDTOFieldNameType
 	Reason                 PaymentStatusEventsDTOFieldNameType
 	OccurredAt             PaymentStatusEventsDTOFieldNameType
-	Metadata               PaymentStatusEventsDTOFieldNameType
 	MetaCreatedAt          PaymentStatusEventsDTOFieldNameType
 	MetaCreatedBy          PaymentStatusEventsDTOFieldNameType
 	MetaUpdatedAt          PaymentStatusEventsDTOFieldNameType
@@ -57,13 +55,13 @@ var PaymentStatusEventsDTOFieldName = paymentStatusEventsDTOFieldName{
 	ProviderStatus:         "providerStatus",
 	Reason:                 "reason",
 	OccurredAt:             "occurredAt",
-	Metadata:               "metadata",
-	MetaCreatedAt:          "metaCreatedAt",
-	MetaCreatedBy:          "metaCreatedBy",
-	MetaUpdatedAt:          "metaUpdatedAt",
-	MetaUpdatedBy:          "metaUpdatedBy",
-	MetaDeletedAt:          "metaDeletedAt",
-	MetaDeletedBy:          "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentStatusEventsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -108,9 +106,6 @@ func transformPaymentStatusEventsDTOFieldNameFromStr(field string) (dbField stri
 	case string(PaymentStatusEventsDTOFieldName.OccurredAt):
 		return string(model.PaymentStatusEventsDBFieldName.OccurredAt), true
 
-	case string(PaymentStatusEventsDTOFieldName.Metadata):
-		return string(model.PaymentStatusEventsDBFieldName.Metadata), true
-
 	case string(PaymentStatusEventsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentStatusEventsDBFieldName.MetaCreatedAt), true
 
@@ -122,12 +117,6 @@ func transformPaymentStatusEventsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(PaymentStatusEventsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentStatusEventsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentStatusEventsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentStatusEventsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentStatusEventsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentStatusEventsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentStatusEventsFilterFieldSpecFromStr(field); found {
@@ -305,7 +294,6 @@ func NewPaymentStatusEventsSelectableResponse(paymentStatusEvents model.PaymentS
 			string(model.PaymentStatusEventsDBFieldName.ProviderStatus),
 			string(model.PaymentStatusEventsDBFieldName.Reason),
 			string(model.PaymentStatusEventsDBFieldName.OccurredAt),
-			string(model.PaymentStatusEventsDBFieldName.Metadata),
 			string(model.PaymentStatusEventsDBFieldName.MetaCreatedAt),
 			string(model.PaymentStatusEventsDBFieldName.MetaCreatedBy),
 			string(model.PaymentStatusEventsDBFieldName.MetaUpdatedAt),
@@ -409,13 +397,6 @@ func NewPaymentStatusEventsSelectableResponse(paymentStatusEvents model.PaymentS
 				key = outputField
 			}
 			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.OccurredAt, explicitAlias)
-
-		case string(model.PaymentStatusEventsDBFieldName.Metadata):
-			key := string(PaymentStatusEventsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentStatusEventsSelectableValue(paymentStatusEventsSelectableResponse, key, paymentStatusEvents.Metadata, explicitAlias)
 
 		case string(model.PaymentStatusEventsDBFieldName.MetaCreatedAt):
 			key := string(PaymentStatusEventsDTOFieldName.MetaCreatedAt)
@@ -530,19 +511,18 @@ func NewPaymentStatusEventsFilterResponse(result []model.PaymentStatusEventsFilt
 }
 
 type PaymentStatusEventsCreateRequest struct {
-	PaymentIntentId        uuid.UUID       `json:"paymentIntentId"`
-	PaymentAttemptId       uuid.UUID       `json:"paymentAttemptId"`
-	ProviderWebhookEventId uuid.UUID       `json:"providerWebhookEventId"`
-	SourceType             string          `json:"sourceType"`
-	EventType              string          `json:"eventType"`
-	OldIntentStatus        string          `json:"oldIntentStatus"`
-	NewIntentStatus        string          `json:"newIntentStatus"`
-	OldAttemptStatus       string          `json:"oldAttemptStatus"`
-	NewAttemptStatus       string          `json:"newAttemptStatus"`
-	ProviderStatus         string          `json:"providerStatus"`
-	Reason                 string          `json:"reason"`
-	OccurredAt             time.Time       `json:"occurredAt"`
-	Metadata               json.RawMessage `json:"metadata"`
+	PaymentIntentId        uuid.UUID `json:"paymentIntentId"`
+	PaymentAttemptId       uuid.UUID `json:"paymentAttemptId"`
+	ProviderWebhookEventId uuid.UUID `json:"providerWebhookEventId"`
+	SourceType             string    `json:"sourceType"`
+	EventType              string    `json:"eventType"`
+	OldIntentStatus        string    `json:"oldIntentStatus"`
+	NewIntentStatus        string    `json:"newIntentStatus"`
+	OldAttemptStatus       string    `json:"oldAttemptStatus"`
+	NewAttemptStatus       string    `json:"newAttemptStatus"`
+	ProviderStatus         string    `json:"providerStatus"`
+	Reason                 string    `json:"reason"`
+	OccurredAt             time.Time `json:"occurredAt"`
 }
 
 func (d *PaymentStatusEventsCreateRequest) Validate() (err error) {
@@ -566,7 +546,6 @@ func (d *PaymentStatusEventsCreateRequest) ToModel() model.PaymentStatusEvents {
 		ProviderStatus:         null.StringFrom(d.ProviderStatus),
 		Reason:                 null.StringFrom(d.Reason),
 		OccurredAt:             d.OccurredAt,
-		Metadata:               d.Metadata,
 	}
 }
 
@@ -592,19 +571,18 @@ func (d PaymentStatusEventsListCreateRequest) ToModelList() []model.PaymentStatu
 }
 
 type PaymentStatusEventsUpdateRequest struct {
-	PaymentIntentId        uuid.UUID       `json:"paymentIntentId"`
-	PaymentAttemptId       uuid.UUID       `json:"paymentAttemptId"`
-	ProviderWebhookEventId uuid.UUID       `json:"providerWebhookEventId"`
-	SourceType             string          `json:"sourceType"`
-	EventType              string          `json:"eventType"`
-	OldIntentStatus        string          `json:"oldIntentStatus"`
-	NewIntentStatus        string          `json:"newIntentStatus"`
-	OldAttemptStatus       string          `json:"oldAttemptStatus"`
-	NewAttemptStatus       string          `json:"newAttemptStatus"`
-	ProviderStatus         string          `json:"providerStatus"`
-	Reason                 string          `json:"reason"`
-	OccurredAt             time.Time       `json:"occurredAt"`
-	Metadata               json.RawMessage `json:"metadata"`
+	PaymentIntentId        uuid.UUID `json:"paymentIntentId"`
+	PaymentAttemptId       uuid.UUID `json:"paymentAttemptId"`
+	ProviderWebhookEventId uuid.UUID `json:"providerWebhookEventId"`
+	SourceType             string    `json:"sourceType"`
+	EventType              string    `json:"eventType"`
+	OldIntentStatus        string    `json:"oldIntentStatus"`
+	NewIntentStatus        string    `json:"newIntentStatus"`
+	OldAttemptStatus       string    `json:"oldAttemptStatus"`
+	NewAttemptStatus       string    `json:"newAttemptStatus"`
+	ProviderStatus         string    `json:"providerStatus"`
+	Reason                 string    `json:"reason"`
+	OccurredAt             time.Time `json:"occurredAt"`
 }
 
 func (d *PaymentStatusEventsUpdateRequest) Validate() (err error) {
@@ -626,25 +604,23 @@ func (d PaymentStatusEventsUpdateRequest) ToModel() model.PaymentStatusEvents {
 		ProviderStatus:         null.StringFrom(d.ProviderStatus),
 		Reason:                 null.StringFrom(d.Reason),
 		OccurredAt:             d.OccurredAt,
-		Metadata:               d.Metadata,
 	}
 }
 
 type PaymentStatusEventsBulkUpdateRequest struct {
-	Id                     uuid.UUID       `json:"id"`
-	PaymentIntentId        uuid.UUID       `json:"paymentIntentId"`
-	PaymentAttemptId       uuid.UUID       `json:"paymentAttemptId"`
-	ProviderWebhookEventId uuid.UUID       `json:"providerWebhookEventId"`
-	SourceType             string          `json:"sourceType"`
-	EventType              string          `json:"eventType"`
-	OldIntentStatus        string          `json:"oldIntentStatus"`
-	NewIntentStatus        string          `json:"newIntentStatus"`
-	OldAttemptStatus       string          `json:"oldAttemptStatus"`
-	NewAttemptStatus       string          `json:"newAttemptStatus"`
-	ProviderStatus         string          `json:"providerStatus"`
-	Reason                 string          `json:"reason"`
-	OccurredAt             time.Time       `json:"occurredAt"`
-	Metadata               json.RawMessage `json:"metadata"`
+	Id                     uuid.UUID `json:"id"`
+	PaymentIntentId        uuid.UUID `json:"paymentIntentId"`
+	PaymentAttemptId       uuid.UUID `json:"paymentAttemptId"`
+	ProviderWebhookEventId uuid.UUID `json:"providerWebhookEventId"`
+	SourceType             string    `json:"sourceType"`
+	EventType              string    `json:"eventType"`
+	OldIntentStatus        string    `json:"oldIntentStatus"`
+	NewIntentStatus        string    `json:"newIntentStatus"`
+	OldAttemptStatus       string    `json:"oldAttemptStatus"`
+	NewAttemptStatus       string    `json:"newAttemptStatus"`
+	ProviderStatus         string    `json:"providerStatus"`
+	Reason                 string    `json:"reason"`
+	OccurredAt             time.Time `json:"occurredAt"`
 }
 
 func (d PaymentStatusEventsBulkUpdateRequest) PrimaryID() PaymentStatusEventsPrimaryID {
@@ -681,25 +657,23 @@ func (d PaymentStatusEventsBulkUpdateRequest) ToModel() model.PaymentStatusEvent
 		ProviderStatus:         null.StringFrom(d.ProviderStatus),
 		Reason:                 null.StringFrom(d.Reason),
 		OccurredAt:             d.OccurredAt,
-		Metadata:               d.Metadata,
 	}
 }
 
 type PaymentStatusEventsResponse struct {
-	Id                     uuid.UUID       `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	PaymentIntentId        uuid.UUID       `json:"paymentIntentId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	PaymentAttemptId       uuid.UUID       `json:"paymentAttemptId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ProviderWebhookEventId uuid.UUID       `json:"providerWebhookEventId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	SourceType             string          `json:"sourceType" validate:"required"`
-	EventType              string          `json:"eventType" validate:"required"`
-	OldIntentStatus        string          `json:"oldIntentStatus"`
-	NewIntentStatus        string          `json:"newIntentStatus"`
-	OldAttemptStatus       string          `json:"oldAttemptStatus"`
-	NewAttemptStatus       string          `json:"newAttemptStatus"`
-	ProviderStatus         string          `json:"providerStatus"`
-	Reason                 string          `json:"reason"`
-	OccurredAt             time.Time       `json:"occurredAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata               json.RawMessage `json:"metadata" swaggertype:"object"`
+	Id                     uuid.UUID `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PaymentIntentId        uuid.UUID `json:"paymentIntentId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PaymentAttemptId       uuid.UUID `json:"paymentAttemptId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ProviderWebhookEventId uuid.UUID `json:"providerWebhookEventId" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	SourceType             string    `json:"sourceType" validate:"required"`
+	EventType              string    `json:"eventType" validate:"required"`
+	OldIntentStatus        string    `json:"oldIntentStatus"`
+	NewIntentStatus        string    `json:"newIntentStatus"`
+	OldAttemptStatus       string    `json:"oldAttemptStatus"`
+	NewAttemptStatus       string    `json:"newAttemptStatus"`
+	ProviderStatus         string    `json:"providerStatus"`
+	Reason                 string    `json:"reason"`
+	OccurredAt             time.Time `json:"occurredAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 }
 
 func NewPaymentStatusEventsResponse(paymentStatusEvents model.PaymentStatusEvents) PaymentStatusEventsResponse {
@@ -717,7 +691,6 @@ func NewPaymentStatusEventsResponse(paymentStatusEvents model.PaymentStatusEvent
 		ProviderStatus:         paymentStatusEvents.ProviderStatus.String,
 		Reason:                 paymentStatusEvents.Reason.String,
 		OccurredAt:             paymentStatusEvents.OccurredAt,
-		Metadata:               paymentStatusEvents.Metadata,
 	}
 }
 

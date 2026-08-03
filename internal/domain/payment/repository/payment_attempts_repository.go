@@ -83,8 +83,6 @@ func composeInsertFieldsAndParamsPaymentAttempts(paymentAttemptsList []model.Pay
 				args = append(args, paymentAttempts.RawRequest)
 			case selectField.RawResponse():
 				args = append(args, paymentAttempts.RawResponse)
-			case selectField.Metadata():
-				args = append(args, paymentAttempts.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentAttempts.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -261,10 +259,6 @@ func (ss PaymentAttemptsSelectFields) RawResponse() PaymentAttemptsField {
 	return PaymentAttemptsField("raw_response")
 }
 
-func (ss PaymentAttemptsSelectFields) Metadata() PaymentAttemptsField {
-	return PaymentAttemptsField("metadata")
-}
-
 func (ss PaymentAttemptsSelectFields) MetaCreatedAt() PaymentAttemptsField {
 	return PaymentAttemptsField("meta_created_at")
 }
@@ -318,7 +312,6 @@ func (ss PaymentAttemptsSelectFields) All() PaymentAttemptsFieldList {
 		ss.LastStatusSyncAt(),
 		ss.RawRequest(),
 		ss.RawResponse(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -394,7 +387,6 @@ func defaultPaymentAttemptsUpdateFields(paymentAttempts model.PaymentAttempts) (
 		NewPaymentAttemptsUpdateField(selectFields.LastStatusSyncAt(), paymentAttempts.LastStatusSyncAt),
 		NewPaymentAttemptsUpdateField(selectFields.RawRequest(), paymentAttempts.RawRequest),
 		NewPaymentAttemptsUpdateField(selectFields.RawResponse(), paymentAttempts.RawResponse),
-		NewPaymentAttemptsUpdateField(selectFields.Metadata(), paymentAttempts.Metadata),
 		NewPaymentAttemptsUpdateField(selectFields.MetaCreatedAt(), paymentAttempts.MetaCreatedAt),
 		NewPaymentAttemptsUpdateField(selectFields.MetaCreatedBy(), paymentAttempts.MetaCreatedBy),
 		NewPaymentAttemptsUpdateField(selectFields.MetaUpdatedAt(), paymentAttempts.MetaUpdatedAt),
@@ -768,9 +760,6 @@ func GetPaymentAttemptsFieldType(paymentAttemptsField PaymentAttemptsField) stri
 		return "jsonb"
 
 	case selectPaymentAttemptsFields.RawResponse():
-		return "jsonb"
-
-	case selectPaymentAttemptsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentAttemptsFields.MetaCreatedAt():

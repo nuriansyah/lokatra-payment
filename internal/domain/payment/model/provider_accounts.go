@@ -26,7 +26,6 @@ type providerAccountsDBFieldName struct {
 	PublicKeyRef        ProviderAccountsDBFieldNameType
 	Status              ProviderAccountsDBFieldNameType
 	Config              ProviderAccountsDBFieldNameType
-	Metadata            ProviderAccountsDBFieldNameType
 	MetaCreatedAt       ProviderAccountsDBFieldNameType
 	MetaCreatedBy       ProviderAccountsDBFieldNameType
 	MetaUpdatedAt       ProviderAccountsDBFieldNameType
@@ -48,13 +47,13 @@ var ProviderAccountsDBFieldName = providerAccountsDBFieldName{
 	PublicKeyRef:        "public_key_ref",
 	Status:              "status",
 	Config:              "config",
-	Metadata:            "metadata",
-	MetaCreatedAt:       "meta_created_at",
-	MetaCreatedBy:       "meta_created_by",
-	MetaUpdatedAt:       "meta_updated_at",
-	MetaUpdatedBy:       "meta_updated_by",
-	MetaDeletedAt:       "meta_deleted_at",
-	MetaDeletedBy:       "meta_deleted_by",
+
+	MetaCreatedAt: "meta_created_at",
+	MetaCreatedBy: "meta_created_by",
+	MetaUpdatedAt: "meta_updated_at",
+	MetaUpdatedBy: "meta_updated_by",
+	MetaDeletedAt: "meta_deleted_at",
+	MetaDeletedBy: "meta_deleted_by",
 }
 
 func NewProviderAccountsDBFieldNameFromStr(field string) (dbField ProviderAccountsDBFieldNameType, found bool) {
@@ -95,9 +94,6 @@ func NewProviderAccountsDBFieldNameFromStr(field string) (dbField ProviderAccoun
 
 	case string(ProviderAccountsDBFieldName.Config):
 		return ProviderAccountsDBFieldName.Config, true
-
-	case string(ProviderAccountsDBFieldName.Metadata):
-		return ProviderAccountsDBFieldName.Metadata, true
 
 	case string(ProviderAccountsDBFieldName.MetaCreatedAt):
 		return ProviderAccountsDBFieldName.MetaCreatedAt, true
@@ -228,15 +224,6 @@ var ProviderAccountsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "config",
 		Column:            "config",
 		SQLAlias:          "config",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -377,7 +364,6 @@ type ProviderAccounts struct {
 	PublicKeyRef        null.String           `db:"public_key_ref"`
 	Status              ProviderAccountStatus `db:"status"`
 	Config              json.RawMessage       `db:"config"`
-	Metadata            json.RawMessage       `db:"metadata"`
 
 	shared.MetaSignature
 }

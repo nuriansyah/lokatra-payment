@@ -34,7 +34,6 @@ type paymentRouteCandidatesRuntimeDBFieldName struct {
 	MaxAttempts         PaymentRouteCandidatesRuntimeDBFieldNameType
 	IsEnabled           PaymentRouteCandidatesRuntimeDBFieldNameType
 	ConditionExpr       PaymentRouteCandidatesRuntimeDBFieldNameType
-	Metadata            PaymentRouteCandidatesRuntimeDBFieldNameType
 	MetaCreatedAt       PaymentRouteCandidatesRuntimeDBFieldNameType
 	MetaCreatedBy       PaymentRouteCandidatesRuntimeDBFieldNameType
 	MetaUpdatedAt       PaymentRouteCandidatesRuntimeDBFieldNameType
@@ -63,7 +62,6 @@ var PaymentRouteCandidatesRuntimeDBFieldName = paymentRouteCandidatesRuntimeDBFi
 	MaxAttempts:         "max_attempts",
 	IsEnabled:           "is_enabled",
 	ConditionExpr:       "condition_expr",
-	Metadata:            "metadata",
 	MetaCreatedAt:       "meta_created_at",
 	MetaCreatedBy:       "meta_created_by",
 	MetaUpdatedAt:       "meta_updated_at",
@@ -131,9 +129,6 @@ func NewPaymentRouteCandidatesRuntimeDBFieldNameFromStr(field string) (dbField P
 
 	case string(PaymentRouteCandidatesRuntimeDBFieldName.ConditionExpr):
 		return PaymentRouteCandidatesRuntimeDBFieldName.ConditionExpr, true
-
-	case string(PaymentRouteCandidatesRuntimeDBFieldName.Metadata):
-		return PaymentRouteCandidatesRuntimeDBFieldName.Metadata, true
 
 	case string(PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedAt):
 		return PaymentRouteCandidatesRuntimeDBFieldName.MetaCreatedAt, true
@@ -331,15 +326,6 @@ var PaymentRouteCandidatesRuntimeFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -482,7 +468,6 @@ type PaymentRouteCandidatesRuntime struct {
 	MaxAttempts         int                 `db:"max_attempts"`
 	IsEnabled           bool                `db:"is_enabled"`
 	ConditionExpr       json.RawMessage     `db:"condition_expr"`
-	Metadata            json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

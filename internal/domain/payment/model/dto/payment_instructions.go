@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -36,7 +35,6 @@ type paymentInstructionsDTOFieldName struct {
 	DeeplinkUrl         PaymentInstructionsDTOFieldNameType
 	RetailOutletCode    PaymentInstructionsDTOFieldNameType
 	ExpiresAt           PaymentInstructionsDTOFieldNameType
-	Metadata            PaymentInstructionsDTOFieldNameType
 	MetaCreatedAt       PaymentInstructionsDTOFieldNameType
 	MetaCreatedBy       PaymentInstructionsDTOFieldNameType
 	MetaUpdatedAt       PaymentInstructionsDTOFieldNameType
@@ -63,13 +61,13 @@ var PaymentInstructionsDTOFieldName = paymentInstructionsDTOFieldName{
 	DeeplinkUrl:         "deeplinkUrl",
 	RetailOutletCode:    "retailOutletCode",
 	ExpiresAt:           "expiresAt",
-	Metadata:            "metadata",
-	MetaCreatedAt:       "metaCreatedAt",
-	MetaCreatedBy:       "metaCreatedBy",
-	MetaUpdatedAt:       "metaUpdatedAt",
-	MetaUpdatedBy:       "metaUpdatedBy",
-	MetaDeletedAt:       "metaDeletedAt",
-	MetaDeletedBy:       "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformPaymentInstructionsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -126,9 +124,6 @@ func transformPaymentInstructionsDTOFieldNameFromStr(field string) (dbField stri
 	case string(PaymentInstructionsDTOFieldName.ExpiresAt):
 		return string(model.PaymentInstructionsDBFieldName.ExpiresAt), true
 
-	case string(PaymentInstructionsDTOFieldName.Metadata):
-		return string(model.PaymentInstructionsDBFieldName.Metadata), true
-
 	case string(PaymentInstructionsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentInstructionsDBFieldName.MetaCreatedAt), true
 
@@ -140,12 +135,6 @@ func transformPaymentInstructionsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(PaymentInstructionsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentInstructionsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentInstructionsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentInstructionsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentInstructionsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentInstructionsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentInstructionsFilterFieldSpecFromStr(field); found {
@@ -327,7 +316,6 @@ func NewPaymentInstructionsSelectableResponse(paymentInstructions model.PaymentI
 			string(model.PaymentInstructionsDBFieldName.DeeplinkUrl),
 			string(model.PaymentInstructionsDBFieldName.RetailOutletCode),
 			string(model.PaymentInstructionsDBFieldName.ExpiresAt),
-			string(model.PaymentInstructionsDBFieldName.Metadata),
 			string(model.PaymentInstructionsDBFieldName.MetaCreatedAt),
 			string(model.PaymentInstructionsDBFieldName.MetaCreatedBy),
 			string(model.PaymentInstructionsDBFieldName.MetaUpdatedAt),
@@ -460,13 +448,6 @@ func NewPaymentInstructionsSelectableResponse(paymentInstructions model.PaymentI
 			}
 			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.ExpiresAt.Time, explicitAlias)
 
-		case string(model.PaymentInstructionsDBFieldName.Metadata):
-			key := string(PaymentInstructionsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentInstructionsSelectableValue(paymentInstructionsSelectableResponse, key, paymentInstructions.Metadata, explicitAlias)
-
 		case string(model.PaymentInstructionsDBFieldName.MetaCreatedAt):
 			key := string(PaymentInstructionsDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -580,23 +561,22 @@ func NewPaymentInstructionsFilterResponse(result []model.PaymentInstructionsFilt
 }
 
 type PaymentInstructionsCreateRequest struct {
-	PaymentAttemptId    uuid.UUID       `json:"paymentAttemptId"`
-	InstructionType     string          `json:"instructionType"`
-	IsActive            bool            `json:"isActive"`
-	DisplayName         string          `json:"displayName"`
-	AccountNumber       string          `json:"accountNumber"`
-	AccountNumberMasked string          `json:"accountNumberMasked"`
-	AccountHolderName   string          `json:"accountHolderName"`
-	BankCode            string          `json:"bankCode"`
-	BillerCode          string          `json:"billerCode"`
-	PaymentCode         string          `json:"paymentCode"`
-	QrString            string          `json:"qrString"`
-	QrImageUrl          string          `json:"qrImageUrl"`
-	CheckoutUrl         string          `json:"checkoutUrl"`
-	DeeplinkUrl         string          `json:"deeplinkUrl"`
-	RetailOutletCode    string          `json:"retailOutletCode"`
-	ExpiresAt           time.Time       `json:"expiresAt"`
-	Metadata            json.RawMessage `json:"metadata"`
+	PaymentAttemptId    uuid.UUID `json:"paymentAttemptId"`
+	InstructionType     string    `json:"instructionType"`
+	IsActive            bool      `json:"isActive"`
+	DisplayName         string    `json:"displayName"`
+	AccountNumber       string    `json:"accountNumber"`
+	AccountNumberMasked string    `json:"accountNumberMasked"`
+	AccountHolderName   string    `json:"accountHolderName"`
+	BankCode            string    `json:"bankCode"`
+	BillerCode          string    `json:"billerCode"`
+	PaymentCode         string    `json:"paymentCode"`
+	QrString            string    `json:"qrString"`
+	QrImageUrl          string    `json:"qrImageUrl"`
+	CheckoutUrl         string    `json:"checkoutUrl"`
+	DeeplinkUrl         string    `json:"deeplinkUrl"`
+	RetailOutletCode    string    `json:"retailOutletCode"`
+	ExpiresAt           time.Time `json:"expiresAt"`
 }
 
 func (d *PaymentInstructionsCreateRequest) Validate() (err error) {
@@ -624,7 +604,6 @@ func (d *PaymentInstructionsCreateRequest) ToModel() model.PaymentInstructions {
 		DeeplinkUrl:         null.StringFrom(d.DeeplinkUrl),
 		RetailOutletCode:    null.StringFrom(d.RetailOutletCode),
 		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -650,23 +629,22 @@ func (d PaymentInstructionsListCreateRequest) ToModelList() []model.PaymentInstr
 }
 
 type PaymentInstructionsUpdateRequest struct {
-	PaymentAttemptId    uuid.UUID       `json:"paymentAttemptId"`
-	InstructionType     string          `json:"instructionType"`
-	IsActive            bool            `json:"isActive"`
-	DisplayName         string          `json:"displayName"`
-	AccountNumber       string          `json:"accountNumber"`
-	AccountNumberMasked string          `json:"accountNumberMasked"`
-	AccountHolderName   string          `json:"accountHolderName"`
-	BankCode            string          `json:"bankCode"`
-	BillerCode          string          `json:"billerCode"`
-	PaymentCode         string          `json:"paymentCode"`
-	QrString            string          `json:"qrString"`
-	QrImageUrl          string          `json:"qrImageUrl"`
-	CheckoutUrl         string          `json:"checkoutUrl"`
-	DeeplinkUrl         string          `json:"deeplinkUrl"`
-	RetailOutletCode    string          `json:"retailOutletCode"`
-	ExpiresAt           time.Time       `json:"expiresAt"`
-	Metadata            json.RawMessage `json:"metadata"`
+	PaymentAttemptId    uuid.UUID `json:"paymentAttemptId"`
+	InstructionType     string    `json:"instructionType"`
+	IsActive            bool      `json:"isActive"`
+	DisplayName         string    `json:"displayName"`
+	AccountNumber       string    `json:"accountNumber"`
+	AccountNumberMasked string    `json:"accountNumberMasked"`
+	AccountHolderName   string    `json:"accountHolderName"`
+	BankCode            string    `json:"bankCode"`
+	BillerCode          string    `json:"billerCode"`
+	PaymentCode         string    `json:"paymentCode"`
+	QrString            string    `json:"qrString"`
+	QrImageUrl          string    `json:"qrImageUrl"`
+	CheckoutUrl         string    `json:"checkoutUrl"`
+	DeeplinkUrl         string    `json:"deeplinkUrl"`
+	RetailOutletCode    string    `json:"retailOutletCode"`
+	ExpiresAt           time.Time `json:"expiresAt"`
 }
 
 func (d *PaymentInstructionsUpdateRequest) Validate() (err error) {
@@ -692,29 +670,27 @@ func (d PaymentInstructionsUpdateRequest) ToModel() model.PaymentInstructions {
 		DeeplinkUrl:         null.StringFrom(d.DeeplinkUrl),
 		RetailOutletCode:    null.StringFrom(d.RetailOutletCode),
 		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
-		Metadata:            d.Metadata,
 	}
 }
 
 type PaymentInstructionsBulkUpdateRequest struct {
-	Id                  uuid.UUID       `json:"id"`
-	PaymentAttemptId    uuid.UUID       `json:"paymentAttemptId"`
-	InstructionType     string          `json:"instructionType"`
-	IsActive            bool            `json:"isActive"`
-	DisplayName         string          `json:"displayName"`
-	AccountNumber       string          `json:"accountNumber"`
-	AccountNumberMasked string          `json:"accountNumberMasked"`
-	AccountHolderName   string          `json:"accountHolderName"`
-	BankCode            string          `json:"bankCode"`
-	BillerCode          string          `json:"billerCode"`
-	PaymentCode         string          `json:"paymentCode"`
-	QrString            string          `json:"qrString"`
-	QrImageUrl          string          `json:"qrImageUrl"`
-	CheckoutUrl         string          `json:"checkoutUrl"`
-	DeeplinkUrl         string          `json:"deeplinkUrl"`
-	RetailOutletCode    string          `json:"retailOutletCode"`
-	ExpiresAt           time.Time       `json:"expiresAt"`
-	Metadata            json.RawMessage `json:"metadata"`
+	Id                  uuid.UUID `json:"id"`
+	PaymentAttemptId    uuid.UUID `json:"paymentAttemptId"`
+	InstructionType     string    `json:"instructionType"`
+	IsActive            bool      `json:"isActive"`
+	DisplayName         string    `json:"displayName"`
+	AccountNumber       string    `json:"accountNumber"`
+	AccountNumberMasked string    `json:"accountNumberMasked"`
+	AccountHolderName   string    `json:"accountHolderName"`
+	BankCode            string    `json:"bankCode"`
+	BillerCode          string    `json:"billerCode"`
+	PaymentCode         string    `json:"paymentCode"`
+	QrString            string    `json:"qrString"`
+	QrImageUrl          string    `json:"qrImageUrl"`
+	CheckoutUrl         string    `json:"checkoutUrl"`
+	DeeplinkUrl         string    `json:"deeplinkUrl"`
+	RetailOutletCode    string    `json:"retailOutletCode"`
+	ExpiresAt           time.Time `json:"expiresAt"`
 }
 
 func (d PaymentInstructionsBulkUpdateRequest) PrimaryID() PaymentInstructionsPrimaryID {
@@ -755,29 +731,27 @@ func (d PaymentInstructionsBulkUpdateRequest) ToModel() model.PaymentInstruction
 		DeeplinkUrl:         null.StringFrom(d.DeeplinkUrl),
 		RetailOutletCode:    null.StringFrom(d.RetailOutletCode),
 		ExpiresAt:           null.TimeFrom(d.ExpiresAt),
-		Metadata:            d.Metadata,
 	}
 }
 
 type PaymentInstructionsResponse struct {
-	Id                  uuid.UUID       `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	PaymentAttemptId    uuid.UUID       `json:"paymentAttemptId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
-	InstructionType     string          `json:"instructionType" validate:"required"`
-	IsActive            bool            `json:"isActive" example:"true"`
-	DisplayName         string          `json:"displayName"`
-	AccountNumber       string          `json:"accountNumber"`
-	AccountNumberMasked string          `json:"accountNumberMasked"`
-	AccountHolderName   string          `json:"accountHolderName"`
-	BankCode            string          `json:"bankCode"`
-	BillerCode          string          `json:"billerCode"`
-	PaymentCode         string          `json:"paymentCode"`
-	QrString            string          `json:"qrString"`
-	QrImageUrl          string          `json:"qrImageUrl" validate:"url"`
-	CheckoutUrl         string          `json:"checkoutUrl" validate:"url"`
-	DeeplinkUrl         string          `json:"deeplinkUrl" validate:"url"`
-	RetailOutletCode    string          `json:"retailOutletCode"`
-	ExpiresAt           time.Time       `json:"expiresAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
-	Metadata            json.RawMessage `json:"metadata" swaggertype:"object"`
+	Id                  uuid.UUID `json:"id" validate:"uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PaymentAttemptId    uuid.UUID `json:"paymentAttemptId" validate:"required,uuid" format:"uuid" example:"123e4567-e89b-12d3-a456-426614174000"`
+	InstructionType     string    `json:"instructionType" validate:"required"`
+	IsActive            bool      `json:"isActive" example:"true"`
+	DisplayName         string    `json:"displayName"`
+	AccountNumber       string    `json:"accountNumber"`
+	AccountNumberMasked string    `json:"accountNumberMasked"`
+	AccountHolderName   string    `json:"accountHolderName"`
+	BankCode            string    `json:"bankCode"`
+	BillerCode          string    `json:"billerCode"`
+	PaymentCode         string    `json:"paymentCode"`
+	QrString            string    `json:"qrString"`
+	QrImageUrl          string    `json:"qrImageUrl" validate:"url"`
+	CheckoutUrl         string    `json:"checkoutUrl" validate:"url"`
+	DeeplinkUrl         string    `json:"deeplinkUrl" validate:"url"`
+	RetailOutletCode    string    `json:"retailOutletCode"`
+	ExpiresAt           time.Time `json:"expiresAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 }
 
 func NewPaymentInstructionsResponse(paymentInstructions model.PaymentInstructions) PaymentInstructionsResponse {
@@ -799,7 +773,6 @@ func NewPaymentInstructionsResponse(paymentInstructions model.PaymentInstruction
 		DeeplinkUrl:         paymentInstructions.DeeplinkUrl.String,
 		RetailOutletCode:    paymentInstructions.RetailOutletCode.String,
 		ExpiresAt:           paymentInstructions.ExpiresAt.Time,
-		Metadata:            paymentInstructions.Metadata,
 	}
 }
 

@@ -63,8 +63,6 @@ func composeInsertFieldsAndParamsPaymentInstructions(paymentInstructionsList []m
 				args = append(args, paymentInstructions.RetailOutletCode)
 			case selectField.ExpiresAt():
 				args = append(args, paymentInstructions.ExpiresAt)
-			case selectField.Metadata():
-				args = append(args, paymentInstructions.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentInstructions.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -201,10 +199,6 @@ func (ss PaymentInstructionsSelectFields) ExpiresAt() PaymentInstructionsField {
 	return PaymentInstructionsField("expires_at")
 }
 
-func (ss PaymentInstructionsSelectFields) Metadata() PaymentInstructionsField {
-	return PaymentInstructionsField("metadata")
-}
-
 func (ss PaymentInstructionsSelectFields) MetaCreatedAt() PaymentInstructionsField {
 	return PaymentInstructionsField("meta_created_at")
 }
@@ -248,7 +242,6 @@ func (ss PaymentInstructionsSelectFields) All() PaymentInstructionsFieldList {
 		ss.DeeplinkUrl(),
 		ss.RetailOutletCode(),
 		ss.ExpiresAt(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -314,7 +307,6 @@ func defaultPaymentInstructionsUpdateFields(paymentInstructions model.PaymentIns
 		NewPaymentInstructionsUpdateField(selectFields.DeeplinkUrl(), paymentInstructions.DeeplinkUrl),
 		NewPaymentInstructionsUpdateField(selectFields.RetailOutletCode(), paymentInstructions.RetailOutletCode),
 		NewPaymentInstructionsUpdateField(selectFields.ExpiresAt(), paymentInstructions.ExpiresAt),
-		NewPaymentInstructionsUpdateField(selectFields.Metadata(), paymentInstructions.Metadata),
 		NewPaymentInstructionsUpdateField(selectFields.MetaCreatedAt(), paymentInstructions.MetaCreatedAt),
 		NewPaymentInstructionsUpdateField(selectFields.MetaCreatedBy(), paymentInstructions.MetaCreatedBy),
 		NewPaymentInstructionsUpdateField(selectFields.MetaUpdatedAt(), paymentInstructions.MetaUpdatedAt),
@@ -659,9 +651,6 @@ func GetPaymentInstructionsFieldType(paymentInstructionsField PaymentInstruction
 
 	case selectPaymentInstructionsFields.ExpiresAt():
 		return "timestamptz"
-
-	case selectPaymentInstructionsFields.Metadata():
-		return "jsonb"
 
 	case selectPaymentInstructionsFields.MetaCreatedAt():
 		return "timestamptz"

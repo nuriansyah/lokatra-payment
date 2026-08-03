@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -35,7 +34,6 @@ type cashCollectionItemsDTOFieldName struct {
 	VoidedAt                CashCollectionItemsDTOFieldNameType
 	VoidReason              CashCollectionItemsDTOFieldNameType
 	Notes                   CashCollectionItemsDTOFieldNameType
-	Metadata                CashCollectionItemsDTOFieldNameType
 	MetaCreatedAt           CashCollectionItemsDTOFieldNameType
 	MetaCreatedBy           CashCollectionItemsDTOFieldNameType
 	MetaUpdatedAt           CashCollectionItemsDTOFieldNameType
@@ -57,7 +55,6 @@ var CashCollectionItemsDTOFieldName = cashCollectionItemsDTOFieldName{
 	VoidedAt:                "voidedAt",
 	VoidReason:              "voidReason",
 	Notes:                   "notes",
-	Metadata:                "metadata",
 	MetaCreatedAt:           "metaCreatedAt",
 	MetaCreatedBy:           "metaCreatedBy",
 	MetaUpdatedAt:           "metaUpdatedAt",
@@ -105,9 +102,6 @@ func transformCashCollectionItemsDTOFieldNameFromStr(field string) (dbField stri
 	case string(CashCollectionItemsDTOFieldName.Notes):
 		return string(model.CashCollectionItemsDBFieldName.Notes), true
 
-	case string(CashCollectionItemsDTOFieldName.Metadata):
-		return string(model.CashCollectionItemsDBFieldName.Metadata), true
-
 	case string(CashCollectionItemsDTOFieldName.MetaCreatedAt):
 		return string(model.CashCollectionItemsDBFieldName.MetaCreatedAt), true
 
@@ -119,12 +113,6 @@ func transformCashCollectionItemsDTOFieldNameFromStr(field string) (dbField stri
 
 	case string(CashCollectionItemsDTOFieldName.MetaUpdatedBy):
 		return string(model.CashCollectionItemsDBFieldName.MetaUpdatedBy), true
-
-	case string(CashCollectionItemsDTOFieldName.MetaDeletedAt):
-		return string(model.CashCollectionItemsDBFieldName.MetaDeletedAt), true
-
-	case string(CashCollectionItemsDTOFieldName.MetaDeletedBy):
-		return string(model.CashCollectionItemsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewCashCollectionItemsFilterFieldSpecFromStr(field); found {
@@ -301,7 +289,6 @@ func NewCashCollectionItemsSelectableResponse(cashCollectionItems model.CashColl
 			string(model.CashCollectionItemsDBFieldName.VoidedAt),
 			string(model.CashCollectionItemsDBFieldName.VoidReason),
 			string(model.CashCollectionItemsDBFieldName.Notes),
-			string(model.CashCollectionItemsDBFieldName.Metadata),
 			string(model.CashCollectionItemsDBFieldName.MetaCreatedAt),
 			string(model.CashCollectionItemsDBFieldName.MetaCreatedBy),
 			string(model.CashCollectionItemsDBFieldName.MetaUpdatedAt),
@@ -398,13 +385,6 @@ func NewCashCollectionItemsSelectableResponse(cashCollectionItems model.CashColl
 				key = outputField
 			}
 			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.Notes.String, explicitAlias)
-
-		case string(model.CashCollectionItemsDBFieldName.Metadata):
-			key := string(CashCollectionItemsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setCashCollectionItemsSelectableValue(cashCollectionItemsSelectableResponse, key, cashCollectionItems.Metadata, explicitAlias)
 
 		case string(model.CashCollectionItemsDBFieldName.MetaCreatedAt):
 			key := string(CashCollectionItemsDTOFieldName.MetaCreatedAt)
@@ -530,7 +510,6 @@ type CashCollectionItemsCreateRequest struct {
 	VoidedAt                time.Time            `json:"voidedAt"`
 	VoidReason              string               `json:"voidReason"`
 	Notes                   string               `json:"notes"`
-	Metadata                json.RawMessage      `json:"metadata"`
 }
 
 func (d *CashCollectionItemsCreateRequest) Validate() (err error) {
@@ -553,7 +532,6 @@ func (d *CashCollectionItemsCreateRequest) ToModel() model.CashCollectionItems {
 		VoidedAt:                null.TimeFrom(d.VoidedAt),
 		VoidReason:              null.StringFrom(d.VoidReason),
 		Notes:                   null.StringFrom(d.Notes),
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -590,7 +568,6 @@ type CashCollectionItemsUpdateRequest struct {
 	VoidedAt                time.Time            `json:"voidedAt"`
 	VoidReason              string               `json:"voidReason"`
 	Notes                   string               `json:"notes"`
-	Metadata                json.RawMessage      `json:"metadata"`
 }
 
 func (d *CashCollectionItemsUpdateRequest) Validate() (err error) {
@@ -611,7 +588,6 @@ func (d CashCollectionItemsUpdateRequest) ToModel() model.CashCollectionItems {
 		VoidedAt:                null.TimeFrom(d.VoidedAt),
 		VoidReason:              null.StringFrom(d.VoidReason),
 		Notes:                   null.StringFrom(d.Notes),
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -628,7 +604,6 @@ type CashCollectionItemsBulkUpdateRequest struct {
 	VoidedAt                time.Time            `json:"voidedAt"`
 	VoidReason              string               `json:"voidReason"`
 	Notes                   string               `json:"notes"`
-	Metadata                json.RawMessage      `json:"metadata"`
 }
 
 func (d CashCollectionItemsBulkUpdateRequest) PrimaryID() CashCollectionItemsPrimaryID {
@@ -664,7 +639,6 @@ func (d CashCollectionItemsBulkUpdateRequest) ToModel() model.CashCollectionItem
 		VoidedAt:                null.TimeFrom(d.VoidedAt),
 		VoidReason:              null.StringFrom(d.VoidReason),
 		Notes:                   null.StringFrom(d.Notes),
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -681,7 +655,6 @@ type CashCollectionItemsResponse struct {
 	VoidedAt                time.Time            `json:"voidedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	VoidReason              string               `json:"voidReason"`
 	Notes                   string               `json:"notes"`
-	Metadata                json.RawMessage      `json:"metadata" swaggertype:"object"`
 }
 
 func NewCashCollectionItemsResponse(cashCollectionItems model.CashCollectionItems) CashCollectionItemsResponse {
@@ -698,7 +671,6 @@ func NewCashCollectionItemsResponse(cashCollectionItems model.CashCollectionItem
 		VoidedAt:                cashCollectionItems.VoidedAt.Time,
 		VoidReason:              cashCollectionItems.VoidReason.String,
 		Notes:                   cashCollectionItems.Notes.String,
-		Metadata:                cashCollectionItems.Metadata,
 	}
 }
 

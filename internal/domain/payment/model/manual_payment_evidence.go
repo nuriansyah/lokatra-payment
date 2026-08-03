@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -36,7 +35,6 @@ type manualPaymentEvidenceDBFieldName struct {
 	ReviewedAt                ManualPaymentEvidenceDBFieldNameType
 	RejectionReason           ManualPaymentEvidenceDBFieldNameType
 	PolicyDecision            ManualPaymentEvidenceDBFieldNameType
-	Metadata                  ManualPaymentEvidenceDBFieldNameType
 	MetaCreatedAt             ManualPaymentEvidenceDBFieldNameType
 	MetaCreatedBy             ManualPaymentEvidenceDBFieldNameType
 	MetaUpdatedAt             ManualPaymentEvidenceDBFieldNameType
@@ -67,7 +65,6 @@ var ManualPaymentEvidenceDBFieldName = manualPaymentEvidenceDBFieldName{
 	ReviewedAt:                "reviewed_at",
 	RejectionReason:           "rejection_reason",
 	PolicyDecision:            "policy_decision",
-	Metadata:                  "metadata",
 	MetaCreatedAt:             "meta_created_at",
 	MetaCreatedBy:             "meta_created_by",
 	MetaUpdatedAt:             "meta_updated_at",
@@ -141,9 +138,6 @@ func NewManualPaymentEvidenceDBFieldNameFromStr(field string) (dbField ManualPay
 
 	case string(ManualPaymentEvidenceDBFieldName.PolicyDecision):
 		return ManualPaymentEvidenceDBFieldName.PolicyDecision, true
-
-	case string(ManualPaymentEvidenceDBFieldName.Metadata):
-		return ManualPaymentEvidenceDBFieldName.Metadata, true
 
 	case string(ManualPaymentEvidenceDBFieldName.MetaCreatedAt):
 		return ManualPaymentEvidenceDBFieldName.MetaCreatedAt, true
@@ -359,15 +353,6 @@ var ManualPaymentEvidenceFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -514,7 +499,6 @@ type ManualPaymentEvidence struct {
 	ReviewedAt                null.Time            `db:"reviewed_at"`
 	RejectionReason           null.String          `db:"rejection_reason"`
 	PolicyDecision            null.String          `db:"policy_decision"`
-	Metadata                  json.RawMessage      `db:"metadata"`
 
 	shared.MetaSignature
 }

@@ -26,7 +26,6 @@ type idempotencyKeysDBFieldName struct {
 	ResponseBody   IdempotencyKeysDBFieldNameType
 	LockedUntil    IdempotencyKeysDBFieldNameType
 	CompletedAt    IdempotencyKeysDBFieldNameType
-	Metadata       IdempotencyKeysDBFieldNameType
 	MetaCreatedAt  IdempotencyKeysDBFieldNameType
 	MetaCreatedBy  IdempotencyKeysDBFieldNameType
 	MetaUpdatedAt  IdempotencyKeysDBFieldNameType
@@ -48,7 +47,6 @@ var IdempotencyKeysDBFieldName = idempotencyKeysDBFieldName{
 	ResponseBody:   "response_body",
 	LockedUntil:    "locked_until",
 	CompletedAt:    "completed_at",
-	Metadata:       "metadata",
 	MetaCreatedAt:  "meta_created_at",
 	MetaCreatedBy:  "meta_created_by",
 	MetaUpdatedAt:  "meta_updated_at",
@@ -95,9 +93,6 @@ func NewIdempotencyKeysDBFieldNameFromStr(field string) (dbField IdempotencyKeys
 
 	case string(IdempotencyKeysDBFieldName.CompletedAt):
 		return IdempotencyKeysDBFieldName.CompletedAt, true
-
-	case string(IdempotencyKeysDBFieldName.Metadata):
-		return IdempotencyKeysDBFieldName.Metadata, true
 
 	case string(IdempotencyKeysDBFieldName.MetaCreatedAt):
 		return IdempotencyKeysDBFieldName.MetaCreatedAt, true
@@ -228,15 +223,6 @@ var IdempotencyKeysFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "completedAt",
 		Column:            "completed_at",
 		SQLAlias:          "completed_at",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -377,7 +363,6 @@ type IdempotencyKeys struct {
 	ResponseBody   json.RawMessage   `db:"response_body"`
 	LockedUntil    null.Time         `db:"locked_until"`
 	CompletedAt    null.Time         `db:"completed_at"`
-	Metadata       json.RawMessage   `db:"metadata"`
 
 	shared.MetaSignature
 }

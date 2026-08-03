@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -44,7 +43,6 @@ type manualPaymentEvidenceDTOFieldName struct {
 	ReviewedAt                ManualPaymentEvidenceDTOFieldNameType
 	RejectionReason           ManualPaymentEvidenceDTOFieldNameType
 	PolicyDecision            ManualPaymentEvidenceDTOFieldNameType
-	Metadata                  ManualPaymentEvidenceDTOFieldNameType
 	MetaCreatedAt             ManualPaymentEvidenceDTOFieldNameType
 	MetaCreatedBy             ManualPaymentEvidenceDTOFieldNameType
 	MetaUpdatedAt             ManualPaymentEvidenceDTOFieldNameType
@@ -75,7 +73,6 @@ var ManualPaymentEvidenceDTOFieldName = manualPaymentEvidenceDTOFieldName{
 	ReviewedAt:                "reviewedAt",
 	RejectionReason:           "rejectionReason",
 	PolicyDecision:            "policyDecision",
-	Metadata:                  "metadata",
 	MetaCreatedAt:             "metaCreatedAt",
 	MetaCreatedBy:             "metaCreatedBy",
 	MetaUpdatedAt:             "metaUpdatedAt",
@@ -150,9 +147,6 @@ func transformManualPaymentEvidenceDTOFieldNameFromStr(field string) (dbField st
 	case string(ManualPaymentEvidenceDTOFieldName.PolicyDecision):
 		return string(model.ManualPaymentEvidenceDBFieldName.PolicyDecision), true
 
-	case string(ManualPaymentEvidenceDTOFieldName.Metadata):
-		return string(model.ManualPaymentEvidenceDBFieldName.Metadata), true
-
 	case string(ManualPaymentEvidenceDTOFieldName.MetaCreatedAt):
 		return string(model.ManualPaymentEvidenceDBFieldName.MetaCreatedAt), true
 
@@ -164,12 +158,6 @@ func transformManualPaymentEvidenceDTOFieldNameFromStr(field string) (dbField st
 
 	case string(ManualPaymentEvidenceDTOFieldName.MetaUpdatedBy):
 		return string(model.ManualPaymentEvidenceDBFieldName.MetaUpdatedBy), true
-
-	case string(ManualPaymentEvidenceDTOFieldName.MetaDeletedAt):
-		return string(model.ManualPaymentEvidenceDBFieldName.MetaDeletedAt), true
-
-	case string(ManualPaymentEvidenceDTOFieldName.MetaDeletedBy):
-		return string(model.ManualPaymentEvidenceDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewManualPaymentEvidenceFilterFieldSpecFromStr(field); found {
@@ -355,7 +343,6 @@ func NewManualPaymentEvidenceSelectableResponse(manualPaymentEvidence model.Manu
 			string(model.ManualPaymentEvidenceDBFieldName.ReviewedAt),
 			string(model.ManualPaymentEvidenceDBFieldName.RejectionReason),
 			string(model.ManualPaymentEvidenceDBFieldName.PolicyDecision),
-			string(model.ManualPaymentEvidenceDBFieldName.Metadata),
 			string(model.ManualPaymentEvidenceDBFieldName.MetaCreatedAt),
 			string(model.ManualPaymentEvidenceDBFieldName.MetaCreatedBy),
 			string(model.ManualPaymentEvidenceDBFieldName.MetaUpdatedAt),
@@ -516,13 +503,6 @@ func NewManualPaymentEvidenceSelectableResponse(manualPaymentEvidence model.Manu
 			}
 			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.PolicyDecision.String, explicitAlias)
 
-		case string(model.ManualPaymentEvidenceDBFieldName.Metadata):
-			key := string(ManualPaymentEvidenceDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setManualPaymentEvidenceSelectableValue(manualPaymentEvidenceSelectableResponse, key, manualPaymentEvidence.Metadata, explicitAlias)
-
 		case string(model.ManualPaymentEvidenceDBFieldName.MetaCreatedAt):
 			key := string(ManualPaymentEvidenceDTOFieldName.MetaCreatedAt)
 			if explicitAlias {
@@ -656,7 +636,6 @@ type ManualPaymentEvidenceCreateRequest struct {
 	ReviewedAt                time.Time                  `json:"reviewedAt"`
 	RejectionReason           string                     `json:"rejectionReason"`
 	PolicyDecision            string                     `json:"policyDecision"`
-	Metadata                  json.RawMessage            `json:"metadata"`
 }
 
 func (d *ManualPaymentEvidenceCreateRequest) Validate() (err error) {
@@ -688,7 +667,6 @@ func (d *ManualPaymentEvidenceCreateRequest) ToModel() model.ManualPaymentEviden
 		ReviewedAt:                null.TimeFrom(d.ReviewedAt),
 		RejectionReason:           null.StringFrom(d.RejectionReason),
 		PolicyDecision:            null.StringFrom(d.PolicyDecision),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -734,7 +712,6 @@ type ManualPaymentEvidenceUpdateRequest struct {
 	ReviewedAt                time.Time                  `json:"reviewedAt"`
 	RejectionReason           string                     `json:"rejectionReason"`
 	PolicyDecision            string                     `json:"policyDecision"`
-	Metadata                  json.RawMessage            `json:"metadata"`
 }
 
 func (d *ManualPaymentEvidenceUpdateRequest) Validate() (err error) {
@@ -764,7 +741,6 @@ func (d ManualPaymentEvidenceUpdateRequest) ToModel() model.ManualPaymentEvidenc
 		ReviewedAt:                null.TimeFrom(d.ReviewedAt),
 		RejectionReason:           null.StringFrom(d.RejectionReason),
 		PolicyDecision:            null.StringFrom(d.PolicyDecision),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -790,7 +766,6 @@ type ManualPaymentEvidenceBulkUpdateRequest struct {
 	ReviewedAt                time.Time                  `json:"reviewedAt"`
 	RejectionReason           string                     `json:"rejectionReason"`
 	PolicyDecision            string                     `json:"policyDecision"`
-	Metadata                  json.RawMessage            `json:"metadata"`
 }
 
 func (d ManualPaymentEvidenceBulkUpdateRequest) PrimaryID() ManualPaymentEvidencePrimaryID {
@@ -835,7 +810,6 @@ func (d ManualPaymentEvidenceBulkUpdateRequest) ToModel() model.ManualPaymentEvi
 		ReviewedAt:                null.TimeFrom(d.ReviewedAt),
 		RejectionReason:           null.StringFrom(d.RejectionReason),
 		PolicyDecision:            null.StringFrom(d.PolicyDecision),
-		Metadata:                  d.Metadata,
 	}
 }
 
@@ -861,7 +835,6 @@ type ManualPaymentEvidenceResponse struct {
 	ReviewedAt                time.Time                  `json:"reviewedAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	RejectionReason           string                     `json:"rejectionReason"`
 	PolicyDecision            string                     `json:"policyDecision"`
-	Metadata                  json.RawMessage            `json:"metadata" swaggertype:"object"`
 }
 
 func NewManualPaymentEvidenceResponse(manualPaymentEvidence model.ManualPaymentEvidence) ManualPaymentEvidenceResponse {
@@ -887,7 +860,6 @@ func NewManualPaymentEvidenceResponse(manualPaymentEvidence model.ManualPaymentE
 		ReviewedAt:                manualPaymentEvidence.ReviewedAt.Time,
 		RejectionReason:           manualPaymentEvidence.RejectionReason.String,
 		PolicyDecision:            manualPaymentEvidence.PolicyDecision.String,
-		Metadata:                  manualPaymentEvidence.Metadata,
 	}
 }
 

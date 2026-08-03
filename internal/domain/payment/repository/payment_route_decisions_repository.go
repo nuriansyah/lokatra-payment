@@ -47,8 +47,6 @@ func composeInsertFieldsAndParamsPaymentRouteDecisions(paymentRouteDecisionsList
 				args = append(args, paymentRouteDecisions.EvaluatedContext)
 			case selectField.Candidates():
 				args = append(args, paymentRouteDecisions.Candidates)
-			case selectField.Metadata():
-				args = append(args, paymentRouteDecisions.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentRouteDecisions.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -153,10 +151,6 @@ func (ss PaymentRouteDecisionsSelectFields) Candidates() PaymentRouteDecisionsFi
 	return PaymentRouteDecisionsField("candidates")
 }
 
-func (ss PaymentRouteDecisionsSelectFields) Metadata() PaymentRouteDecisionsField {
-	return PaymentRouteDecisionsField("metadata")
-}
-
 func (ss PaymentRouteDecisionsSelectFields) MetaCreatedAt() PaymentRouteDecisionsField {
 	return PaymentRouteDecisionsField("meta_created_at")
 }
@@ -192,7 +186,6 @@ func (ss PaymentRouteDecisionsSelectFields) All() PaymentRouteDecisionsFieldList
 		ss.Reason(),
 		ss.EvaluatedContext(),
 		ss.Candidates(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -250,7 +243,6 @@ func defaultPaymentRouteDecisionsUpdateFields(paymentRouteDecisions model.Paymen
 		NewPaymentRouteDecisionsUpdateField(selectFields.Reason(), paymentRouteDecisions.Reason),
 		NewPaymentRouteDecisionsUpdateField(selectFields.EvaluatedContext(), paymentRouteDecisions.EvaluatedContext),
 		NewPaymentRouteDecisionsUpdateField(selectFields.Candidates(), paymentRouteDecisions.Candidates),
-		NewPaymentRouteDecisionsUpdateField(selectFields.Metadata(), paymentRouteDecisions.Metadata),
 		NewPaymentRouteDecisionsUpdateField(selectFields.MetaCreatedAt(), paymentRouteDecisions.MetaCreatedAt),
 		NewPaymentRouteDecisionsUpdateField(selectFields.MetaCreatedBy(), paymentRouteDecisions.MetaCreatedBy),
 		NewPaymentRouteDecisionsUpdateField(selectFields.MetaUpdatedAt(), paymentRouteDecisions.MetaUpdatedAt),
@@ -570,9 +562,6 @@ func GetPaymentRouteDecisionsFieldType(paymentRouteDecisionsField PaymentRouteDe
 		return "jsonb"
 
 	case selectPaymentRouteDecisionsFields.Candidates():
-		return "jsonb"
-
-	case selectPaymentRouteDecisionsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentRouteDecisionsFields.MetaCreatedAt():

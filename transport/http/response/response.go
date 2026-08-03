@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
 	"github.com/nuriansyah/lokatra-payment/shared/logger"
 )
@@ -115,6 +116,72 @@ func WithError(w http.ResponseWriter, err error, opts ...func(*Base)) {
 		opt(&base)
 	}
 	respond(w, *base.HTTPCode, base)
+}
+
+// ---------------------------------------------------------------------------
+// RFC 9457 Problem Details
+// ---------------------------------------------------------------------------
+
+// ProblemDetail represents an RFC 9457 Problem Details response.
+type ProblemDetail struct {
+	Type     string      `json:"type,omitempty"`
+	Title    string      `json:"title,omitempty"`
+	Status   int         `json:"status"`
+	Detail   string      `json:"detail,omitempty"`
+	Instance string      `json:"instance,omitempty"`
+	Code     string      `json:"code,omitempty"`
+	Errors   interface{} `json:"errors,omitempty"`
+}
+
+// WithProblemDetails sends an RFC 9457 Problem Details response.
+// Uses error code to determine HTTP status if not explicitly provided.
+func WithProblemDetails(w http.ResponseWriter, err error, requestID string) {
+	errCode := failure.GetErrorCode(err)
+	httpStatus := shared.ProblemStatusForCode(errCode)
+	if httpStatus == 500 {
+		httpStatus = failure.GetCode(err)
+	}
+
+	problem := ProblemDetail{
+		Type:   "about:blank",
+		Title:  http.StatusText(httpStatus),
+		Status: httpStatus,
+		Detail: err.Error(),
+		Code:   errCode,
+	}
+	if requestID != "" {
+		problem.Instance = requestID
+	}
+
+	response, _ := json.Marshal(problem)
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(httpStatus)
+	_, writeErr := w.Write(response)
+	if writeErr != nil {
+		logger.ErrorWithStack(writeErr)
+	}
+}
+
+// WithProblemDetailsWithStatus sends an RFC 9457 Problem Details with explicit status.
+func WithProblemDetailsWithStatus(w http.ResponseWriter, httpStatus int, code, detail, requestID string) {
+	problem := ProblemDetail{
+		Type:   "about:blank",
+		Title:  http.StatusText(httpStatus),
+		Status: httpStatus,
+		Detail: detail,
+		Code:   code,
+	}
+	if requestID != "" {
+		problem.Instance = requestID
+	}
+
+	response, _ := json.Marshal(problem)
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(httpStatus)
+	_, writeErr := w.Write(response)
+	if writeErr != nil {
+		logger.ErrorWithStack(writeErr)
+	}
 }
 
 // WithError sends a response with an error message

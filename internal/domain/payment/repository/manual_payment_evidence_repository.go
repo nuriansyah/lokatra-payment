@@ -71,8 +71,6 @@ func composeInsertFieldsAndParamsManualPaymentEvidence(manualPaymentEvidenceList
 				args = append(args, manualPaymentEvidence.RejectionReason)
 			case selectField.PolicyDecision():
 				args = append(args, manualPaymentEvidence.PolicyDecision)
-			case selectField.Metadata():
-				args = append(args, manualPaymentEvidence.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, manualPaymentEvidence.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -225,10 +223,6 @@ func (ss ManualPaymentEvidenceSelectFields) PolicyDecision() ManualPaymentEviden
 	return ManualPaymentEvidenceField("policy_decision")
 }
 
-func (ss ManualPaymentEvidenceSelectFields) Metadata() ManualPaymentEvidenceField {
-	return ManualPaymentEvidenceField("metadata")
-}
-
 func (ss ManualPaymentEvidenceSelectFields) MetaCreatedAt() ManualPaymentEvidenceField {
 	return ManualPaymentEvidenceField("meta_created_at")
 }
@@ -276,7 +270,6 @@ func (ss ManualPaymentEvidenceSelectFields) All() ManualPaymentEvidenceFieldList
 		ss.ReviewedAt(),
 		ss.RejectionReason(),
 		ss.PolicyDecision(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -346,7 +339,6 @@ func defaultManualPaymentEvidenceUpdateFields(manualPaymentEvidence model.Manual
 		NewManualPaymentEvidenceUpdateField(selectFields.ReviewedAt(), manualPaymentEvidence.ReviewedAt),
 		NewManualPaymentEvidenceUpdateField(selectFields.RejectionReason(), manualPaymentEvidence.RejectionReason),
 		NewManualPaymentEvidenceUpdateField(selectFields.PolicyDecision(), manualPaymentEvidence.PolicyDecision),
-		NewManualPaymentEvidenceUpdateField(selectFields.Metadata(), manualPaymentEvidence.Metadata),
 		NewManualPaymentEvidenceUpdateField(selectFields.MetaCreatedAt(), manualPaymentEvidence.MetaCreatedAt),
 		NewManualPaymentEvidenceUpdateField(selectFields.MetaCreatedBy(), manualPaymentEvidence.MetaCreatedBy),
 		NewManualPaymentEvidenceUpdateField(selectFields.MetaUpdatedAt(), manualPaymentEvidence.MetaUpdatedAt),
@@ -703,9 +695,6 @@ func GetManualPaymentEvidenceFieldType(manualPaymentEvidenceField ManualPaymentE
 
 	case selectManualPaymentEvidenceFields.PolicyDecision():
 		return "text"
-
-	case selectManualPaymentEvidenceFields.Metadata():
-		return "jsonb"
 
 	case selectManualPaymentEvidenceFields.MetaCreatedAt():
 		return "timestamptz"

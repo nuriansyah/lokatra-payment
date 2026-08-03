@@ -11,6 +11,7 @@ import (
 	"github.com/guregu/null"
 	pg "github.com/nuriansyah/lokatra-payment/external/paymentgateway"
 	paymentmodel "github.com/nuriansyah/lokatra-payment/internal/domain/payment/model"
+	"github.com/nuriansyah/lokatra-payment/internal/domain/payment/model/dto"
 	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
 )
@@ -20,23 +21,59 @@ type PaymentIntentActionResult struct {
 	Routing *RoutingResult
 }
 
-func (s *ServiceImpl) executePaymentIntent(ctx context.Context, intent paymentmodel.PaymentIntents, actorID uuid.UUID) (PaymentIntentActionResult, error) {
+func (a PaymentIntentActionResult) ToResponse() dto.PaymentIntentActionResponse {
+	resp := dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(a.Intent)}
+	if a.Routing == nil {
+		return resp
+	}
+	routing := &dto.RoutingExecutionResponse{
+		Candidates: make([]dto.RoutingCandidateResponse, 0, len(a.Routing.Candidates)),
+		Attempts:   make([]dto.ProviderAttemptResponse, 0, len(a.Routing.Attempts)),
+	}
+	for _, c := range a.Routing.Candidates {
+		routing.Candidates = append(routing.Candidates, dto.RoutingCandidateResponse{
+			ProviderCode: string(c.ProviderCode), AccountID: c.AccountID, Priority: c.Priority,
+			MaxAttempts: c.MaxAttempts, Reason: c.Reason, Skipped: c.Skipped, SkipReason: c.SkipReason,
+		})
+	}
+	for _, a := range a.Routing.Attempts {
+		routing.Attempts = append(routing.Attempts, dto.ProviderAttemptResponse{
+			ProviderCode: string(a.ProviderCode), AccountID: a.AccountID, Attempt: a.Attempt,
+			StartedAt: a.StartedAt, Duration: a.Duration, Error: a.Error,
+		})
+	}
+	if a.Routing.Selected.ProviderCode != "" {
+		s := a.Routing.Selected
+		routing.Selected = &dto.RoutingCandidateResponse{
+			ProviderCode: string(s.ProviderCode), AccountID: s.AccountID, Priority: s.Priority,
+			MaxAttempts: s.MaxAttempts, Reason: s.Reason, Skipped: s.Skipped, SkipReason: s.SkipReason,
+		}
+		p := a.Routing.Payment
+		routing.Payment = &p
+	}
+	resp.Routing = routing
+	return resp
+}
+
+func (s *ServiceImpl) executePaymentIntent(ctx context.Context, intent paymentmodel.PaymentIntents, actorID uuid.UUID) (dto.PaymentIntentActionResponse, error) {
 	method, ok := normalizePaymentMethod(intent.SelectedMethodCode.String)
 	if !ok {
-		return PaymentIntentActionResult{Intent: intent}, fmt.Errorf("unsupported payment method %q", intent.SelectedMethodCode.String)
+		return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intent)}, fmt.Errorf("unsupported payment method %q", intent.SelectedMethodCode.String)
 	}
 	intent.Status = paymentmodel.PaymentIntentStatusProcessing
-	setUpdateSignature(&intent.MetaSignature, actorID, time.Now().UTC())
+	intent.SetSignatureMetaUpdate(actorID)
+
 	if err := s.paymentRepo.UpdatePaymentIntentsByID(ctx, intent.ToPaymentIntentsPrimaryID(), &intent); err != nil {
-		return PaymentIntentActionResult{Intent: intent}, err
+		return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intent)}, err
 	}
 	routingRequest := RoutingRequest{
 		Method:   method,
 		Channel:  intent.SelectedChannelCode.String,
 		Currency: intent.Currency,
+		Amount:   intent.Amount.StringFixed(2),
 		GatewayCall: pg.CreatePaymentRequest{
 			PaymentIntentID: intent.Id.String(),
-			AttemptID:       mustUUID().String(),
+			AttemptID:       uuid.Must(uuid.NewV7()).String(),
 			OrderID:         intent.IntentCode,
 			Amount:          pg.Money{Amount: intent.Amount.StringFixed(2), Currency: intent.Currency},
 			Method:          method,
@@ -49,81 +86,88 @@ func (s *ServiceImpl) executePaymentIntent(ctx context.Context, intent paymentmo
 	routingResult, routeErr := s.routingEngine.Execute(ctx, routingRequest)
 	now := time.Now().UTC()
 	candidateJSON, _ := json.Marshal(routingResult.Candidates)
-	evaluatedJSON, _ := json.Marshal(map[string]any{"method": method, "channel": routingRequest.Channel, "currency": routingRequest.Currency})
+	evaluatedJSON, _ := json.Marshal(map[string]any{
+		"method":   method,
+		"channel":  routingRequest.Channel,
+		"currency": routingRequest.Currency,
+		"amount":   routingRequest.Amount,
+		"strategy": routingResult.Strategy,
+		"ruleId":   routingResult.RuleID,
+	})
 	decision := paymentmodel.PaymentRouteDecisions{
-		Id:                        mustUUID(),
+		Id:                        uuid.Must(uuid.NewV7()),
 		PaymentIntentId:           intent.Id,
-		SelectedProviderAccountId: optionalUUID(routingResult.Selected.AccountID),
-		SelectedProviderCode:      optionalString(string(routingResult.Selected.ProviderCode)),
+		SelectedProviderAccountId: nuuid.From(routingResult.Selected.AccountID),
+		SelectedProviderCode:      null.StringFrom(string(routingResult.Selected.ProviderCode)),
 		MethodCode:                string(method),
-		ChannelCode:               optionalString(routingRequest.Channel),
+		ChannelCode:               null.StringFrom(routingRequest.Channel),
 		Reason:                    routingDecisionReason(routingResult, routeErr),
 		EvaluatedContext:          evaluatedJSON,
 		Candidates:                candidateJSON,
-		Metadata:                  json.RawMessage(`{}`),
 		MetaSignature:             shared.MetaSignature{MetaCreatedAt: now, MetaCreatedBy: actorID},
 	}
 	if err := s.paymentRepo.CreatePaymentRouteDecisions(ctx, &decision); err != nil {
-		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, err
+		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), err
 	}
 
 	nextAttemptNo, err := s.nextPaymentAttemptNumber(ctx, intent.Id)
 	if err != nil {
-		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, err
+		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), err
 	}
 	var successfulAttemptID uuid.UUID
 	for index, providerAttempt := range routingResult.Attempts {
 		attempt := paymentmodel.PaymentAttempts{
-			Id:                mustUUID(),
+			Id:                uuid.Must(uuid.NewV7()),
 			PaymentIntentId:   intent.Id,
 			AttemptNo:         nextAttemptNo + index,
-			ProviderAccountId: optionalUUID(providerAttempt.AccountID),
+			ProviderAccountId: nuuid.From(providerAttempt.AccountID),
 			RouteDecisionId:   nuuid.From(decision.Id),
 			ProviderCode:      null.StringFrom(string(providerAttempt.ProviderCode)),
 			MethodCode:        string(method),
-			ChannelCode:       optionalString(routingRequest.Channel),
+			ChannelCode:       null.StringFrom(routingRequest.Channel),
 			Amount:            intent.Amount,
 			Currency:          intent.Currency,
 			Status:            paymentmodel.PaymentAttemptStatusFailed,
-			FailureMessage:    optionalString(providerAttempt.Error),
+			FailureMessage:    null.StringFrom(providerAttempt.Error),
 			RawRequest:        mustJSON(routingRequest.GatewayCall),
-			Metadata:          mustJSON(map[string]any{"durationMs": providerAttempt.Duration.Milliseconds(), "providerAttempt": providerAttempt.Attempt}),
 			MetaSignature:     shared.MetaSignature{MetaCreatedAt: providerAttempt.StartedAt, MetaCreatedBy: actorID},
 		}
 		if providerAttempt.Error == "" && providerAttempt.ProviderCode == routingResult.Selected.ProviderCode {
 			attempt.Status = paymentAttemptStatus(routingResult.Payment.Status)
-			attempt.ProviderReference = optionalString(routingResult.Payment.ProviderReference)
-			attempt.ProviderTransactionId = optionalString(routingResult.Payment.ProviderTransactionID)
-			attempt.ProviderOrderId = optionalString(routingResult.Payment.OrderID)
-			attempt.ProviderPaymentId = optionalString(routingResult.Payment.ProviderPaymentID)
+			attempt.ProviderReference = null.StringFrom(routingResult.Payment.ProviderReference)
+			attempt.ProviderTransactionId = null.StringFrom(routingResult.Payment.ProviderTransactionID)
+			attempt.ProviderOrderId = null.StringFrom(routingResult.Payment.OrderID)
+			attempt.ProviderPaymentId = null.StringFrom(routingResult.Payment.ProviderPaymentID)
 			attempt.RawResponse = routingResult.Payment.Raw
 			successfulAttemptID = attempt.Id
 		}
 		if err := s.paymentRepo.CreatePaymentAttempts(ctx, &attempt); err != nil {
-			return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, err
+			return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), err
 		}
 	}
 
 	if routeErr != nil {
 		intent.Status = paymentmodel.PaymentIntentStatusRequiresConfirmation
-		setUpdateSignature(&intent.MetaSignature, actorID, time.Now().UTC())
+		intent.SetSignatureMetaUpdate(actorID)
 		if updateErr := s.paymentRepo.UpdatePaymentIntentsByID(ctx, intent.ToPaymentIntentsPrimaryID(), &intent); updateErr != nil {
-			return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, updateErr
+			return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), updateErr
 		}
-		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, routeErr
+		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), routeErr
 	}
 	if err := s.persistPaymentInstructions(ctx, successfulAttemptID, routingResult.Payment.Instructions, actorID); err != nil {
-		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, err
+		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), err
 	}
 	intent.Status = paymentIntentStatus(routingResult.Payment.Status)
 	if intent.Status == paymentmodel.PaymentIntentStatusSucceeded {
 		intent.PaidAt = null.TimeFrom(now)
 	}
-	setUpdateSignature(&intent.MetaSignature, actorID, now)
+
+	intent.SetSignatureMetaUpdate(actorID)
+
 	if err := s.paymentRepo.UpdatePaymentIntentsByID(ctx, intent.ToPaymentIntentsPrimaryID(), &intent); err != nil {
-		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, err
+		return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), err
 	}
-	return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}, nil
+	return PaymentIntentActionResult{Intent: intent, Routing: &routingResult}.ToResponse(), nil
 }
 
 func (s *ServiceImpl) nextPaymentAttemptNumber(ctx context.Context, intentID uuid.UUID) (int, error) {
@@ -144,19 +188,18 @@ func (s *ServiceImpl) nextPaymentAttemptNumber(ctx context.Context, intentID uui
 func (s *ServiceImpl) persistPaymentInstructions(ctx context.Context, attemptID uuid.UUID, instructions []pg.PaymentInstruction, actorID uuid.UUID) error {
 	for _, instruction := range instructions {
 		record := paymentmodel.PaymentInstructions{
-			Id:               mustUUID(),
+			Id:               uuid.Must(uuid.NewV7()),
 			PaymentAttemptId: attemptID,
 			InstructionType:  instruction.Type,
 			IsActive:         true,
-			DisplayName:      optionalString(instruction.DisplayName),
-			AccountNumber:    optionalString(instruction.AccountNumber),
-			BillerCode:       optionalString(instruction.BillerCode),
-			PaymentCode:      optionalString(instruction.PaymentCode),
-			QrString:         optionalString(instruction.QRString),
-			QrImageUrl:       optionalString(instruction.QRImageURL),
-			CheckoutUrl:      optionalString(instruction.CheckoutURL),
-			DeeplinkUrl:      optionalString(instruction.DeeplinkURL),
-			Metadata:         mustJSON(instruction.ProviderData),
+			DisplayName:      null.StringFrom(instruction.DisplayName),
+			AccountNumber:    null.StringFrom(instruction.AccountNumber),
+			BillerCode:       null.StringFrom(instruction.BillerCode),
+			PaymentCode:      null.StringFrom(instruction.PaymentCode),
+			QrString:         null.StringFrom(instruction.QRString),
+			QrImageUrl:       null.StringFrom(instruction.QRImageURL),
+			CheckoutUrl:      null.StringFrom(instruction.CheckoutURL),
+			DeeplinkUrl:      null.StringFrom(instruction.DeeplinkURL),
 			MetaSignature:    shared.MetaSignature{MetaCreatedAt: time.Now().UTC(), MetaCreatedBy: actorID},
 		}
 		if instruction.ExpiresAt != nil {
@@ -213,7 +256,11 @@ func routingDecisionReason(result RoutingResult, err error) string {
 	if err != nil {
 		return "routing_exhausted: " + err.Error()
 	}
-	return fmt.Sprintf("selected_%s_priority_%d", result.Selected.ProviderCode, result.Selected.Priority)
+	strategy := result.Strategy
+	if strategy == "" {
+		strategy = "priority"
+	}
+	return fmt.Sprintf("selected_%s_priority_%d_strategy_%s", result.Selected.ProviderCode, result.Selected.Priority, strategy)
 }
 
 func mustJSON(value any) json.RawMessage {

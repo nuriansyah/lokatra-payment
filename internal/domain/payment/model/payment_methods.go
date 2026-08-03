@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -17,7 +16,6 @@ type paymentMethodsDBFieldName struct {
 	MethodType    PaymentMethodsDBFieldNameType
 	Name          PaymentMethodsDBFieldNameType
 	Status        PaymentMethodsDBFieldNameType
-	Metadata      PaymentMethodsDBFieldNameType
 	MetaCreatedAt PaymentMethodsDBFieldNameType
 	MetaCreatedBy PaymentMethodsDBFieldNameType
 	MetaUpdatedAt PaymentMethodsDBFieldNameType
@@ -32,7 +30,6 @@ var PaymentMethodsDBFieldName = paymentMethodsDBFieldName{
 	MethodType:    "method_type",
 	Name:          "name",
 	Status:        "status",
-	Metadata:      "metadata",
 	MetaCreatedAt: "meta_created_at",
 	MetaCreatedBy: "meta_created_by",
 	MetaUpdatedAt: "meta_updated_at",
@@ -58,9 +55,6 @@ func NewPaymentMethodsDBFieldNameFromStr(field string) (dbField PaymentMethodsDB
 
 	case string(PaymentMethodsDBFieldName.Status):
 		return PaymentMethodsDBFieldName.Status, true
-
-	case string(PaymentMethodsDBFieldName.Metadata):
-		return PaymentMethodsDBFieldName.Metadata, true
 
 	case string(PaymentMethodsDBFieldName.MetaCreatedAt):
 		return PaymentMethodsDBFieldName.MetaCreatedAt, true
@@ -128,15 +122,6 @@ var PaymentMethodsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "status",
 		Column:            "status",
 		SQLAlias:          "status",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -280,7 +265,6 @@ type PaymentMethods struct {
 	MethodType PaymentMethodType   `db:"method_type"`
 	Name       string              `db:"name"`
 	Status     PaymentMethodStatus `db:"status"`
-	Metadata   json.RawMessage     `db:"metadata"`
 
 	shared.MetaSignature
 }

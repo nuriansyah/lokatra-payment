@@ -32,13 +32,13 @@ type providerAccountsDTOFieldName struct {
 	PublicKeyRef        ProviderAccountsDTOFieldNameType
 	Status              ProviderAccountsDTOFieldNameType
 	Config              ProviderAccountsDTOFieldNameType
-	Metadata            ProviderAccountsDTOFieldNameType
-	MetaCreatedAt       ProviderAccountsDTOFieldNameType
-	MetaCreatedBy       ProviderAccountsDTOFieldNameType
-	MetaUpdatedAt       ProviderAccountsDTOFieldNameType
-	MetaUpdatedBy       ProviderAccountsDTOFieldNameType
-	MetaDeletedAt       ProviderAccountsDTOFieldNameType
-	MetaDeletedBy       ProviderAccountsDTOFieldNameType
+
+	MetaCreatedAt ProviderAccountsDTOFieldNameType
+	MetaCreatedBy ProviderAccountsDTOFieldNameType
+	MetaUpdatedAt ProviderAccountsDTOFieldNameType
+	MetaUpdatedBy ProviderAccountsDTOFieldNameType
+	MetaDeletedAt ProviderAccountsDTOFieldNameType
+	MetaDeletedBy ProviderAccountsDTOFieldNameType
 }
 
 var ProviderAccountsDTOFieldName = providerAccountsDTOFieldName{
@@ -54,13 +54,13 @@ var ProviderAccountsDTOFieldName = providerAccountsDTOFieldName{
 	PublicKeyRef:        "publicKeyRef",
 	Status:              "status",
 	Config:              "config",
-	Metadata:            "metadata",
-	MetaCreatedAt:       "metaCreatedAt",
-	MetaCreatedBy:       "metaCreatedBy",
-	MetaUpdatedAt:       "metaUpdatedAt",
-	MetaUpdatedBy:       "metaUpdatedBy",
-	MetaDeletedAt:       "metaDeletedAt",
-	MetaDeletedBy:       "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderAccountsDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -102,9 +102,6 @@ func transformProviderAccountsDTOFieldNameFromStr(field string) (dbField string,
 	case string(ProviderAccountsDTOFieldName.Config):
 		return string(model.ProviderAccountsDBFieldName.Config), true
 
-	case string(ProviderAccountsDTOFieldName.Metadata):
-		return string(model.ProviderAccountsDBFieldName.Metadata), true
-
 	case string(ProviderAccountsDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderAccountsDBFieldName.MetaCreatedAt), true
 
@@ -116,12 +113,6 @@ func transformProviderAccountsDTOFieldNameFromStr(field string) (dbField string,
 
 	case string(ProviderAccountsDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderAccountsDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderAccountsDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderAccountsDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderAccountsDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderAccountsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderAccountsFilterFieldSpecFromStr(field); found {
@@ -298,7 +289,6 @@ func NewProviderAccountsSelectableResponse(providerAccounts model.ProviderAccoun
 			string(model.ProviderAccountsDBFieldName.PublicKeyRef),
 			string(model.ProviderAccountsDBFieldName.Status),
 			string(model.ProviderAccountsDBFieldName.Config),
-			string(model.ProviderAccountsDBFieldName.Metadata),
 			string(model.ProviderAccountsDBFieldName.MetaCreatedAt),
 			string(model.ProviderAccountsDBFieldName.MetaCreatedBy),
 			string(model.ProviderAccountsDBFieldName.MetaUpdatedAt),
@@ -395,13 +385,6 @@ func NewProviderAccountsSelectableResponse(providerAccounts model.ProviderAccoun
 				key = outputField
 			}
 			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.Config, explicitAlias)
-
-		case string(model.ProviderAccountsDBFieldName.Metadata):
-			key := string(ProviderAccountsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderAccountsSelectableValue(providerAccountsSelectableResponse, key, providerAccounts.Metadata, explicitAlias)
 
 		case string(model.ProviderAccountsDBFieldName.MetaCreatedAt):
 			key := string(ProviderAccountsDTOFieldName.MetaCreatedAt)
@@ -527,7 +510,6 @@ type ProviderAccountsCreateRequest struct {
 	PublicKeyRef        string                      `json:"publicKeyRef"`
 	Status              model.ProviderAccountStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
 	Config              json.RawMessage             `json:"config"`
-	Metadata            json.RawMessage             `json:"metadata"`
 }
 
 func (d *ProviderAccountsCreateRequest) Validate() (err error) {
@@ -550,7 +532,6 @@ func (d *ProviderAccountsCreateRequest) ToModel() model.ProviderAccounts {
 		PublicKeyRef:        null.StringFrom(d.PublicKeyRef),
 		Status:              d.Status,
 		Config:              d.Config,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -587,7 +568,6 @@ type ProviderAccountsUpdateRequest struct {
 	PublicKeyRef        string                      `json:"publicKeyRef"`
 	Status              model.ProviderAccountStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
 	Config              json.RawMessage             `json:"config"`
-	Metadata            json.RawMessage             `json:"metadata"`
 }
 
 func (d *ProviderAccountsUpdateRequest) Validate() (err error) {
@@ -608,7 +588,6 @@ func (d ProviderAccountsUpdateRequest) ToModel() model.ProviderAccounts {
 		PublicKeyRef:        null.StringFrom(d.PublicKeyRef),
 		Status:              d.Status,
 		Config:              d.Config,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -625,7 +604,6 @@ type ProviderAccountsBulkUpdateRequest struct {
 	PublicKeyRef        string                      `json:"publicKeyRef"`
 	Status              model.ProviderAccountStatus `json:"status" example:"active" enums:"active,inactive,deprecated"`
 	Config              json.RawMessage             `json:"config"`
-	Metadata            json.RawMessage             `json:"metadata"`
 }
 
 func (d ProviderAccountsBulkUpdateRequest) PrimaryID() ProviderAccountsPrimaryID {
@@ -661,7 +639,6 @@ func (d ProviderAccountsBulkUpdateRequest) ToModel() model.ProviderAccounts {
 		PublicKeyRef:        null.StringFrom(d.PublicKeyRef),
 		Status:              d.Status,
 		Config:              d.Config,
-		Metadata:            d.Metadata,
 	}
 }
 
@@ -678,7 +655,6 @@ type ProviderAccountsResponse struct {
 	PublicKeyRef        string                      `json:"publicKeyRef"`
 	Status              model.ProviderAccountStatus `json:"status" validate:"oneof=active inactive deprecated" enums:"active,inactive,deprecated"`
 	Config              json.RawMessage             `json:"config" swaggertype:"object"`
-	Metadata            json.RawMessage             `json:"metadata" swaggertype:"object"`
 }
 
 func NewProviderAccountsResponse(providerAccounts model.ProviderAccounts) ProviderAccountsResponse {
@@ -695,7 +671,6 @@ func NewProviderAccountsResponse(providerAccounts model.ProviderAccounts) Provid
 		PublicKeyRef:        providerAccounts.PublicKeyRef.String,
 		Status:              model.ProviderAccountStatus(providerAccounts.Status),
 		Config:              providerAccounts.Config,
-		Metadata:            providerAccounts.Metadata,
 	}
 }
 

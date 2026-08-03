@@ -30,13 +30,16 @@ type ProviderConfig struct {
 	Extra           map[string]string `json:"extra"`
 }
 
-func (c ProviderConfig) Endpoint(key, fallback string) string {
+func (c ProviderConfig) Endpoint(key string, fallback ...string) string {
 	if c.Endpoints != nil {
 		if v, ok := c.Endpoints[key]; ok && v != "" {
 			return v
 		}
 	}
-	return fallback
+	if len(fallback) > 0 {
+		return fallback[0]
+	}
+	return ""
 }
 
 func (c ProviderConfig) Currency() string {

@@ -38,7 +38,6 @@ type paymentAuthorizationsDTOFieldName struct {
 	FailureMessage          PaymentAuthorizationsDTOFieldNameType
 	RawRequest              PaymentAuthorizationsDTOFieldNameType
 	RawResponse             PaymentAuthorizationsDTOFieldNameType
-	Metadata                PaymentAuthorizationsDTOFieldNameType
 	MetaCreatedAt           PaymentAuthorizationsDTOFieldNameType
 	MetaCreatedBy           PaymentAuthorizationsDTOFieldNameType
 	MetaUpdatedAt           PaymentAuthorizationsDTOFieldNameType
@@ -63,7 +62,6 @@ var PaymentAuthorizationsDTOFieldName = paymentAuthorizationsDTOFieldName{
 	FailureMessage:          "failureMessage",
 	RawRequest:              "rawRequest",
 	RawResponse:             "rawResponse",
-	Metadata:                "metadata",
 	MetaCreatedAt:           "metaCreatedAt",
 	MetaCreatedBy:           "metaCreatedBy",
 	MetaUpdatedAt:           "metaUpdatedAt",
@@ -120,9 +118,6 @@ func transformPaymentAuthorizationsDTOFieldNameFromStr(field string) (dbField st
 	case string(PaymentAuthorizationsDTOFieldName.RawResponse):
 		return string(model.PaymentAuthorizationsDBFieldName.RawResponse), true
 
-	case string(PaymentAuthorizationsDTOFieldName.Metadata):
-		return string(model.PaymentAuthorizationsDBFieldName.Metadata), true
-
 	case string(PaymentAuthorizationsDTOFieldName.MetaCreatedAt):
 		return string(model.PaymentAuthorizationsDBFieldName.MetaCreatedAt), true
 
@@ -134,12 +129,6 @@ func transformPaymentAuthorizationsDTOFieldNameFromStr(field string) (dbField st
 
 	case string(PaymentAuthorizationsDTOFieldName.MetaUpdatedBy):
 		return string(model.PaymentAuthorizationsDBFieldName.MetaUpdatedBy), true
-
-	case string(PaymentAuthorizationsDTOFieldName.MetaDeletedAt):
-		return string(model.PaymentAuthorizationsDBFieldName.MetaDeletedAt), true
-
-	case string(PaymentAuthorizationsDTOFieldName.MetaDeletedBy):
-		return string(model.PaymentAuthorizationsDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewPaymentAuthorizationsFilterFieldSpecFromStr(field); found {
@@ -319,7 +308,6 @@ func NewPaymentAuthorizationsSelectableResponse(paymentAuthorizations model.Paym
 			string(model.PaymentAuthorizationsDBFieldName.FailureMessage),
 			string(model.PaymentAuthorizationsDBFieldName.RawRequest),
 			string(model.PaymentAuthorizationsDBFieldName.RawResponse),
-			string(model.PaymentAuthorizationsDBFieldName.Metadata),
 			string(model.PaymentAuthorizationsDBFieldName.MetaCreatedAt),
 			string(model.PaymentAuthorizationsDBFieldName.MetaCreatedBy),
 			string(model.PaymentAuthorizationsDBFieldName.MetaUpdatedAt),
@@ -437,13 +425,6 @@ func NewPaymentAuthorizationsSelectableResponse(paymentAuthorizations model.Paym
 				key = outputField
 			}
 			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.RawResponse, explicitAlias)
-
-		case string(model.PaymentAuthorizationsDBFieldName.Metadata):
-			key := string(PaymentAuthorizationsDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setPaymentAuthorizationsSelectableValue(paymentAuthorizationsSelectableResponse, key, paymentAuthorizations.Metadata, explicitAlias)
 
 		case string(model.PaymentAuthorizationsDBFieldName.MetaCreatedAt):
 			key := string(PaymentAuthorizationsDTOFieldName.MetaCreatedAt)
@@ -572,7 +553,6 @@ type PaymentAuthorizationsCreateRequest struct {
 	FailureMessage          string                           `json:"failureMessage"`
 	RawRequest              json.RawMessage                  `json:"rawRequest"`
 	RawResponse             json.RawMessage                  `json:"rawResponse"`
-	Metadata                json.RawMessage                  `json:"metadata"`
 }
 
 func (d *PaymentAuthorizationsCreateRequest) Validate() (err error) {
@@ -598,7 +578,6 @@ func (d *PaymentAuthorizationsCreateRequest) ToModel() model.PaymentAuthorizatio
 		FailureMessage:          null.StringFrom(d.FailureMessage),
 		RawRequest:              d.RawRequest,
 		RawResponse:             d.RawResponse,
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -638,7 +617,6 @@ type PaymentAuthorizationsUpdateRequest struct {
 	FailureMessage          string                           `json:"failureMessage"`
 	RawRequest              json.RawMessage                  `json:"rawRequest"`
 	RawResponse             json.RawMessage                  `json:"rawResponse"`
-	Metadata                json.RawMessage                  `json:"metadata"`
 }
 
 func (d *PaymentAuthorizationsUpdateRequest) Validate() (err error) {
@@ -662,7 +640,6 @@ func (d PaymentAuthorizationsUpdateRequest) ToModel() model.PaymentAuthorization
 		FailureMessage:          null.StringFrom(d.FailureMessage),
 		RawRequest:              d.RawRequest,
 		RawResponse:             d.RawResponse,
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -682,7 +659,6 @@ type PaymentAuthorizationsBulkUpdateRequest struct {
 	FailureMessage          string                           `json:"failureMessage"`
 	RawRequest              json.RawMessage                  `json:"rawRequest"`
 	RawResponse             json.RawMessage                  `json:"rawResponse"`
-	Metadata                json.RawMessage                  `json:"metadata"`
 }
 
 func (d PaymentAuthorizationsBulkUpdateRequest) PrimaryID() PaymentAuthorizationsPrimaryID {
@@ -721,7 +697,6 @@ func (d PaymentAuthorizationsBulkUpdateRequest) ToModel() model.PaymentAuthoriza
 		FailureMessage:          null.StringFrom(d.FailureMessage),
 		RawRequest:              d.RawRequest,
 		RawResponse:             d.RawResponse,
-		Metadata:                d.Metadata,
 	}
 }
 
@@ -741,7 +716,6 @@ type PaymentAuthorizationsResponse struct {
 	FailureMessage          string                           `json:"failureMessage"`
 	RawRequest              json.RawMessage                  `json:"rawRequest" swaggertype:"object"`
 	RawResponse             json.RawMessage                  `json:"rawResponse" swaggertype:"object"`
-	Metadata                json.RawMessage                  `json:"metadata" swaggertype:"object"`
 }
 
 func NewPaymentAuthorizationsResponse(paymentAuthorizations model.PaymentAuthorizations) PaymentAuthorizationsResponse {
@@ -761,7 +735,6 @@ func NewPaymentAuthorizationsResponse(paymentAuthorizations model.PaymentAuthori
 		FailureMessage:          paymentAuthorizations.FailureMessage.String,
 		RawRequest:              paymentAuthorizations.RawRequest,
 		RawResponse:             paymentAuthorizations.RawResponse,
-		Metadata:                paymentAuthorizations.Metadata,
 	}
 }
 

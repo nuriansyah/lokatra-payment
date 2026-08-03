@@ -10,15 +10,18 @@ import (
 type Handler struct {
 	config         *configs.Config
 	PaymentService *service.ServiceImpl
+	PayRouteAdmin  *PayRouteAdminHandler
 }
 
 func ProvideHandler(
 	config *configs.Config,
 	paymentService *service.ServiceImpl,
+	payRouteAdmin *PayRouteAdminHandler,
 ) *Handler {
 	return &Handler{
 		config:         config,
 		PaymentService: paymentService,
+		PayRouteAdmin:  payRouteAdmin,
 	}
 }
 
@@ -44,4 +47,12 @@ func (h *Handler) Router(r chi.Router) {
 		r.Post("/payment-installments/{installmentID}/{action}", h.PaymentInstallmentAction)
 		r.Post("/payment-authorizations/{authorizationID}/{action}", h.PaymentAuthorizationAction)
 	})
+
+	// PayRoute Admin Dashboard API
+	if h.PayRouteAdmin != nil {
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(middleware.RequireAdminToken(h.config))
+			h.PayRouteAdmin.Router(r)
+		})
+	}
 }

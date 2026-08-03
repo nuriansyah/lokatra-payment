@@ -55,8 +55,6 @@ func composeInsertFieldsAndParamsProviderCircuitBreakers(providerCircuitBreakers
 				args = append(args, providerCircuitBreakers.HalfOpenAt)
 			case selectField.Reason():
 				args = append(args, providerCircuitBreakers.Reason)
-			case selectField.Metadata():
-				args = append(args, providerCircuitBreakers.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerCircuitBreakers.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -177,10 +175,6 @@ func (ss ProviderCircuitBreakersSelectFields) Reason() ProviderCircuitBreakersFi
 	return ProviderCircuitBreakersField("reason")
 }
 
-func (ss ProviderCircuitBreakersSelectFields) Metadata() ProviderCircuitBreakersField {
-	return ProviderCircuitBreakersField("metadata")
-}
-
 func (ss ProviderCircuitBreakersSelectFields) MetaCreatedAt() ProviderCircuitBreakersField {
 	return ProviderCircuitBreakersField("meta_created_at")
 }
@@ -220,7 +214,6 @@ func (ss ProviderCircuitBreakersSelectFields) All() ProviderCircuitBreakersField
 		ss.OpenUntil(),
 		ss.HalfOpenAt(),
 		ss.Reason(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -282,7 +275,6 @@ func defaultProviderCircuitBreakersUpdateFields(providerCircuitBreakers model.Pr
 		NewProviderCircuitBreakersUpdateField(selectFields.OpenUntil(), providerCircuitBreakers.OpenUntil),
 		NewProviderCircuitBreakersUpdateField(selectFields.HalfOpenAt(), providerCircuitBreakers.HalfOpenAt),
 		NewProviderCircuitBreakersUpdateField(selectFields.Reason(), providerCircuitBreakers.Reason),
-		NewProviderCircuitBreakersUpdateField(selectFields.Metadata(), providerCircuitBreakers.Metadata),
 		NewProviderCircuitBreakersUpdateField(selectFields.MetaCreatedAt(), providerCircuitBreakers.MetaCreatedAt),
 		NewProviderCircuitBreakersUpdateField(selectFields.MetaCreatedBy(), providerCircuitBreakers.MetaCreatedBy),
 		NewProviderCircuitBreakersUpdateField(selectFields.MetaUpdatedAt(), providerCircuitBreakers.MetaUpdatedAt),
@@ -615,9 +607,6 @@ func GetProviderCircuitBreakersFieldType(providerCircuitBreakersField ProviderCi
 
 	case selectProviderCircuitBreakersFields.Reason():
 		return "text"
-
-	case selectProviderCircuitBreakersFields.Metadata():
-		return "jsonb"
 
 	case selectProviderCircuitBreakersFields.MetaCreatedAt():
 		return "timestamptz"

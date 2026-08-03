@@ -53,8 +53,6 @@ func composeInsertFieldsAndParamsProviderAccounts(providerAccountsList []model.P
 				args = append(args, providerAccounts.Status)
 			case selectField.Config():
 				args = append(args, providerAccounts.Config)
-			case selectField.Metadata():
-				args = append(args, providerAccounts.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, providerAccounts.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -171,10 +169,6 @@ func (ss ProviderAccountsSelectFields) Config() ProviderAccountsField {
 	return ProviderAccountsField("config")
 }
 
-func (ss ProviderAccountsSelectFields) Metadata() ProviderAccountsField {
-	return ProviderAccountsField("metadata")
-}
-
 func (ss ProviderAccountsSelectFields) MetaCreatedAt() ProviderAccountsField {
 	return ProviderAccountsField("meta_created_at")
 }
@@ -213,7 +207,6 @@ func (ss ProviderAccountsSelectFields) All() ProviderAccountsFieldList {
 		ss.PublicKeyRef(),
 		ss.Status(),
 		ss.Config(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -274,7 +267,6 @@ func defaultProviderAccountsUpdateFields(providerAccounts model.ProviderAccounts
 		NewProviderAccountsUpdateField(selectFields.PublicKeyRef(), providerAccounts.PublicKeyRef),
 		NewProviderAccountsUpdateField(selectFields.Status(), providerAccounts.Status),
 		NewProviderAccountsUpdateField(selectFields.Config(), providerAccounts.Config),
-		NewProviderAccountsUpdateField(selectFields.Metadata(), providerAccounts.Metadata),
 		NewProviderAccountsUpdateField(selectFields.MetaCreatedAt(), providerAccounts.MetaCreatedAt),
 		NewProviderAccountsUpdateField(selectFields.MetaCreatedBy(), providerAccounts.MetaCreatedBy),
 		NewProviderAccountsUpdateField(selectFields.MetaUpdatedAt(), providerAccounts.MetaUpdatedAt),
@@ -603,9 +595,6 @@ func GetProviderAccountsFieldType(providerAccountsField ProviderAccountsField) s
 		return "provider_account_status_enum"
 
 	case selectProviderAccountsFields.Config():
-		return "jsonb"
-
-	case selectProviderAccountsFields.Metadata():
 		return "jsonb"
 
 	case selectProviderAccountsFields.MetaCreatedAt():

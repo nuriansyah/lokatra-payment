@@ -31,7 +31,6 @@ type providerApiRequestsDBFieldName struct {
 	Success           ProviderApiRequestsDBFieldNameType
 	ErrorCode         ProviderApiRequestsDBFieldNameType
 	ErrorMessage      ProviderApiRequestsDBFieldNameType
-	Metadata          ProviderApiRequestsDBFieldNameType
 	MetaCreatedAt     ProviderApiRequestsDBFieldNameType
 	MetaCreatedBy     ProviderApiRequestsDBFieldNameType
 	MetaUpdatedAt     ProviderApiRequestsDBFieldNameType
@@ -58,7 +57,6 @@ var ProviderApiRequestsDBFieldName = providerApiRequestsDBFieldName{
 	Success:           "success",
 	ErrorCode:         "error_code",
 	ErrorMessage:      "error_message",
-	Metadata:          "metadata",
 	MetaCreatedAt:     "meta_created_at",
 	MetaCreatedBy:     "meta_created_by",
 	MetaUpdatedAt:     "meta_updated_at",
@@ -120,9 +118,6 @@ func NewProviderApiRequestsDBFieldNameFromStr(field string) (dbField ProviderApi
 
 	case string(ProviderApiRequestsDBFieldName.ErrorMessage):
 		return ProviderApiRequestsDBFieldName.ErrorMessage, true
-
-	case string(ProviderApiRequestsDBFieldName.Metadata):
-		return ProviderApiRequestsDBFieldName.Metadata, true
 
 	case string(ProviderApiRequestsDBFieldName.MetaCreatedAt):
 		return ProviderApiRequestsDBFieldName.MetaCreatedAt, true
@@ -302,15 +297,6 @@ var ProviderApiRequestsFilterFields = map[string]FilterFieldSpec{
 		Filterable:        true,
 		Sortable:          true,
 	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
 	"meta_created_at": {
 		SourcePath:        "meta_created_at",
 		DefaultOutputPath: "metaCreatedAt",
@@ -444,7 +430,6 @@ type ProviderApiRequests struct {
 	Success           null.Bool       `db:"success"`
 	ErrorCode         null.String     `db:"error_code"`
 	ErrorMessage      null.String     `db:"error_message"`
-	Metadata          json.RawMessage `db:"metadata"`
 
 	shared.MetaSignature
 }

@@ -77,8 +77,6 @@ func composeInsertFieldsAndParamsPaymentRefunds(paymentRefundsList []model.Payme
 				args = append(args, paymentRefunds.RawRequest)
 			case selectField.RawResponse():
 				args = append(args, paymentRefunds.RawResponse)
-			case selectField.Metadata():
-				args = append(args, paymentRefunds.Metadata)
 			case selectField.MetaCreatedAt():
 				args = append(args, paymentRefunds.MetaCreatedAt)
 			case selectField.MetaCreatedBy():
@@ -243,10 +241,6 @@ func (ss PaymentRefundsSelectFields) RawResponse() PaymentRefundsField {
 	return PaymentRefundsField("raw_response")
 }
 
-func (ss PaymentRefundsSelectFields) Metadata() PaymentRefundsField {
-	return PaymentRefundsField("metadata")
-}
-
 func (ss PaymentRefundsSelectFields) MetaCreatedAt() PaymentRefundsField {
 	return PaymentRefundsField("meta_created_at")
 }
@@ -297,7 +291,6 @@ func (ss PaymentRefundsSelectFields) All() PaymentRefundsFieldList {
 		ss.FailureMessage(),
 		ss.RawRequest(),
 		ss.RawResponse(),
-		ss.Metadata(),
 		ss.MetaCreatedAt(),
 		ss.MetaCreatedBy(),
 		ss.MetaUpdatedAt(),
@@ -370,7 +363,6 @@ func defaultPaymentRefundsUpdateFields(paymentRefunds model.PaymentRefunds) (pay
 		NewPaymentRefundsUpdateField(selectFields.FailureMessage(), paymentRefunds.FailureMessage),
 		NewPaymentRefundsUpdateField(selectFields.RawRequest(), paymentRefunds.RawRequest),
 		NewPaymentRefundsUpdateField(selectFields.RawResponse(), paymentRefunds.RawResponse),
-		NewPaymentRefundsUpdateField(selectFields.Metadata(), paymentRefunds.Metadata),
 		NewPaymentRefundsUpdateField(selectFields.MetaCreatedAt(), paymentRefunds.MetaCreatedAt),
 		NewPaymentRefundsUpdateField(selectFields.MetaCreatedBy(), paymentRefunds.MetaCreatedBy),
 		NewPaymentRefundsUpdateField(selectFields.MetaUpdatedAt(), paymentRefunds.MetaUpdatedAt),
@@ -735,9 +727,6 @@ func GetPaymentRefundsFieldType(paymentRefundsField PaymentRefundsField) string 
 		return "jsonb"
 
 	case selectPaymentRefundsFields.RawResponse():
-		return "jsonb"
-
-	case selectPaymentRefundsFields.Metadata():
 		return "jsonb"
 
 	case selectPaymentRefundsFields.MetaCreatedAt():

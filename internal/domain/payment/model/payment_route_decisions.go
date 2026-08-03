@@ -23,7 +23,6 @@ type paymentRouteDecisionsDBFieldName struct {
 	Reason                    PaymentRouteDecisionsDBFieldNameType
 	EvaluatedContext          PaymentRouteDecisionsDBFieldNameType
 	Candidates                PaymentRouteDecisionsDBFieldNameType
-	Metadata                  PaymentRouteDecisionsDBFieldNameType
 	MetaCreatedAt             PaymentRouteDecisionsDBFieldNameType
 	MetaCreatedBy             PaymentRouteDecisionsDBFieldNameType
 	MetaUpdatedAt             PaymentRouteDecisionsDBFieldNameType
@@ -42,7 +41,6 @@ var PaymentRouteDecisionsDBFieldName = paymentRouteDecisionsDBFieldName{
 	Reason:                    "reason",
 	EvaluatedContext:          "evaluated_context",
 	Candidates:                "candidates",
-	Metadata:                  "metadata",
 	MetaCreatedAt:             "meta_created_at",
 	MetaCreatedBy:             "meta_created_by",
 	MetaUpdatedAt:             "meta_updated_at",
@@ -80,9 +78,6 @@ func NewPaymentRouteDecisionsDBFieldNameFromStr(field string) (dbField PaymentRo
 
 	case string(PaymentRouteDecisionsDBFieldName.Candidates):
 		return PaymentRouteDecisionsDBFieldName.Candidates, true
-
-	case string(PaymentRouteDecisionsDBFieldName.Metadata):
-		return PaymentRouteDecisionsDBFieldName.Metadata, true
 
 	case string(PaymentRouteDecisionsDBFieldName.MetaCreatedAt):
 		return PaymentRouteDecisionsDBFieldName.MetaCreatedAt, true
@@ -186,15 +181,6 @@ var PaymentRouteDecisionsFilterFields = map[string]FilterFieldSpec{
 		DefaultOutputPath: "candidates",
 		Column:            "candidates",
 		SQLAlias:          "candidates",
-		Selectable:        true,
-		Filterable:        true,
-		Sortable:          true,
-	},
-	"metadata": {
-		SourcePath:        "metadata",
-		DefaultOutputPath: "metadata",
-		Column:            "metadata",
-		SQLAlias:          "metadata",
 		Selectable:        true,
 		Filterable:        true,
 		Sortable:          true,
@@ -324,7 +310,6 @@ type PaymentRouteDecisions struct {
 	Reason                    string          `db:"reason"`
 	EvaluatedContext          json.RawMessage `db:"evaluated_context"`
 	Candidates                json.RawMessage `db:"candidates"`
-	Metadata                  json.RawMessage `db:"metadata"`
 
 	shared.MetaSignature
 }

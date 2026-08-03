@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -32,13 +31,13 @@ type providerCircuitBreakersDTOFieldName struct {
 	OpenUntil         ProviderCircuitBreakersDTOFieldNameType
 	HalfOpenAt        ProviderCircuitBreakersDTOFieldNameType
 	Reason            ProviderCircuitBreakersDTOFieldNameType
-	Metadata          ProviderCircuitBreakersDTOFieldNameType
-	MetaCreatedAt     ProviderCircuitBreakersDTOFieldNameType
-	MetaCreatedBy     ProviderCircuitBreakersDTOFieldNameType
-	MetaUpdatedAt     ProviderCircuitBreakersDTOFieldNameType
-	MetaUpdatedBy     ProviderCircuitBreakersDTOFieldNameType
-	MetaDeletedAt     ProviderCircuitBreakersDTOFieldNameType
-	MetaDeletedBy     ProviderCircuitBreakersDTOFieldNameType
+
+	MetaCreatedAt ProviderCircuitBreakersDTOFieldNameType
+	MetaCreatedBy ProviderCircuitBreakersDTOFieldNameType
+	MetaUpdatedAt ProviderCircuitBreakersDTOFieldNameType
+	MetaUpdatedBy ProviderCircuitBreakersDTOFieldNameType
+	MetaDeletedAt ProviderCircuitBreakersDTOFieldNameType
+	MetaDeletedBy ProviderCircuitBreakersDTOFieldNameType
 }
 
 var ProviderCircuitBreakersDTOFieldName = providerCircuitBreakersDTOFieldName{
@@ -55,13 +54,13 @@ var ProviderCircuitBreakersDTOFieldName = providerCircuitBreakersDTOFieldName{
 	OpenUntil:         "openUntil",
 	HalfOpenAt:        "halfOpenAt",
 	Reason:            "reason",
-	Metadata:          "metadata",
-	MetaCreatedAt:     "metaCreatedAt",
-	MetaCreatedBy:     "metaCreatedBy",
-	MetaUpdatedAt:     "metaUpdatedAt",
-	MetaUpdatedBy:     "metaUpdatedBy",
-	MetaDeletedAt:     "metaDeletedAt",
-	MetaDeletedBy:     "metaDeletedBy",
+
+	MetaCreatedAt: "metaCreatedAt",
+	MetaCreatedBy: "metaCreatedBy",
+	MetaUpdatedAt: "metaUpdatedAt",
+	MetaUpdatedBy: "metaUpdatedBy",
+	MetaDeletedAt: "metaDeletedAt",
+	MetaDeletedBy: "metaDeletedBy",
 }
 
 func transformProviderCircuitBreakersDTOFieldNameFromStr(field string) (dbField string, found bool) {
@@ -106,9 +105,6 @@ func transformProviderCircuitBreakersDTOFieldNameFromStr(field string) (dbField 
 	case string(ProviderCircuitBreakersDTOFieldName.Reason):
 		return string(model.ProviderCircuitBreakersDBFieldName.Reason), true
 
-	case string(ProviderCircuitBreakersDTOFieldName.Metadata):
-		return string(model.ProviderCircuitBreakersDBFieldName.Metadata), true
-
 	case string(ProviderCircuitBreakersDTOFieldName.MetaCreatedAt):
 		return string(model.ProviderCircuitBreakersDBFieldName.MetaCreatedAt), true
 
@@ -120,12 +116,6 @@ func transformProviderCircuitBreakersDTOFieldNameFromStr(field string) (dbField 
 
 	case string(ProviderCircuitBreakersDTOFieldName.MetaUpdatedBy):
 		return string(model.ProviderCircuitBreakersDBFieldName.MetaUpdatedBy), true
-
-	case string(ProviderCircuitBreakersDTOFieldName.MetaDeletedAt):
-		return string(model.ProviderCircuitBreakersDBFieldName.MetaDeletedAt), true
-
-	case string(ProviderCircuitBreakersDTOFieldName.MetaDeletedBy):
-		return string(model.ProviderCircuitBreakersDBFieldName.MetaDeletedBy), true
 
 	}
 	if _, found := model.NewProviderCircuitBreakersFilterFieldSpecFromStr(field); found {
@@ -303,7 +293,6 @@ func NewProviderCircuitBreakersSelectableResponse(providerCircuitBreakers model.
 			string(model.ProviderCircuitBreakersDBFieldName.OpenUntil),
 			string(model.ProviderCircuitBreakersDBFieldName.HalfOpenAt),
 			string(model.ProviderCircuitBreakersDBFieldName.Reason),
-			string(model.ProviderCircuitBreakersDBFieldName.Metadata),
 			string(model.ProviderCircuitBreakersDBFieldName.MetaCreatedAt),
 			string(model.ProviderCircuitBreakersDBFieldName.MetaCreatedBy),
 			string(model.ProviderCircuitBreakersDBFieldName.MetaUpdatedAt),
@@ -407,13 +396,6 @@ func NewProviderCircuitBreakersSelectableResponse(providerCircuitBreakers model.
 				key = outputField
 			}
 			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.Reason.String, explicitAlias)
-
-		case string(model.ProviderCircuitBreakersDBFieldName.Metadata):
-			key := string(ProviderCircuitBreakersDTOFieldName.Metadata)
-			if explicitAlias {
-				key = outputField
-			}
-			setProviderCircuitBreakersSelectableValue(providerCircuitBreakersSelectableResponse, key, providerCircuitBreakers.Metadata, explicitAlias)
 
 		case string(model.ProviderCircuitBreakersDBFieldName.MetaCreatedAt):
 			key := string(ProviderCircuitBreakersDTOFieldName.MetaCreatedAt)
@@ -540,7 +522,6 @@ type ProviderCircuitBreakersCreateRequest struct {
 	OpenUntil         time.Time           `json:"openUntil"`
 	HalfOpenAt        time.Time           `json:"halfOpenAt"`
 	Reason            string              `json:"reason"`
-	Metadata          json.RawMessage     `json:"metadata"`
 }
 
 func (d *ProviderCircuitBreakersCreateRequest) Validate() (err error) {
@@ -564,7 +545,6 @@ func (d *ProviderCircuitBreakersCreateRequest) ToModel() model.ProviderCircuitBr
 		OpenUntil:         null.TimeFrom(d.OpenUntil),
 		HalfOpenAt:        null.TimeFrom(d.HalfOpenAt),
 		Reason:            null.StringFrom(d.Reason),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -602,7 +582,6 @@ type ProviderCircuitBreakersUpdateRequest struct {
 	OpenUntil         time.Time           `json:"openUntil"`
 	HalfOpenAt        time.Time           `json:"halfOpenAt"`
 	Reason            string              `json:"reason"`
-	Metadata          json.RawMessage     `json:"metadata"`
 }
 
 func (d *ProviderCircuitBreakersUpdateRequest) Validate() (err error) {
@@ -624,7 +603,6 @@ func (d ProviderCircuitBreakersUpdateRequest) ToModel() model.ProviderCircuitBre
 		OpenUntil:         null.TimeFrom(d.OpenUntil),
 		HalfOpenAt:        null.TimeFrom(d.HalfOpenAt),
 		Reason:            null.StringFrom(d.Reason),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -642,7 +620,6 @@ type ProviderCircuitBreakersBulkUpdateRequest struct {
 	OpenUntil         time.Time           `json:"openUntil"`
 	HalfOpenAt        time.Time           `json:"halfOpenAt"`
 	Reason            string              `json:"reason"`
-	Metadata          json.RawMessage     `json:"metadata"`
 }
 
 func (d ProviderCircuitBreakersBulkUpdateRequest) PrimaryID() ProviderCircuitBreakersPrimaryID {
@@ -679,7 +656,6 @@ func (d ProviderCircuitBreakersBulkUpdateRequest) ToModel() model.ProviderCircui
 		OpenUntil:         null.TimeFrom(d.OpenUntil),
 		HalfOpenAt:        null.TimeFrom(d.HalfOpenAt),
 		Reason:            null.StringFrom(d.Reason),
-		Metadata:          d.Metadata,
 	}
 }
 
@@ -697,7 +673,6 @@ type ProviderCircuitBreakersResponse struct {
 	OpenUntil         time.Time           `json:"openUntil" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	HalfOpenAt        time.Time           `json:"halfOpenAt" format:"date-time" example:"2024-01-01T00:00:00Z"`
 	Reason            string              `json:"reason"`
-	Metadata          json.RawMessage     `json:"metadata" swaggertype:"object"`
 }
 
 func NewProviderCircuitBreakersResponse(providerCircuitBreakers model.ProviderCircuitBreakers) ProviderCircuitBreakersResponse {
@@ -715,7 +690,6 @@ func NewProviderCircuitBreakersResponse(providerCircuitBreakers model.ProviderCi
 		OpenUntil:         providerCircuitBreakers.OpenUntil.Time,
 		HalfOpenAt:        providerCircuitBreakers.HalfOpenAt.Time,
 		Reason:            providerCircuitBreakers.Reason.String,
-		Metadata:          providerCircuitBreakers.Metadata,
 	}
 }
 

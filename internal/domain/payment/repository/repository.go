@@ -23,6 +23,12 @@ type Repository interface {
 	CashCollectionSessionsRepository
 	PaymentInstallmentsRepository
 	PaymentAuthorizationsRepository
+	PayrouteRoutingRulesRepository
+	PayrouteRoutingRuleVersionsRepository
+	PayrouteMdrRatesRepository
+	PayroutePspHealthRepository
+	PayrouteAuditLogRepository
+	PayrouteConfigRepository
 }
 
 // RepositoryImpl is the Postgres-backed implementation of Repository.

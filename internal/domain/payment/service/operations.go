@@ -18,63 +18,62 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func (s *ServiceImpl) CreatePaymentIntent(ctx context.Context, request dto.CreatePaymentIntentRequest) (paymentmodel.PaymentIntents, error) {
-	if request.ActorID == uuid.Nil || request.MerchantID == uuid.Nil || request.SourceID == uuid.Nil {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("actorId, merchantId, and sourceId are required")
+func (s *ServiceImpl) CreatePaymentIntent(ctx context.Context, req dto.CreatePaymentIntentRequest) (dto.PaymentIntentsResponse, error) {
+	if strings.TrimSpace(req.IdempotencyKey) == "" {
+		return dto.PaymentIntentsResponse{}, failure.WithCode(shared.ErrPayIdempotencyKeyRequired, "idempotencyKey is required")
 	}
-	if strings.TrimSpace(request.SourceService) == "" || strings.TrimSpace(request.SourceType) == "" {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("sourceService and sourceType are required")
+
+	if err := validateCurrency(req.Currency); err != nil {
+		return dto.PaymentIntentsResponse{}, err
 	}
-	if request.Amount.LessThanOrEqual(decimal.Zero) || strings.TrimSpace(request.Currency) == "" || strings.TrimSpace(request.IdempotencyKey) == "" {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("positive amount, currency, and idempotencyKey are required")
+	if err := validateAmount(req.Amount, req.Currency); err != nil {
+		return dto.PaymentIntentsResponse{}, err
 	}
-	if request.ExpiresAt != nil && !request.ExpiresAt.After(time.Now().UTC()) {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("expiresAt must be in the future")
-	}
-	if !validOptionalJSON(request.SourceSnapshot) || !validOptionalJSON(request.Metadata) {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("sourceSnapshot and metadata must contain valid JSON")
-	}
-	if existing, found := s.findIntentByIdempotencyKey(ctx, request.MerchantID, request.IdempotencyKey); found {
-		if existing.SourceId != request.SourceID || !existing.Amount.Equal(request.Amount) || !strings.EqualFold(existing.Currency, request.Currency) {
-			return paymentmodel.PaymentIntents{}, failure.Conflict("create", "payment intent", "idempotency key was used with a different request")
+
+	if existing, found := s.findIntentByIdempotencyKey(ctx, req.MerchantID, req.IdempotencyKey); found {
+		if existing.SourceId != req.SourceID || !existing.Amount.Equal(req.Amount) || !strings.EqualFold(existing.Currency, req.Currency) {
+			return dto.PaymentIntentsResponse{}, failure.WithCode(shared.ErrPayIdempotencyKeyReusedDifferentPayload, "idempotency key was used with a different request")
 		}
-		return existing, nil
+		return dto.NewPaymentIntentsResponse(existing), nil
 	}
 
 	status := paymentmodel.PaymentIntentStatusRequiresPaymentMethod
-	if strings.TrimSpace(request.PaymentMethodCode) != "" {
+	if strings.TrimSpace(req.PaymentMethodCode) != "" {
 		status = paymentmodel.PaymentIntentStatusRequiresConfirmation
 	}
-	now := time.Now().UTC()
+
+	now := time.Now()
 	intent := paymentmodel.PaymentIntents{
-		Id:                  mustUUID(),
+		Id:                  uuid.Must(uuid.NewV7()),
 		IntentCode:          operationCode("pi"),
-		SourceService:       strings.TrimSpace(request.SourceService),
-		SourceType:          strings.TrimSpace(request.SourceType),
-		SourceId:            request.SourceID,
-		MerchantId:          request.MerchantID,
-		CustomerId:          optionalUUID(request.CustomerID),
-		Amount:              request.Amount,
-		Currency:            strings.ToUpper(strings.TrimSpace(request.Currency)),
+		SourceService:       strings.TrimSpace(req.SourceService),
+		SourceType:          strings.TrimSpace(req.SourceType),
+		SourceId:            req.SourceID,
+		MerchantId:          req.MerchantID,
+		CustomerId:          nuuid.From(req.CustomerID),
+		Amount:              req.Amount,
+		Currency:            strings.ToUpper(strings.TrimSpace(req.Currency)),
 		Status:              status,
-		SelectedMethodCode:  optionalString(request.PaymentMethodCode),
-		SelectedChannelCode: optionalString(request.PaymentChannelCode),
-		Description:         optionalString(request.Description),
-		IdempotencyKey:      strings.TrimSpace(request.IdempotencyKey),
-		SourceSnapshot:      normalizedJSON(request.SourceSnapshot),
-		Metadata:            normalizedJSON(request.Metadata),
-		MetaSignature:       newCreateSignature(request.ActorID, now),
+		SelectedMethodCode:  null.StringFrom(req.PaymentMethodCode),
+		SelectedChannelCode: null.StringFrom(req.PaymentChannelCode),
+		Description:         null.StringFrom(req.Description),
+		IdempotencyKey:      strings.TrimSpace(req.IdempotencyKey),
+		SourceSnapshot:      normalizedJSON(req.SourceSnapshot),
+		MetaSignature: shared.MetaSignature{
+			MetaCreatedBy: req.ActorID,
+			MetaCreatedAt: now,
+		},
 	}
-	if request.ExpiresAt != nil {
-		intent.ExpiresAt = null.TimeFrom(request.ExpiresAt.UTC())
+	if req.ExpiresAt != nil {
+		intent.ExpiresAt = null.TimeFrom(req.ExpiresAt.UTC())
 	}
 	if err := s.paymentRepo.CreatePaymentIntents(ctx, &intent); err != nil {
-		if existing, found := s.findIntentByIdempotencyKey(ctx, request.MerchantID, request.IdempotencyKey); found {
-			return existing, nil
+		if existing, found := s.findIntentByIdempotencyKey(ctx, req.MerchantID, req.IdempotencyKey); found {
+			return dto.NewPaymentIntentsResponse(existing), nil
 		}
-		return paymentmodel.PaymentIntents{}, err
+		return dto.PaymentIntentsResponse{}, err
 	}
-	return intent, nil
+	return dto.NewPaymentIntentsResponse(intent), nil
 }
 
 func (s *ServiceImpl) findIntentByIdempotencyKey(ctx context.Context, merchantID uuid.UUID, key string) (paymentmodel.PaymentIntents, bool) {
@@ -91,105 +90,111 @@ func (s *ServiceImpl) findIntentByIdempotencyKey(ctx context.Context, merchantID
 	return result[0].PaymentIntents, true
 }
 
-func (s *ServiceImpl) GetPaymentIntent(ctx context.Context, id uuid.UUID) (paymentmodel.PaymentIntents, error) {
+func (s *ServiceImpl) GetPaymentIntent(ctx context.Context, id uuid.UUID) (dto.PaymentIntentsResponse, error) {
 	if id == uuid.Nil {
-		return paymentmodel.PaymentIntents{}, failure.BadRequestFromString("payment intent id is required")
+		return dto.PaymentIntentsResponse{}, failure.WithCode(shared.ErrInvalidID, "payment intent id is required")
 	}
-	return s.paymentRepo.ResolvePaymentIntentsByID(ctx, paymentmodel.PaymentIntentsPrimaryID{Id: id})
+	intent, err := s.paymentRepo.ResolvePaymentIntentsByID(ctx, paymentmodel.PaymentIntentsPrimaryID{Id: id})
+	if err != nil {
+		return dto.PaymentIntentsResponse{}, err
+	}
+	return dto.NewPaymentIntentsResponse(intent), nil
 }
 
-func (s *ServiceImpl) ApplyPaymentIntentAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (PaymentIntentActionResult, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return PaymentIntentActionResult{}, err
-	}
+func (s *ServiceImpl) ApplyPaymentIntentAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.PaymentIntentActionResponse, error) {
 	unlock, acquired, err := s.executionLocker.TryLock(ctx, id.String(), 2*time.Minute)
 	if err != nil {
-		return PaymentIntentActionResult{}, failure.InternalError(err)
+		return dto.PaymentIntentActionResponse{}, failure.InternalError(err)
 	}
 	if !acquired {
-		return PaymentIntentActionResult{}, failure.Conflict(action, "payment intent", "another action is already in progress")
+		return dto.PaymentIntentActionResponse{}, failure.Conflict(action, "payment intent", "another action is already in progress")
 	}
 	defer unlock()
-	intent, err := s.GetPaymentIntent(ctx, id)
+
+	intentModel, err := s.paymentRepo.ResolvePaymentIntentsByID(ctx, paymentmodel.PaymentIntentsPrimaryID{Id: id})
 	if err != nil {
-		return PaymentIntentActionResult{}, err
+		return dto.PaymentIntentActionResponse{}, err
 	}
 	now := time.Now().UTC()
+
 	switch action {
 	case "confirm":
-		if intent.Status != paymentmodel.PaymentIntentStatusRequiresConfirmation {
-			return PaymentIntentActionResult{Intent: intent}, invalidAction(action, string(intent.Status))
+		if intentModel.Status != paymentmodel.PaymentIntentStatusRequiresConfirmation {
+			return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intentModel)}, invalidAction(action, string(intentModel.Status))
 		}
-		return s.executePaymentIntent(ctx, intent, command.ActorID)
+		return s.executePaymentIntent(ctx, intentModel, req.ActorID)
 	case "cancel":
-		if intent.Status == paymentmodel.PaymentIntentStatusSucceeded || intent.Status == paymentmodel.PaymentIntentStatusCanceled {
-			return PaymentIntentActionResult{Intent: intent}, invalidAction(action, string(intent.Status))
+		if intentModel.Status == paymentmodel.PaymentIntentStatusSucceeded || intentModel.Status == paymentmodel.PaymentIntentStatusCanceled {
+			return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intentModel)}, invalidAction(action, string(intentModel.Status))
 		}
-		intent.Status = paymentmodel.PaymentIntentStatusCanceled
-		intent.CanceledAt = null.TimeFrom(now)
-		intent.CancellationReason = optionalString(command.Reason)
+		intentModel.Status = paymentmodel.PaymentIntentStatusCanceled
+		intentModel.CanceledAt = null.TimeFrom(now)
+		intentModel.CancellationReason = null.StringFrom(req.Reason)
 	default:
-		return PaymentIntentActionResult{Intent: intent}, unsupportedAction(action)
+		return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intentModel)}, unsupportedAction(action)
 	}
-	setUpdateSignature(&intent.MetaSignature, command.ActorID, now)
-	if err := s.paymentRepo.UpdatePaymentIntentsByID(ctx, intent.ToPaymentIntentsPrimaryID(), &intent); err != nil {
-		return PaymentIntentActionResult{Intent: intent}, err
+
+	intentModel.SetSignatureMetaUpdate(req.ActorID)
+
+	err = s.paymentRepo.UpdatePaymentIntentsByID(ctx, intentModel.ToPaymentIntentsPrimaryID(), &intentModel)
+	if err != nil {
+		return dto.PaymentIntentActionResponse{}, err
 	}
-	return PaymentIntentActionResult{Intent: intent}, nil
+	return dto.PaymentIntentActionResponse{Intent: dto.NewPaymentIntentsResponse(intentModel)}, nil
 }
 
-func (s *ServiceImpl) CreateRefund(ctx context.Context, request dto.CreateRefundRequest) (paymentmodel.PaymentRefunds, error) {
-	if request.ActorID == uuid.Nil || request.PaymentIntentID == uuid.Nil || request.Amount.LessThanOrEqual(decimal.Zero) || strings.TrimSpace(request.IdempotencyKey) == "" {
-		return paymentmodel.PaymentRefunds{}, failure.BadRequestFromString("actorId, paymentIntentId, positive amount, and idempotencyKey are required")
+func (s *ServiceImpl) CreateRefund(ctx context.Context, req dto.CreateRefundRequest) (dto.PaymentRefundsResponse, error) {
+	if strings.TrimSpace(req.IdempotencyKey) == "" {
+		return dto.PaymentRefundsResponse{}, failure.WithCode(shared.ErrPayIdempotencyKeyRequired, "idempotencyKey is required")
 	}
-	if !validOptionalJSON(request.Metadata) {
-		return paymentmodel.PaymentRefunds{}, failure.BadRequestFromString("metadata must contain valid JSON")
-	}
-	intent, err := s.GetPaymentIntent(ctx, request.PaymentIntentID)
+
+	intentResp, err := s.GetPaymentIntent(ctx, req.PaymentIntentID)
 	if err != nil {
-		return paymentmodel.PaymentRefunds{}, err
+		return dto.PaymentRefundsResponse{}, err
 	}
-	if intent.Status != paymentmodel.PaymentIntentStatusSucceeded {
-		return paymentmodel.PaymentRefunds{}, invalidAction("refund", string(intent.Status))
+	if intentResp.Status != paymentmodel.PaymentIntentStatusSucceeded {
+		return dto.PaymentRefundsResponse{}, invalidAction("refund", string(intentResp.Status))
 	}
-	if request.Amount.GreaterThan(intent.Amount) {
-		return paymentmodel.PaymentRefunds{}, failure.BadRequestFromString("refund amount exceeds payment intent amount")
+	if req.Amount.GreaterThan(intentResp.Amount) {
+		return dto.PaymentRefundsResponse{}, failure.BadRequestFromString("refund amount exceeds payment intent amount")
 	}
-	currency := strings.ToUpper(strings.TrimSpace(request.Currency))
+	currency := strings.ToUpper(strings.TrimSpace(req.Currency))
 	if currency == "" {
-		currency = intent.Currency
+		currency = intentResp.Currency
 	}
-	if !strings.EqualFold(currency, intent.Currency) {
-		return paymentmodel.PaymentRefunds{}, failure.BadRequestFromString("refund currency must match payment intent currency")
+	if !strings.EqualFold(currency, intentResp.Currency) {
+		return dto.PaymentRefundsResponse{}, failure.BadRequestFromString("refund currency must match payment intent currency")
 	}
+
 	now := time.Now()
-	refundCode := stableOperationCode("rf", request.PaymentIntentID.String(), request.IdempotencyKey)
+	refundCode := stableOperationCode("rf", req.PaymentIntentID.String(), req.IdempotencyKey)
 	if existing, found := s.findRefundByCode(ctx, refundCode); found {
-		return existing, nil
+		return dto.NewPaymentRefundsResponse(existing), nil
 	}
 	refund := paymentmodel.PaymentRefunds{
 		Id:               uuid.Must(uuid.NewV7()),
-		PaymentIntentId:  request.PaymentIntentID,
-		PaymentAttemptId: optionalUUID(request.PaymentAttemptID),
+		PaymentIntentId:  req.PaymentIntentID,
+		PaymentAttemptId: nuuid.From(req.PaymentAttemptID),
 		RefundCode:       refundCode,
-		Amount:           request.Amount,
+		Amount:           req.Amount,
 		Currency:         currency,
-		Reason:           optionalString(request.Reason),
+		Reason:           null.StringFrom(req.Reason),
 		Status:           paymentmodel.PaymentRefundStatusRequested,
-		RequestedBy:      request.ActorID,
+		RequestedBy:      req.ActorID,
 		RequestedAt:      now,
-		Metadata:         mergeIdempotencyMetadata(request.Metadata, request.IdempotencyKey),
-		MetaSignature:    newCreateSignature(request.ActorID, now),
+		MetaSignature: shared.MetaSignature{
+			MetaCreatedBy: req.ActorID,
+			MetaCreatedAt: now,
+		},
 	}
 	err = s.paymentRepo.CreatePaymentRefunds(ctx, &refund)
 	if err != nil {
-		// The unique refund code closes the race between concurrent retries.
 		if existing, found := s.findRefundByCode(ctx, refundCode); found {
-			return existing, nil
+			return dto.NewPaymentRefundsResponse(existing), nil
 		}
-		return paymentmodel.PaymentRefunds{}, err
+		return dto.PaymentRefundsResponse{}, err
 	}
-	return refund, nil
+	return dto.NewPaymentRefundsResponse(refund), nil
 }
 
 func (s *ServiceImpl) findRefundByCode(ctx context.Context, code string) (paymentmodel.PaymentRefunds, bool) {
@@ -203,211 +208,217 @@ func (s *ServiceImpl) findRefundByCode(ctx context.Context, code string) (paymen
 	return result[0].PaymentRefunds, true
 }
 
-func (s *ServiceImpl) ApplyRefundAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.PaymentRefunds, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.PaymentRefunds{}, err
-	}
+func (s *ServiceImpl) ApplyRefundAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.PaymentRefundsResponse, error) {
 	item, err := s.paymentRepo.ResolvePaymentRefundsByID(ctx, paymentmodel.PaymentRefundsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.PaymentRefundsResponse{}, err
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "approve":
 		if item.Status != paymentmodel.PaymentRefundStatusRequested {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentRefundsResponse(item), invalidAction(action, string(item.Status))
 		}
-		item.Status, item.ApprovedBy, item.ApprovedAt = paymentmodel.PaymentRefundStatusApproved, nuuid.From(command.ActorID), null.TimeFrom(now)
+		item.Status, item.ApprovedBy, item.ApprovedAt = paymentmodel.PaymentRefundStatusApproved, nuuid.From(req.ActorID), null.TimeFrom(now)
 	case "reject":
 		if item.Status != paymentmodel.PaymentRefundStatusRequested {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentRefundsResponse(item), invalidAction(action, string(item.Status))
 		}
-		item.Status, item.RejectedBy, item.RejectedAt = paymentmodel.PaymentRefundStatusRejected, nuuid.From(command.ActorID), null.TimeFrom(now)
-		item.RejectionReason = optionalString(command.Reason)
+		item.Status, item.RejectedBy, item.RejectedAt = paymentmodel.PaymentRefundStatusRejected, nuuid.From(req.ActorID), null.TimeFrom(now)
+		item.RejectionReason = null.StringFrom(req.Reason)
 	case "process":
 		if item.Status != paymentmodel.PaymentRefundStatusApproved {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentRefundsResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status, item.ProcessingAt = paymentmodel.PaymentRefundStatusProcessing, null.TimeFrom(now)
 	case "succeed":
 		if item.Status != paymentmodel.PaymentRefundStatusProcessing {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentRefundsResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status, item.SucceededAt = paymentmodel.PaymentRefundStatusSucceeded, null.TimeFrom(now)
 	case "fail":
 		if item.Status != paymentmodel.PaymentRefundStatusProcessing {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentRefundsResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status, item.FailedAt = paymentmodel.PaymentRefundStatusFailed, null.TimeFrom(now)
-		item.FailureCode, item.FailureMessage = optionalString(command.FailureCode), optionalString(command.FailureMessage)
+		item.FailureCode, item.FailureMessage = null.StringFrom(req.FailureCode), null.StringFrom(req.FailureMessage)
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewPaymentRefundsResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
-	if err := s.paymentRepo.UpdatePaymentRefundsByID(ctx, item.ToPaymentRefundsPrimaryID(), &item); err != nil {
-		return item, err
+
+	item.SetSignatureMetaUpdate(req.ActorID)
+
+	err = s.paymentRepo.UpdatePaymentRefundsByID(ctx, item.ToPaymentRefundsPrimaryID(), &item)
+	if err != nil {
+		return dto.PaymentRefundsResponse{}, err
 	}
-	return item, nil
+
+	return dto.NewPaymentRefundsResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyWebhookAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.ProviderWebhookEvents, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.ProviderWebhookEvents{}, err
-	}
+func (s *ServiceImpl) ApplyWebhookAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.ProviderWebhookEventsResponse, error) {
 	item, err := s.paymentRepo.ResolveProviderWebhookEventsByID(ctx, paymentmodel.ProviderWebhookEventsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.ProviderWebhookEventsResponse{}, err
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "retry":
 		if item.ProcessingStatus != paymentmodel.WebhookProcessingStatusFailed {
-			return item, invalidAction(action, string(item.ProcessingStatus))
+			return dto.NewProviderWebhookEventsResponse(item), invalidAction(action, string(item.ProcessingStatus))
 		}
 		item.ProcessingStatus, item.NextRetryAt, item.ErrorCode, item.ErrorMessage = paymentmodel.WebhookProcessingStatusReceived, null.Time{}, null.String{}, null.String{}
 	case "ignore":
 		if item.ProcessingStatus == paymentmodel.WebhookProcessingStatusProcessed {
-			return item, invalidAction(action, string(item.ProcessingStatus))
+			return dto.NewProviderWebhookEventsResponse(item), invalidAction(action, string(item.ProcessingStatus))
 		}
 		item.ProcessingStatus, item.ProcessedAt = paymentmodel.WebhookProcessingStatusProcessed, null.TimeFrom(now)
-		item.ErrorMessage = optionalString(command.Reason)
+		item.ErrorMessage = null.StringFrom(req.Reason)
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewProviderWebhookEventsResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
-	if err := s.paymentRepo.UpdateProviderWebhookEventsByID(ctx, item.ToProviderWebhookEventsPrimaryID(), &item); err != nil {
-		return item, err
+
+	item.SetSignatureMetaUpdate(req.ActorID)
+
+	err = s.paymentRepo.UpdateProviderWebhookEventsByID(ctx, item.ToProviderWebhookEventsPrimaryID(), &item)
+	if err != nil {
+		return dto.ProviderWebhookEventsResponse{}, err
 	}
-	return item, nil
+	return dto.NewProviderWebhookEventsResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyManualEvidenceAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.ManualPaymentEvidence, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.ManualPaymentEvidence{}, err
-	}
+func (s *ServiceImpl) ApplyManualEvidenceAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.ManualPaymentEvidenceResponse, error) {
 	item, err := s.paymentRepo.ResolveManualPaymentEvidenceByID(ctx, paymentmodel.ManualPaymentEvidencePrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.ManualPaymentEvidenceResponse{}, err
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "review":
 		if item.Status != paymentmodel.ManualEvidenceStatusSubmitted {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewManualPaymentEvidenceResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status = paymentmodel.ManualEvidenceStatusUnderReview
 	case "approve", "reject":
 		if item.Status != paymentmodel.ManualEvidenceStatusUnderReview {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewManualPaymentEvidenceResponse(item), invalidAction(action, string(item.Status))
 		}
-		item.ReviewedBy, item.ReviewedAt = nuuid.From(command.ActorID), null.TimeFrom(now)
+		item.ReviewedBy, item.ReviewedAt = nuuid.From(req.ActorID), null.TimeFrom(now)
 		if action == "approve" {
 			item.Status = paymentmodel.ManualEvidenceStatusApproved
 		} else {
-			item.Status, item.RejectionReason = paymentmodel.ManualEvidenceStatusRejected, optionalString(command.Reason)
+			item.Status, item.RejectionReason = paymentmodel.ManualEvidenceStatusRejected, null.StringFrom(req.Reason)
 		}
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewManualPaymentEvidenceResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
-	if err := s.paymentRepo.UpdateManualPaymentEvidenceByID(ctx, item.ToManualPaymentEvidencePrimaryID(), &item); err != nil {
-		return item, err
+
+	item.SetSignatureMetaUpdate(req.ActorID)
+
+	err = s.paymentRepo.UpdateManualPaymentEvidenceByID(ctx, item.ToManualPaymentEvidencePrimaryID(), &item)
+	if err != nil {
+		return dto.ManualPaymentEvidenceResponse{}, err
 	}
-	return item, nil
+	return dto.NewManualPaymentEvidenceResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyOverpaymentAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.PaymentOverpayments, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.PaymentOverpayments{}, err
-	}
+func (s *ServiceImpl) ApplyOverpaymentAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.PaymentOverpaymentsResponse, error) {
 	item, err := s.paymentRepo.ResolvePaymentOverpaymentsByID(ctx, paymentmodel.PaymentOverpaymentsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.PaymentOverpaymentsResponse{}, err
 	}
 	if item.Status == "resolved" {
-		return item, invalidAction(action, item.Status)
+		return dto.NewPaymentOverpaymentsResponse(item), invalidAction(action, item.Status)
 	}
 	allowed := map[string]bool{"refund": true, "credit_balance": true, "apply_next_invoice": true, "write_off": true}
 	if !allowed[action] {
-		return item, unsupportedAction(action)
+		return dto.NewPaymentOverpaymentsResponse(item), unsupportedAction(action)
 	}
+
 	now := time.Now().UTC()
-	item.Status, item.ResolutionAction, item.ResolutionNotes = "resolved", null.StringFrom(action), optionalString(command.Notes)
-	item.ResolvedAt, item.ResolvedBy = null.TimeFrom(now), nuuid.From(command.ActorID)
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
+	item.Status, item.ResolutionAction, item.ResolutionNotes = "resolved", null.StringFrom(action), null.StringFrom(req.Notes)
+	item.ResolvedAt, item.ResolvedBy = null.TimeFrom(now), nuuid.From(req.ActorID)
+	item.SetSignatureMetaUpdate(req.ActorID)
+
 	if err := s.paymentRepo.UpdatePaymentOverpaymentsByID(ctx, item.ToPaymentOverpaymentsPrimaryID(), &item); err != nil {
-		return item, err
+		return dto.PaymentOverpaymentsResponse{}, err
 	}
-	return item, nil
+	return dto.NewPaymentOverpaymentsResponse(item), nil
 }
 
-func (s *ServiceImpl) OpenCashSession(ctx context.Context, request dto.OpenCashSessionRequest) (paymentmodel.CashCollectionSessions, error) {
-	if request.ActorID == uuid.Nil || request.MerchantID == uuid.Nil || request.CollectorID == uuid.Nil || request.OpeningFloatAmount.IsNegative() || strings.TrimSpace(request.Currency) == "" {
-		return paymentmodel.CashCollectionSessions{}, failure.BadRequestFromString("actorId, merchantId, collectorId, non-negative openingFloatAmount, and currency are required")
-	}
-	if !validOptionalJSON(request.Metadata) {
-		return paymentmodel.CashCollectionSessions{}, failure.BadRequestFromString("metadata must contain valid JSON")
-	}
+func (s *ServiceImpl) OpenCashSession(ctx context.Context, req dto.OpenCashSessionRequest) (dto.CashCollectionSessionsResponse, error) {
 	now := time.Now().UTC()
-	item := paymentmodel.CashCollectionSessions{Id: mustUUID(), SessionCode: operationCode("cash"), MerchantId: request.MerchantID, CollectorId: request.CollectorID, LocationId: optionalUUID(request.LocationID), OpenedAt: now, Status: paymentmodel.CashSessionStatusOpen, OpeningFloatAmount: request.OpeningFloatAmount, ExpectedAmount: decimal.Zero, CountedAmount: decimal.Zero, VarianceAmount: decimal.Zero, Currency: strings.ToUpper(request.Currency), Notes: optionalString(request.Notes), Metadata: normalizedJSON(request.Metadata), MetaSignature: newCreateSignature(request.ActorID, now)}
-	if err := s.paymentRepo.CreateCashCollectionSessions(ctx, &item); err != nil {
-		return item, err
+	item := paymentmodel.CashCollectionSessions{
+		Id:                 uuid.Must(uuid.NewV7()),
+		SessionCode:        operationCode("cash"),
+		MerchantId:         req.MerchantID,
+		CollectorId:        req.CollectorID,
+		LocationId:         nuuid.From(req.LocationID),
+		OpenedAt:           now,
+		Status:             paymentmodel.CashSessionStatusOpen,
+		OpeningFloatAmount: req.OpeningFloatAmount,
+		ExpectedAmount:     decimal.Zero,
+		CountedAmount:      decimal.Zero,
+		VarianceAmount:     decimal.Zero,
+		Currency:           strings.ToUpper(req.Currency),
+		Notes:              null.StringFrom(req.Notes),
 	}
-	return item, nil
+
+	item.SetSignatureMetaCreate(req.ActorID)
+
+	err := s.paymentRepo.CreateCashCollectionSessions(ctx, &item)
+	if err != nil {
+		return dto.CashCollectionSessionsResponse{}, err
+	}
+	return dto.NewCashCollectionSessionsResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyCashSessionAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.CashCollectionSessions, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.CashCollectionSessions{}, err
-	}
+func (s *ServiceImpl) ApplyCashSessionAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.CashCollectionSessionsResponse, error) {
 	item, err := s.paymentRepo.ResolveCashCollectionSessionsByID(ctx, paymentmodel.CashCollectionSessionsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.CashCollectionSessionsResponse{}, err
 	}
 	if item.Status != paymentmodel.CashSessionStatusOpen {
-		return item, invalidAction(action, string(item.Status))
+		return dto.NewCashCollectionSessionsResponse(item), invalidAction(action, string(item.Status))
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "close":
-		if command.Amount.IsNegative() {
-			return item, failure.BadRequestFromString("amount cannot be negative")
+		if req.Amount.IsNegative() {
+			return dto.CashCollectionSessionsResponse{}, failure.BadRequestFromString("amount cannot be negative")
 		}
-		item.Status, item.ClosedAt, item.CountedAmount = paymentmodel.CashSessionStatusClosed, null.TimeFrom(now), command.Amount
-		item.VarianceAmount = command.Amount.Sub(item.ExpectedAmount)
+		item.Status, item.ClosedAt, item.CountedAmount = paymentmodel.CashSessionStatusClosed, null.TimeFrom(now), req.Amount
+		item.VarianceAmount = req.Amount.Sub(item.ExpectedAmount)
 	case "cancel":
 		item.Status, item.ClosedAt = paymentmodel.CashSessionStatusCanceled, null.TimeFrom(now)
-		item.Notes = optionalString(command.Reason)
+		item.Notes = null.StringFrom(req.Reason)
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewCashCollectionSessionsResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
+	item.SetSignatureMetaUpdate(req.ActorID)
 	if err := s.paymentRepo.UpdateCashCollectionSessionsByID(ctx, item.ToCashCollectionSessionsPrimaryID(), &item); err != nil {
-		return item, err
+		return dto.CashCollectionSessionsResponse{}, err
 	}
-	return item, nil
+	return dto.NewCashCollectionSessionsResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyInstallmentAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.PaymentInstallments, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.PaymentInstallments{}, err
-	}
+func (s *ServiceImpl) ApplyInstallmentAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.PaymentInstallmentsResponse, error) {
 	item, err := s.paymentRepo.ResolvePaymentInstallmentsByID(ctx, paymentmodel.PaymentInstallmentsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.PaymentInstallmentsResponse{}, err
 	}
 	if item.Status != paymentmodel.PaymentInstallmentStatusPending {
-		return item, invalidAction(action, string(item.Status))
+		return dto.NewPaymentInstallmentsResponse(item), invalidAction(action, string(item.Status))
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "pay":
-		paid := command.Amount
+		paid := req.Amount
 		if paid.IsZero() {
 			paid = item.DueAmount
 		}
 		if paid.LessThan(item.DueAmount) {
-			return item, failure.BadRequestFromString("paid amount must cover due amount")
+			return dto.PaymentInstallmentsResponse{}, failure.BadRequestFromString("paid amount must cover due amount")
 		}
 		item.Status, item.PaidAmount, item.PaidAt = paymentmodel.PaymentInstallmentStatusPaid, paid, null.TimeFrom(now)
 	case "mark-overdue":
@@ -415,72 +426,65 @@ func (s *ServiceImpl) ApplyInstallmentAction(ctx context.Context, id uuid.UUID, 
 	case "cancel":
 		item.Status = paymentmodel.PaymentInstallmentStatusCanceled
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewPaymentInstallmentsResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
+
+	item.SetSignatureMetaUpdate(req.ActorID)
 	if err := s.paymentRepo.UpdatePaymentInstallmentsByID(ctx, item.ToPaymentInstallmentsPrimaryID(), &item); err != nil {
-		return item, err
+		return dto.PaymentInstallmentsResponse{}, err
 	}
-	return item, nil
+	return dto.NewPaymentInstallmentsResponse(item), nil
 }
 
-func (s *ServiceImpl) ApplyAuthorizationAction(ctx context.Context, id uuid.UUID, action string, command dto.ActionCommand) (paymentmodel.PaymentAuthorizations, error) {
-	if err := validateActor(command.ActorID); err != nil {
-		return paymentmodel.PaymentAuthorizations{}, err
-	}
+func (s *ServiceImpl) ApplyAuthorizationAction(ctx context.Context, id uuid.UUID, action string, req dto.ActionCommand) (dto.PaymentAuthorizationsResponse, error) {
 	item, err := s.paymentRepo.ResolvePaymentAuthorizationsByID(ctx, paymentmodel.PaymentAuthorizationsPrimaryID{Id: id})
 	if err != nil {
-		return item, err
+		return dto.PaymentAuthorizationsResponse{}, err
 	}
 	now := time.Now().UTC()
 	switch action {
 	case "authorize":
 		if item.Status != paymentmodel.PaymentAuthorizationStatusRequested {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentAuthorizationsResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status, item.AuthorizedAt = paymentmodel.PaymentAuthorizationStatusAuthorized, null.TimeFrom(now)
 	case "capture":
 		if item.Status != paymentmodel.PaymentAuthorizationStatusAuthorized {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentAuthorizationsResponse(item), invalidAction(action, string(item.Status))
 		}
-		amount := command.Amount
+		amount := req.Amount
 		if amount.IsZero() {
 			amount = item.Amount
 		}
 		if amount.IsNegative() || amount.GreaterThan(item.Amount.Sub(item.CapturedAmount)) {
-			return item, failure.BadRequestFromString("capture amount exceeds remaining authorization")
+			return dto.PaymentAuthorizationsResponse{}, failure.BadRequestFromString("capture amount exceeds remaining authorization")
 		}
 		item.Status, item.CapturedAmount = paymentmodel.PaymentAuthorizationStatusCaptured, item.CapturedAmount.Add(amount)
 	case "void":
 		if item.Status != paymentmodel.PaymentAuthorizationStatusRequested && item.Status != paymentmodel.PaymentAuthorizationStatusAuthorized {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentAuthorizationsResponse(item), invalidAction(action, string(item.Status))
 		}
 		item.Status = paymentmodel.PaymentAuthorizationStatusVoided
 	case "fail":
 		if item.Status == paymentmodel.PaymentAuthorizationStatusCaptured || item.Status == paymentmodel.PaymentAuthorizationStatusVoided {
-			return item, invalidAction(action, string(item.Status))
+			return dto.NewPaymentAuthorizationsResponse(item), invalidAction(action, string(item.Status))
 		}
-		item.Status, item.FailureCode, item.FailureMessage = paymentmodel.PaymentAuthorizationStatusFailed, optionalString(command.FailureCode), optionalString(command.FailureMessage)
+		item.Status, item.FailureCode, item.FailureMessage = paymentmodel.PaymentAuthorizationStatusFailed, null.StringFrom(req.FailureCode), null.StringFrom(req.FailureMessage)
 	default:
-		return item, unsupportedAction(action)
+		return dto.NewPaymentAuthorizationsResponse(item), unsupportedAction(action)
 	}
-	setUpdateSignature(&item.MetaSignature, command.ActorID, now)
-	if err := s.paymentRepo.UpdatePaymentAuthorizationsByID(ctx, item.ToPaymentAuthorizationsPrimaryID(), &item); err != nil {
-		return item, err
+
+	item.SetSignatureMetaUpdate(req.ActorID)
+
+	err = s.paymentRepo.UpdatePaymentAuthorizationsByID(ctx, item.ToPaymentAuthorizationsPrimaryID(), &item)
+	if err != nil {
+		return dto.PaymentAuthorizationsResponse{}, err
 	}
-	return item, nil
+	return dto.NewPaymentAuthorizationsResponse(item), nil
 }
 
-func validateActor(actorID uuid.UUID) error {
-	if actorID == uuid.Nil {
-		return failure.BadRequestFromString("actorId is required")
-	}
-	return nil
-}
-
-func mustUUID() uuid.UUID { id, _ := uuid.NewV4(); return id }
 func operationCode(prefix string) string {
-	return fmt.Sprintf("%s_%s", prefix, strings.ReplaceAll(mustUUID().String(), "-", "")[:20])
+	return fmt.Sprintf("%s_%s", prefix, strings.ReplaceAll(uuid.Must(uuid.NewV7()).String(), "-", "")[:20])
 }
 func stableOperationCode(prefix string, parts ...string) string {
 	sum := sha256.Sum256([]byte(strings.Join(parts, ":")))
@@ -492,13 +496,11 @@ func optionalUUID(id uuid.UUID) nuuid.NUUID {
 	}
 	return nuuid.From(id)
 }
-func optionalString(value string) null.String {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return null.String{}
-	}
-	return null.StringFrom(value)
+func mustUUID() uuid.UUID {
+	id, _ := uuid.NewV7()
+	return id
 }
+
 func normalizedJSON(value json.RawMessage) json.RawMessage {
 	if len(value) == 0 {
 		return json.RawMessage(`{}`)
@@ -506,17 +508,7 @@ func normalizedJSON(value json.RawMessage) json.RawMessage {
 	return value
 }
 func validOptionalJSON(value json.RawMessage) bool { return len(value) == 0 || json.Valid(value) }
-func newCreateSignature(actor uuid.UUID, now time.Time) shared.MetaSignature {
-	return shared.MetaSignature{
-		MetaCreatedAt: now,
-		MetaCreatedBy: actor,
-		MetaUpdatedAt: null.TimeFrom(now),
-		MetaUpdatedBy: &actor,
-	}
-}
-func setUpdateSignature(meta *shared.MetaSignature, actor uuid.UUID, now time.Time) {
-	meta.MetaUpdatedAt, meta.MetaUpdatedBy = null.TimeFrom(now), &actor
-}
+
 func unsupportedAction(action string) error {
 	return failure.BadRequestFromString(fmt.Sprintf("unsupported action %q", action))
 }
@@ -532,4 +524,40 @@ func mergeIdempotencyMetadata(raw json.RawMessage, key string) json.RawMessage {
 	metadata["idempotencyKey"] = strings.TrimSpace(key)
 	encoded, _ := json.Marshal(metadata)
 	return encoded
+}
+
+var supportedCurrencies = map[string]bool{
+	"IDR": true, "USD": true, "SGD": true, "MYR": true, "THB": true,
+	"PHP": true, "VND": true, "AUD": true, "EUR": true, "GBP": true,
+	"JPY": true, "KRW": true, "CNY": true, "HKD": true, "TWD": true,
+	"INR": true, "BND": true, "KHR": true, "LAK": true, "MMK": true,
+}
+
+var maxAmountByCurrency = map[string]decimal.Decimal{
+	"IDR": decimal.NewFromInt(500_000_000),
+	"USD": decimal.NewFromFloat(50_000),
+	"SGD": decimal.NewFromFloat(65_000),
+}
+
+func validateCurrency(currency string) error {
+	code := strings.ToUpper(strings.TrimSpace(currency))
+	if code == "" {
+		return failure.WithCode(shared.ErrPayUnsupportedCurrency, "currency is required")
+	}
+	if !supportedCurrencies[code] {
+		return failure.WithCode(shared.ErrPayUnsupportedCurrency, "unsupported currency: "+code)
+	}
+	return nil
+}
+
+func validateAmount(amount decimal.Decimal, currency string) error {
+	if amount.IsNegative() || amount.IsZero() {
+		return failure.WithCode(shared.ErrPayInvalidAmount, "amount must be positive")
+	}
+	if max, ok := maxAmountByCurrency[strings.ToUpper(currency)]; ok {
+		if amount.GreaterThan(max) {
+			return failure.WithCode(shared.ErrPayInvalidAmount, "amount exceeds maximum for currency "+strings.ToUpper(currency))
+		}
+	}
+	return nil
 }
