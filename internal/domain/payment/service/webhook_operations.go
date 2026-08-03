@@ -139,7 +139,7 @@ func (s *ServiceImpl) HandleWebhook(ctx context.Context, providerName string, he
 		ParsedBody:         parsedBody,
 		ProcessingStatus:   paymentmodel.WebhookProcessingStatusReceived,
 		ReceivedAt:         now,
-		MetaSignature:      shared.MetaSignature{MetaCreatedAt: now, MetaCreatedBy: uuid.Nil},
+		MetaSignature:      shared.MetaSignature{MetaCreatedAt: now, MetaCreatedBy: uuid.Nil, MetaUpdatedAt: null.TimeFrom(now)},
 	}
 
 	if err := s.paymentRepo.CreateProviderWebhookEvents(ctx, &record); err != nil {

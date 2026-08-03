@@ -17,6 +17,17 @@ import (
 
 const maxOperationBodyBytes = 1 << 20
 
+// CreatePaymentIntent handles the creation of a new payment intent.
+// @Summary Create a new payment intent
+// @Description Create a new payment intent with the provided details.
+// @Tags Payment Intents
+// @Accept json
+// @Produce json
+// @Param request body dto.CreatePaymentIntentRequest true "Payment Intent Request"
+// @Success 201 {object} dto.PaymentIntentsResponse
+// @Failure 400 {object} response.Base
+// @Failure 500 {object} response.Base
+// @Router /v1/payment-intents [post]
 func (h *Handler) CreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var req dto.CreatePaymentIntentRequest
@@ -64,6 +75,18 @@ func (h *Handler) PaymentIntentAction(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// HandleWebhook handles incoming webhook requests from payment providers.
+// @Summary Handle Webhook
+// @Description Handle incoming webhook requests from payment providers.
+// @Tags Webhooks
+// @Accept json
+// @Produce json
+// @Param provider path string true "Payment Provider"
+// @Param request body object true "Webhook Payload"
+// @Success 202 {object} dto.WebhookReceipt
+// @Failure 400 {object} response.Base
+// @Failure 500 {object} response.Base
+// @Router /v1/webhooks/{provider} [post]
 func (h *Handler) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	provider := strings.ToLower(strings.TrimSpace(chi.URLParam(r, "provider")))
 	r.Body = http.MaxBytesReader(w, r.Body, maxOperationBodyBytes)

@@ -29,7 +29,7 @@ type CreatePaymentIntentRequest struct {
 	Description        string          `json:"description,omitempty"`
 	ExpiresAt          *time.Time      `json:"expiresAt,omitempty"`
 	IdempotencyKey     string          `json:"idempotencyKey,omitempty"`
-	SourceSnapshot     json.RawMessage `json:"sourceSnapshot,omitempty"`
+	SourceSnapshot     json.RawMessage `json:"sourceSnapshot,omitempty" swaggertype:"object"`
 }
 
 func (d CreatePaymentIntentRequest) Validate() error {
