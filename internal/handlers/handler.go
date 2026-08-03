@@ -46,13 +46,10 @@ func (h *Handler) Router(r chi.Router) {
 		r.Post("/cash-sessions/{cashSessionID}/{action}", h.CashCollectionSessionAction)
 		r.Post("/payment-installments/{installmentID}/{action}", h.PaymentInstallmentAction)
 		r.Post("/payment-authorizations/{authorizationID}/{action}", h.PaymentAuthorizationAction)
-	})
 
-	// PayRoute Admin Dashboard API
-	if h.PayRouteAdmin != nil {
-		r.Route("/admin", func(r chi.Router) {
-			r.Use(middleware.RequireAdminToken(h.config))
+		// PayRoute Admin Dashboard API
+		if h.PayRouteAdmin != nil {
 			h.PayRouteAdmin.Router(r)
-		})
-	}
+		}
+	})
 }
