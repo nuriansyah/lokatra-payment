@@ -951,10 +951,6 @@ func composeProviderWebhookEventsFilterSelectColumns(filter model.Filter, isCurs
 			selectColumns = append(selectColumns, "base.\"error_message\"")
 			selectedColumns["error_message"] = struct{}{}
 		}
-		if _, selected := selectedColumns["metadata"]; !selected {
-			selectColumns = append(selectColumns, "base.\"metadata\"")
-			selectedColumns["metadata"] = struct{}{}
-		}
 		if _, selected := selectedColumns["meta_created_at"]; !selected {
 			selectColumns = append(selectColumns, "base.\"meta_created_at\"")
 			selectedColumns["meta_created_at"] = struct{}{}

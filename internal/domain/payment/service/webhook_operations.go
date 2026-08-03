@@ -125,7 +125,7 @@ func (s *ServiceImpl) HandleWebhook(ctx context.Context, providerName string, he
 	record := paymentmodel.ProviderWebhookEvents{
 		Id:                 uuid.Must(uuid.NewV7()),
 		EndpointKey:        null.StringFrom(string(provider)),
-		ProviderAccountId:  accountID,
+		ProviderAccountId:  optionalUUID(accountID),
 		ProviderCode:       string(provider),
 		EventId:            null.StringFrom(receipt.EventID),
 		EventType:          null.StringFrom(receipt.EventType),

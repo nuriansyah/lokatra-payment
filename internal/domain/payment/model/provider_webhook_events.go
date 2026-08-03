@@ -510,7 +510,7 @@ type ProviderWebhookEvents struct {
 	Id                 uuid.UUID               `db:"id"`
 	WebhookEndpointId  nuuid.NUUID             `db:"webhook_endpoint_id"`
 	EndpointKey        null.String             `db:"endpoint_key"`
-	ProviderAccountId  uuid.UUID               `db:"provider_account_id"`
+	ProviderAccountId  nuuid.NUUID             `db:"provider_account_id"`
 	ProviderCode       string                  `db:"provider_code"`
 	EventId            null.String             `db:"event_id"`
 	EventType          null.String             `db:"event_type"`
