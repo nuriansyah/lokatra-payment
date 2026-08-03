@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS payment_providers (
   code citext NOT NULL UNIQUE,
   name text NOT NULL,
   provider_type payment_provider_type_enum NOT NULL DEFAULT 'gateway',
-  status provider_status_enum NOT NULL DEFAULT 'active',
+  status payment_provider_status_enum NOT NULL DEFAULT 'active',
   supports_refund boolean NOT NULL DEFAULT false,
   supports_partial_refund boolean NOT NULL DEFAULT false,
   supports_authorization boolean NOT NULL DEFAULT false,
