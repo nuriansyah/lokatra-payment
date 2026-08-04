@@ -508,7 +508,7 @@ func (d *SettlementPolicyVersionsCreateRequest) Validate() (err error) {
 }
 
 func (d *SettlementPolicyVersionsCreateRequest) ToModel() model.SettlementPolicyVersions {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.SettlementPolicyVersions{
 		Id:                 id,
 		SettlementPolicyId: d.SettlementPolicyId,

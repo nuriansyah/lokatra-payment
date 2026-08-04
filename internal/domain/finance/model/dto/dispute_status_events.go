@@ -465,7 +465,7 @@ func (d *DisputeStatusEventsCreateRequest) Validate() (err error) {
 }
 
 func (d *DisputeStatusEventsCreateRequest) ToModel() model.DisputeStatusEvents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.DisputeStatusEvents{
 		Id:             id,
 		DisputeId:      d.DisputeId,

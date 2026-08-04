@@ -492,7 +492,7 @@ func (d *FinancePartiesCreateRequest) Validate() (err error) {
 }
 
 func (d *FinancePartiesCreateRequest) ToModel() model.FinanceParties {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceParties{
 		Id:          id,
 		PartyType:   d.PartyType,

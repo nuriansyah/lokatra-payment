@@ -481,7 +481,7 @@ func (d *PayoutBatchesCreateRequest) Validate() (err error) {
 }
 
 func (d *PayoutBatchesCreateRequest) ToModel() model.PayoutBatches {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PayoutBatches{
 		Id:                id,
 		PayoutBatchCode:   d.PayoutBatchCode,

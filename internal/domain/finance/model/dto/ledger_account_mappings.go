@@ -492,7 +492,7 @@ func (d *LedgerAccountMappingsCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerAccountMappingsCreateRequest) ToModel() model.LedgerAccountMappings {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerAccountMappings{
 		Id:            id,
 		MappingCode:   d.MappingCode,

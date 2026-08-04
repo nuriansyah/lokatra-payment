@@ -479,7 +479,7 @@ func (d *DisputeEvidenceCreateRequest) Validate() (err error) {
 }
 
 func (d *DisputeEvidenceCreateRequest) ToModel() model.DisputeEvidence {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.DisputeEvidence{
 		Id:             id,
 		DisputeId:      d.DisputeId,

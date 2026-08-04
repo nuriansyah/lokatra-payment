@@ -414,7 +414,7 @@ func (d *MerchantBalanceSummaryCreateRequest) Validate() (err error) {
 }
 
 func (d *MerchantBalanceSummaryCreateRequest) ToModel() model.MerchantBalanceSummary {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.MerchantBalanceSummary{
 		MerchantPartyId:  id,
 		CurrencyCode:     d.CurrencyCode,

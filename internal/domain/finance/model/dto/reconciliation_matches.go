@@ -481,7 +481,7 @@ func (d *ReconciliationMatchesCreateRequest) Validate() (err error) {
 }
 
 func (d *ReconciliationMatchesCreateRequest) ToModel() model.ReconciliationMatches {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ReconciliationMatches{
 		Id:                  id,
 		ReconciliationRunId: d.ReconciliationRunId,

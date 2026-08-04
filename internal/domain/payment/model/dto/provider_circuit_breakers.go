@@ -530,7 +530,7 @@ func (d *ProviderCircuitBreakersCreateRequest) Validate() (err error) {
 }
 
 func (d *ProviderCircuitBreakersCreateRequest) ToModel() model.ProviderCircuitBreakers {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ProviderCircuitBreakers{
 		Id:                id,
 		ProviderAccountId: d.ProviderAccountId,

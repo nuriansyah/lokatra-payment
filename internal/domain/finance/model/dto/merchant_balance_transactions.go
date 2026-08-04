@@ -534,7 +534,7 @@ func (d *MerchantBalanceTransactionsCreateRequest) Validate() (err error) {
 }
 
 func (d *MerchantBalanceTransactionsCreateRequest) ToModel() model.MerchantBalanceTransactions {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.MerchantBalanceTransactions{
 		Id:               id,
 		BalanceAccountId: d.BalanceAccountId,

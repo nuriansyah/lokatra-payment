@@ -499,7 +499,7 @@ func (d *PaymentProvidersCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentProvidersCreateRequest) ToModel() model.PaymentProviders {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentProviders{
 		Id:                    id,
 		Code:                  d.Code,

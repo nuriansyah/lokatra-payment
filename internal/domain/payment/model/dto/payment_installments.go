@@ -503,7 +503,7 @@ func (d *PaymentInstallmentsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentInstallmentsCreateRequest) ToModel() model.PaymentInstallments {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentInstallments{
 		Id:              id,
 		PaymentPlanId:   d.PaymentPlanId,

@@ -537,7 +537,7 @@ func (d *FinanceDashboardRefreshJobsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceDashboardRefreshJobsCreateRequest) ToModel() model.FinanceDashboardRefreshJobs {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceDashboardRefreshJobs{
 		Id:             id,
 		JobKey:         d.JobKey,

@@ -579,7 +579,7 @@ func (d *FinanceOutboxEventsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceOutboxEventsCreateRequest) ToModel() model.FinanceOutboxEvents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceOutboxEvents{
 		Id:              id,
 		AggregateType:   d.AggregateType,

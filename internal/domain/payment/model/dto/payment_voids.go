@@ -519,7 +519,7 @@ func (d *PaymentVoidsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentVoidsCreateRequest) ToModel() model.PaymentVoids {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentVoids{
 		Id:                     id,
 		PaymentAuthorizationId: d.PaymentAuthorizationId,

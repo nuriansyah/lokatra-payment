@@ -507,7 +507,7 @@ func (d *FinanceWorkerRunsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceWorkerRunsCreateRequest) ToModel() model.FinanceWorkerRuns {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceWorkerRuns{
 		Id:             id,
 		WorkerName:     d.WorkerName,

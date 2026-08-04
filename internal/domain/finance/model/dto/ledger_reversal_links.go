@@ -435,7 +435,7 @@ func (d *LedgerReversalLinksCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerReversalLinksCreateRequest) ToModel() model.LedgerReversalLinks {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerReversalLinks{
 		Id:                id,
 		OriginalJournalId: d.OriginalJournalId,

@@ -452,7 +452,7 @@ func (d *FeeProfilesCreateRequest) Validate() (err error) {
 }
 
 func (d *FeeProfilesCreateRequest) ToModel() model.FeeProfiles {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FeeProfiles{
 		Id:              id,
 		ProfileCode:     d.ProfileCode,

@@ -479,7 +479,7 @@ func (d *ProviderStatementFilesCreateRequest) Validate() (err error) {
 }
 
 func (d *ProviderStatementFilesCreateRequest) ToModel() model.ProviderStatementFiles {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ProviderStatementFiles{
 		Id:                id,
 		ProviderAccountId: d.ProviderAccountId,

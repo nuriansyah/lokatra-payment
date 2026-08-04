@@ -522,7 +522,7 @@ func (d *LedgerJournalLinesCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerJournalLinesCreateRequest) ToModel() model.LedgerJournalLines {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerJournalLines{
 		Id:               id,
 		JournalEntryId:   d.JournalEntryId,

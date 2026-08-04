@@ -509,7 +509,7 @@ func (d *PayoutApprovalsCreateRequest) Validate() (err error) {
 }
 
 func (d *PayoutApprovalsCreateRequest) ToModel() model.PayoutApprovals {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PayoutApprovals{
 		Id:                     id,
 		PayoutId:               d.PayoutId,

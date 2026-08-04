@@ -518,7 +518,7 @@ func (d *CashCollectionItemsCreateRequest) Validate() (err error) {
 }
 
 func (d *CashCollectionItemsCreateRequest) ToModel() model.CashCollectionItems {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.CashCollectionItems{
 		Id:                      id,
 		CashCollectionSessionId: d.CashCollectionSessionId,

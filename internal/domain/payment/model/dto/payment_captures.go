@@ -517,7 +517,7 @@ func (d *PaymentCapturesCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentCapturesCreateRequest) ToModel() model.PaymentCaptures {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentCaptures{
 		Id:                     id,
 		PaymentAuthorizationId: d.PaymentAuthorizationId,

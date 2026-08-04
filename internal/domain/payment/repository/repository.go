@@ -29,6 +29,11 @@ type Repository interface {
 	PayroutePspHealthRepository
 	PayrouteAuditLogRepository
 	PayrouteConfigRepository
+	InvoiceRepository
+	InvoiceLineItemRepository
+	InvoicePaymentLinkRepository
+	InvoicePaymentRepository
+	InvoiceStatusEventRepository
 }
 
 // RepositoryImpl is the Postgres-backed implementation of Repository.

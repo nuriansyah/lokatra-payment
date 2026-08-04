@@ -11,17 +11,20 @@ type Handler struct {
 	config         *configs.Config
 	PaymentService *service.ServiceImpl
 	PayRouteAdmin  *PayRouteAdminHandler
+	Invoice        *InvoiceHandler
 }
 
 func ProvideHandler(
 	config *configs.Config,
 	paymentService *service.ServiceImpl,
 	payRouteAdmin *PayRouteAdminHandler,
+	invoice *InvoiceHandler,
 ) *Handler {
 	return &Handler{
 		config:         config,
 		PaymentService: paymentService,
 		PayRouteAdmin:  payRouteAdmin,
+		Invoice:        invoice,
 	}
 }
 
@@ -36,6 +39,10 @@ func (h *Handler) Router(r chi.Router) {
 	})
 	r.Post("/webhooks/{provider}", h.HandleWebhook)
 	r.With(middleware.IdempotencyMiddleware).Post("/refunds", h.CreateRefund)
+	r.Route("/invoices", func(r chi.Router) {
+		r.Use(middleware.IdempotencyMiddleware)
+		h.Invoice.RegisterRoutes(r)
+	})
 	r.Route("/admin", func(r chi.Router) {
 		r.Use(middleware.RequireAdminToken(h.config))
 		r.Post("/refunds/{refundID}/{action}", h.RefundAction)

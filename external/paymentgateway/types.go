@@ -283,3 +283,14 @@ type PaymentGateway interface {
 	VerifyWebhook(ctx context.Context, req VerifyWebhookRequest) (VerifyWebhookResult, error)
 	NormalizeWebhook(ctx context.Context, req NormalizeWebhookRequest) (CanonicalPaymentEvent, error)
 }
+type PaymentLinkCreator interface {
+	CreatePaymentLink(ctx context.Context, req CreatePaymentLinkRequest) (linkURL string, expiresAt *time.Time, err error)
+}
+
+type CreatePaymentLinkRequest struct {
+	InvoiceID   string `json:"invoiceId"`
+	Amount      string `json:"amount"`
+	Currency    string `json:"currency"`
+	CustomerID  string `json:"customerId"`
+	Description string `json:"description,omitempty"`
+}

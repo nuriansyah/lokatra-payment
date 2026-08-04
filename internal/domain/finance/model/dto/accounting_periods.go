@@ -523,7 +523,7 @@ func (d *AccountingPeriodsCreateRequest) Validate() (err error) {
 }
 
 func (d *AccountingPeriodsCreateRequest) ToModel() model.AccountingPeriods {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.AccountingPeriods{
 		Id:           id,
 		BookId:       d.BookId,

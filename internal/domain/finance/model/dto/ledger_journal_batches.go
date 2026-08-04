@@ -465,7 +465,7 @@ func (d *LedgerJournalBatchesCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerJournalBatchesCreateRequest) ToModel() model.LedgerJournalBatches {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerJournalBatches{
 		Id:          id,
 		BatchCode:   d.BatchCode,

@@ -689,7 +689,7 @@ func (d *PaymentRefundsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentRefundsCreateRequest) ToModel() model.PaymentRefunds {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentRefunds{
 		Id:                id,
 		PaymentIntentId:   d.PaymentIntentId,

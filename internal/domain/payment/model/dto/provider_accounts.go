@@ -518,7 +518,7 @@ func (d *ProviderAccountsCreateRequest) Validate() (err error) {
 }
 
 func (d *ProviderAccountsCreateRequest) ToModel() model.ProviderAccounts {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ProviderAccounts{
 		Id:                  id,
 		ProviderId:          d.ProviderId,

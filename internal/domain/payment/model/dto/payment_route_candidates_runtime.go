@@ -618,7 +618,7 @@ func (d *PaymentRouteCandidatesRuntimeCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentRouteCandidatesRuntimeCreateRequest) ToModel() model.PaymentRouteCandidatesRuntime {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentRouteCandidatesRuntime{
 		Id:                  id,
 		ScopeType:           d.ScopeType,

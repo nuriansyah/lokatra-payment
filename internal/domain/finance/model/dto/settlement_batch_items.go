@@ -550,7 +550,7 @@ func (d *SettlementBatchItemsCreateRequest) Validate() (err error) {
 }
 
 func (d *SettlementBatchItemsCreateRequest) ToModel() model.SettlementBatchItems {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.SettlementBatchItems{
 		Id:                   id,
 		SettlementBatchId:    d.SettlementBatchId,

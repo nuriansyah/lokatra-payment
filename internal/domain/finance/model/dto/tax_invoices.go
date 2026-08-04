@@ -539,7 +539,7 @@ func (d *TaxInvoicesCreateRequest) Validate() (err error) {
 }
 
 func (d *TaxInvoicesCreateRequest) ToModel() model.TaxInvoices {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.TaxInvoices{
 		Id:              id,
 		InvoiceNo:       d.InvoiceNo,

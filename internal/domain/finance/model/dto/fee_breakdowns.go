@@ -522,7 +522,7 @@ func (d *FeeBreakdownsCreateRequest) Validate() (err error) {
 }
 
 func (d *FeeBreakdownsCreateRequest) ToModel() model.FeeBreakdowns {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FeeBreakdowns{
 		Id:               id,
 		SourceType:       d.SourceType,

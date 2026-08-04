@@ -492,7 +492,7 @@ func (d *TaxProfilesCreateRequest) Validate() (err error) {
 }
 
 func (d *TaxProfilesCreateRequest) ToModel() model.TaxProfiles {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.TaxProfiles{
 		Id:                   id,
 		OwnerPartyId:         d.OwnerPartyId,

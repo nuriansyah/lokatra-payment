@@ -539,7 +539,7 @@ func (d *TaxRulesCreateRequest) Validate() (err error) {
 }
 
 func (d *TaxRulesCreateRequest) ToModel() model.TaxRules {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.TaxRules{
 		Id:                 id,
 		RuleCode:           d.RuleCode,

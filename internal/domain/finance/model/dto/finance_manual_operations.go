@@ -521,7 +521,7 @@ func (d *FinanceManualOperationsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceManualOperationsCreateRequest) ToModel() model.FinanceManualOperations {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceManualOperations{
 		Id:              id,
 		OperationCode:   d.OperationCode,

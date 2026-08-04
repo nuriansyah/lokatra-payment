@@ -565,7 +565,7 @@ func (d *ReserveHoldsCreateRequest) Validate() (err error) {
 }
 
 func (d *ReserveHoldsCreateRequest) ToModel() model.ReserveHolds {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ReserveHolds{
 		Id:              id,
 		MerchantPartyId: d.MerchantPartyId,

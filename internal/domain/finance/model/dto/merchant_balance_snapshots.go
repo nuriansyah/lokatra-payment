@@ -479,7 +479,7 @@ func (d *MerchantBalanceSnapshotsCreateRequest) Validate() (err error) {
 }
 
 func (d *MerchantBalanceSnapshotsCreateRequest) ToModel() model.MerchantBalanceSnapshots {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.MerchantBalanceSnapshots{
 		Id:               id,
 		BalanceAccountId: d.BalanceAccountId,

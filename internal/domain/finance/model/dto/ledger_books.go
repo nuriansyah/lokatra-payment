@@ -462,7 +462,7 @@ func (d *LedgerBooksCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerBooksCreateRequest) ToModel() model.LedgerBooks {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerBooks{
 		Id:            id,
 		BookCode:      d.BookCode,

@@ -531,7 +531,7 @@ func (d *PaymentStatusEventsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentStatusEventsCreateRequest) ToModel() model.PaymentStatusEvents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentStatusEvents{
 		Id:                     id,
 		PaymentIntentId:        nuuid.From(d.PaymentIntentId),

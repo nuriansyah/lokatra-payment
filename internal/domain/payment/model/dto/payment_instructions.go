@@ -585,7 +585,7 @@ func (d *PaymentInstructionsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentInstructionsCreateRequest) ToModel() model.PaymentInstructions {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentInstructions{
 		Id:                  id,
 		PaymentAttemptId:    d.PaymentAttemptId,

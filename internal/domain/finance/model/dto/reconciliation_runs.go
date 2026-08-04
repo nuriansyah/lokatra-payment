@@ -523,7 +523,7 @@ func (d *ReconciliationRunsCreateRequest) Validate() (err error) {
 }
 
 func (d *ReconciliationRunsCreateRequest) ToModel() model.ReconciliationRuns {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ReconciliationRuns{
 		Id:              id,
 		ReconCode:       d.ReconCode,

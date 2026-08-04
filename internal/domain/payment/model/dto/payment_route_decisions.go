@@ -476,7 +476,7 @@ func (d *PaymentRouteDecisionsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentRouteDecisionsCreateRequest) ToModel() model.PaymentRouteDecisions {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentRouteDecisions{
 		Id:                        id,
 		PaymentIntentId:           d.PaymentIntentId,

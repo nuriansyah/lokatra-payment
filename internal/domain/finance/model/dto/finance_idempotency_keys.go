@@ -523,7 +523,7 @@ func (d *FinanceIdempotencyKeysCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceIdempotencyKeysCreateRequest) ToModel() model.FinanceIdempotencyKeys {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceIdempotencyKeys{
 		Id:             id,
 		Scope:          d.Scope,

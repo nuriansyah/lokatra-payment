@@ -448,7 +448,7 @@ func (d *MerchantBalanceAccountsCreateRequest) Validate() (err error) {
 }
 
 func (d *MerchantBalanceAccountsCreateRequest) ToModel() model.MerchantBalanceAccounts {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.MerchantBalanceAccounts{
 		Id:                    id,
 		MerchantPartyId:       d.MerchantPartyId,

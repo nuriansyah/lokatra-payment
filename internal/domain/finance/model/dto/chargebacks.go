@@ -539,7 +539,7 @@ func (d *ChargebacksCreateRequest) Validate() (err error) {
 }
 
 func (d *ChargebacksCreateRequest) ToModel() model.Chargebacks {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.Chargebacks{
 		Id:                id,
 		ChargebackCode:    d.ChargebackCode,

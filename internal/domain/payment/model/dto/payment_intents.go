@@ -617,7 +617,7 @@ func (d *PaymentIntentsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentIntentsCreateRequest) ToModel() model.PaymentIntents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentIntents{
 		Id:                  id,
 		IntentCode:          d.IntentCode,

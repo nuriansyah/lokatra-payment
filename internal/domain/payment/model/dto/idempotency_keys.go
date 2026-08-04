@@ -517,7 +517,7 @@ func (d *IdempotencyKeysCreateRequest) Validate() (err error) {
 }
 
 func (d *IdempotencyKeysCreateRequest) ToModel() model.IdempotencyKeys {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.IdempotencyKeys{
 		Id:             id,
 		Key:            d.Key,

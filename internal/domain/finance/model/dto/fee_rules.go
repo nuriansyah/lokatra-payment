@@ -520,7 +520,7 @@ func (d *FeeRulesCreateRequest) Validate() (err error) {
 }
 
 func (d *FeeRulesCreateRequest) ToModel() model.FeeRules {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FeeRules{
 		Id:               id,
 		FeeRuleVersionId: d.FeeRuleVersionId,

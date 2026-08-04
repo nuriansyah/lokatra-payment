@@ -523,7 +523,7 @@ func (d *ReconciliationExceptionsCreateRequest) Validate() (err error) {
 }
 
 func (d *ReconciliationExceptionsCreateRequest) ToModel() model.ReconciliationExceptions {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ReconciliationExceptions{
 		Id:                  id,
 		ReconciliationRunId: d.ReconciliationRunId,

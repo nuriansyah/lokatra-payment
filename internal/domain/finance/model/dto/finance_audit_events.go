@@ -523,7 +523,7 @@ func (d *FinanceAuditEventsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceAuditEventsCreateRequest) ToModel() model.FinanceAuditEvents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceAuditEvents{
 		Id:            id,
 		AggregateType: d.AggregateType,

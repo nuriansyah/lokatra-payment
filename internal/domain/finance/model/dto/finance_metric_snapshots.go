@@ -495,7 +495,7 @@ func (d *FinanceMetricSnapshotsCreateRequest) Validate() (err error) {
 }
 
 func (d *FinanceMetricSnapshotsCreateRequest) ToModel() model.FinanceMetricSnapshots {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.FinanceMetricSnapshots{
 		Id:          id,
 		MetricName:  d.MetricName,

@@ -43,6 +43,10 @@ var payRouteAdminSet = wire.NewSet(
 	handlers.ProvidePayRouteAdminHandler,
 )
 
+var invoiceSet = wire.NewSet(
+	handlers.NewInvoiceHandler,
+)
+
 // Wiring for HTTP routing.
 var routingService = wire.NewSet(
 	wire.Struct(new(router.DomainHandlers), "*"),
@@ -63,6 +67,8 @@ func InitializeServiceService() *http.HTTP {
 		paymentServiceSet,
 		// payroute admin
 		payRouteAdminSet,
+		// invoice
+		invoiceSet,
 		// routing
 		routingService,
 		// selected transport layer

@@ -537,7 +537,7 @@ func (d *CreditNotesCreateRequest) Validate() (err error) {
 }
 
 func (d *CreditNotesCreateRequest) ToModel() model.CreditNotes {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.CreditNotes{
 		Id:            id,
 		CreditNoteNo:  d.CreditNoteNo,

@@ -552,7 +552,7 @@ func (d *PayoutAttemptsCreateRequest) Validate() (err error) {
 }
 
 func (d *PayoutAttemptsCreateRequest) ToModel() model.PayoutAttempts {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PayoutAttempts{
 		Id:                id,
 		PayoutId:          d.PayoutId,

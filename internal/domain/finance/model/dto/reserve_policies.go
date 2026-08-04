@@ -452,7 +452,7 @@ func (d *ReservePoliciesCreateRequest) Validate() (err error) {
 }
 
 func (d *ReservePoliciesCreateRequest) ToModel() model.ReservePolicies {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ReservePolicies{
 		Id:              id,
 		PolicyCode:      d.PolicyCode,

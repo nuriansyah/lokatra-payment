@@ -536,7 +536,7 @@ func (d *LedgerAccountResolutionRulesCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerAccountResolutionRulesCreateRequest) ToModel() model.LedgerAccountResolutionRules {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerAccountResolutionRules{
 		Id:              id,
 		BookId:          d.BookId,

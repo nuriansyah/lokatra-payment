@@ -479,7 +479,7 @@ func (d *TaxDocumentArtifactsCreateRequest) Validate() (err error) {
 }
 
 func (d *TaxDocumentArtifactsCreateRequest) ToModel() model.TaxDocumentArtifacts {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.TaxDocumentArtifacts{
 		Id:             id,
 		DocumentType:   d.DocumentType,

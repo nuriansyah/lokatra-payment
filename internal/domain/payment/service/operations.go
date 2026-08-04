@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/nuriansyah/lokatra-payment/shared"
 	"github.com/nuriansyah/lokatra-payment/shared/failure"
 	"github.com/nuriansyah/lokatra-payment/shared/nuuid"
+	"github.com/rs/zerolog/log"
 	"github.com/shopspring/decimal"
 )
 
@@ -67,10 +69,16 @@ func (s *ServiceImpl) CreatePaymentIntent(ctx context.Context, req dto.CreatePay
 	if req.ExpiresAt != nil {
 		intent.ExpiresAt = null.TimeFrom(req.ExpiresAt.UTC())
 	}
-	if err := s.paymentRepo.CreatePaymentIntents(ctx, &intent); err != nil {
+	err := s.paymentRepo.CreatePaymentIntents(ctx, &intent)
+	if err != nil {
 		if existing, found := s.findIntentByIdempotencyKey(ctx, req.MerchantID, req.IdempotencyKey); found {
 			return dto.NewPaymentIntentsResponse(existing), nil
 		}
+		if failure.GetCode(err) == http.StatusInternalServerError {
+			log.Ctx(ctx).Error().Err(err).Msg("[CreatePaymentIntent][CreatePaymentIntents] failed to create payment intent")
+			return dto.PaymentIntentsResponse{}, failure.InternalError(err)
+		}
+		log.Ctx(ctx).Warn().Err(err).Msg("[CreatePaymentIntent][CreatePaymentIntents] failed to create payment intent")
 		return dto.PaymentIntentsResponse{}, err
 	}
 	return dto.NewPaymentIntentsResponse(intent), nil
@@ -85,6 +93,11 @@ func (s *ServiceImpl) findIntentByIdempotencyKey(ctx context.Context, merchantID
 		Pagination: paymentmodel.Pagination{Page: 1, PageSize: 1},
 	})
 	if err != nil || len(result) == 0 {
+		if failure.GetCode(err) == http.StatusInternalServerError {
+			log.Ctx(ctx).Error().Err(err).Msg("[findIntentByIdempotencyKey][ResolvePaymentIntentsByFilter] failed to resolve payment intent by idempotency key")
+			return paymentmodel.PaymentIntents{}, false
+		}
+		log.Ctx(ctx).Warn().Err(err).Msg("[findIntentByIdempotencyKey][ResolvePaymentIntentsByFilter] failed to resolve payment intent by idempotency key")
 		return paymentmodel.PaymentIntents{}, false
 	}
 	return result[0].PaymentIntents, true
@@ -396,7 +409,12 @@ func (s *ServiceImpl) ApplyCashSessionAction(ctx context.Context, id uuid.UUID, 
 		return dto.NewCashCollectionSessionsResponse(item), unsupportedAction(action)
 	}
 	item.SetSignatureMetaUpdate(req.ActorID)
-	if err := s.paymentRepo.UpdateCashCollectionSessionsByID(ctx, item.ToCashCollectionSessionsPrimaryID(), &item); err != nil {
+
+	err = s.paymentRepo.UpdateCashCollectionSessionsByID(ctx, item.ToCashCollectionSessionsPrimaryID(), &item)
+	if err != nil {
+		if failure.GetCode(err) == http.StatusConflict {
+			return dto.NewCashCollectionSessionsResponse(item), failure.Conflict(action, "cash collection session", "another action is already in progress")
+		}
 		return dto.CashCollectionSessionsResponse{}, err
 	}
 	return dto.NewCashCollectionSessionsResponse(item), nil
@@ -430,7 +448,12 @@ func (s *ServiceImpl) ApplyInstallmentAction(ctx context.Context, id uuid.UUID, 
 	}
 
 	item.SetSignatureMetaUpdate(req.ActorID)
-	if err := s.paymentRepo.UpdatePaymentInstallmentsByID(ctx, item.ToPaymentInstallmentsPrimaryID(), &item); err != nil {
+
+	err = s.paymentRepo.UpdatePaymentInstallmentsByID(ctx, item.ToPaymentInstallmentsPrimaryID(), &item)
+	if err != nil {
+		if failure.GetCode(err) == http.StatusConflict {
+			return dto.NewPaymentInstallmentsResponse(item), failure.Conflict(action, "payment installment", "another action is already in progress")
+		}
 		return dto.PaymentInstallmentsResponse{}, err
 	}
 	return dto.NewPaymentInstallmentsResponse(item), nil
@@ -478,6 +501,9 @@ func (s *ServiceImpl) ApplyAuthorizationAction(ctx context.Context, id uuid.UUID
 
 	err = s.paymentRepo.UpdatePaymentAuthorizationsByID(ctx, item.ToPaymentAuthorizationsPrimaryID(), &item)
 	if err != nil {
+		if failure.GetCode(err) == http.StatusConflict {
+			return dto.NewPaymentAuthorizationsResponse(item), failure.Conflict(action, "payment authorization", "another action is already in progress")
+		}
 		return dto.PaymentAuthorizationsResponse{}, err
 	}
 	return dto.NewPaymentAuthorizationsResponse(item), nil
@@ -507,23 +533,12 @@ func normalizedJSON(value json.RawMessage) json.RawMessage {
 	}
 	return value
 }
-func validOptionalJSON(value json.RawMessage) bool { return len(value) == 0 || json.Valid(value) }
 
 func unsupportedAction(action string) error {
 	return failure.BadRequestFromString(fmt.Sprintf("unsupported action %q", action))
 }
 func invalidAction(action, status string) error {
 	return failure.Conflict(action, "payment resource", fmt.Sprintf("action is not allowed from status %s", status))
-}
-
-func mergeIdempotencyMetadata(raw json.RawMessage, key string) json.RawMessage {
-	metadata := map[string]any{}
-	if len(raw) > 0 {
-		_ = json.Unmarshal(raw, &metadata)
-	}
-	metadata["idempotencyKey"] = strings.TrimSpace(key)
-	encoded, _ := json.Marshal(metadata)
-	return encoded
 }
 
 var supportedCurrencies = map[string]bool{

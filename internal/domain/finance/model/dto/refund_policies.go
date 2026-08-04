@@ -508,7 +508,7 @@ func (d *RefundPoliciesCreateRequest) Validate() (err error) {
 }
 
 func (d *RefundPoliciesCreateRequest) ToModel() model.RefundPolicies {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.RefundPolicies{
 		Id:                         id,
 		PolicyCode:                 d.PolicyCode,

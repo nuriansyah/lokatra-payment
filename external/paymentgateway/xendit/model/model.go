@@ -149,3 +149,24 @@ type WebhookPayment struct {
 	Created    string                 `json:"created"`
 	Data       PaymentRequestResponse `json:"data"`
 }
+
+type CreateInvoiceRequest struct {
+	ExternalID     string   `json:"external_id"`
+	Amount         float64  `json:"amount"`
+	Currency       string   `json:"currency"`
+	Description    string   `json:"description,omitempty"`
+	CustomerID     string   `json:"customer_id,omitempty"`
+	PaymentMethods []string `json:"payment_methods,omitempty"`
+}
+
+type InvoiceResponse struct {
+	ID            string `json:"id"`
+	ExternalID    string `json:"external_id"`
+	Status        string `json:"status"`
+	Amount        float64 `json:"amount"`
+	Currency      string `json:"currency"`
+	InvoiceURL    string `json:"invoice_url"`
+	ExpiryDate    string `json:"expiry_date,omitempty"`
+	Created       string `json:"created"`
+	Updated       string `json:"updated"`
+}

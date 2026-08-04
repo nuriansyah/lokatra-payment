@@ -579,7 +579,7 @@ func (d *SettlementBatchesCreateRequest) Validate() (err error) {
 }
 
 func (d *SettlementBatchesCreateRequest) ToModel() model.SettlementBatches {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.SettlementBatches{
 		Id:               id,
 		BatchCode:        d.BatchCode,

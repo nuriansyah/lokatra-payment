@@ -551,7 +551,7 @@ func (d *SettlementEligibilitySnapshotsCreateRequest) Validate() (err error) {
 }
 
 func (d *SettlementEligibilitySnapshotsCreateRequest) ToModel() model.SettlementEligibilitySnapshots {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.SettlementEligibilitySnapshots{
 		Id:                        id,
 		SourceType:                d.SourceType,

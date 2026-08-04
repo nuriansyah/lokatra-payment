@@ -673,7 +673,7 @@ func (d *ProviderWebhookEventsCreateRequest) Validate() (err error) {
 }
 
 func (d *ProviderWebhookEventsCreateRequest) ToModel() model.ProviderWebhookEvents {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ProviderWebhookEvents{
 		Id:                 id,
 		WebhookEndpointId:  nuuid.From(d.WebhookEndpointId),

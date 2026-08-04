@@ -466,7 +466,7 @@ func (d *RefundAllocationsCreateRequest) Validate() (err error) {
 }
 
 func (d *RefundAllocationsCreateRequest) ToModel() model.RefundAllocations {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.RefundAllocations{
 		Id:                 id,
 		RefundId:           d.RefundId,

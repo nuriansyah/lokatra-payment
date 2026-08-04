@@ -588,7 +588,7 @@ func (d *ProviderApiRequestsCreateRequest) Validate() (err error) {
 }
 
 func (d *ProviderApiRequestsCreateRequest) ToModel() model.ProviderApiRequests {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.ProviderApiRequests{
 		Id:                id,
 		ProviderAccountId: nuuid.From(d.ProviderAccountId),

@@ -609,7 +609,7 @@ func (d *DisputeCasesCreateRequest) Validate() (err error) {
 }
 
 func (d *DisputeCasesCreateRequest) ToModel() model.DisputeCases {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.DisputeCases{
 		Id:                 id,
 		DisputeCode:        d.DisputeCode,

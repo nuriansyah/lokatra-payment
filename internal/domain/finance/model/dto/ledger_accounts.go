@@ -506,7 +506,7 @@ func (d *LedgerAccountsCreateRequest) Validate() (err error) {
 }
 
 func (d *LedgerAccountsCreateRequest) ToModel() model.LedgerAccounts {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.LedgerAccounts{
 		Id:                 id,
 		BookId:             d.BookId,

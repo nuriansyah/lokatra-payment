@@ -551,7 +551,7 @@ func (d *BankStatementLinesCreateRequest) Validate() (err error) {
 }
 
 func (d *BankStatementLinesCreateRequest) ToModel() model.BankStatementLines {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.BankStatementLines{
 		Id:              id,
 		StatementFileId: d.StatementFileId,

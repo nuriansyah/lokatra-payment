@@ -508,7 +508,7 @@ func (d *TaxBreakdownsCreateRequest) Validate() (err error) {
 }
 
 func (d *TaxBreakdownsCreateRequest) ToModel() model.TaxBreakdowns {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.TaxBreakdowns{
 		Id:                 id,
 		SourceType:         d.SourceType,

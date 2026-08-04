@@ -532,7 +532,7 @@ func (d *PaymentOverpaymentsCreateRequest) Validate() (err error) {
 }
 
 func (d *PaymentOverpaymentsCreateRequest) ToModel() model.PaymentOverpayments {
-	id, _ := uuid.NewV4()
+	id, _ := uuid.NewV7()
 	return model.PaymentOverpayments{
 		Id:                id,
 		PaymentIntentId:   d.PaymentIntentId,
